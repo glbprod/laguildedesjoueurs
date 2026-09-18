@@ -1,0 +1,63 @@
+---
+import { getEntry } from 'astro:content';
+import Page from './Page.astro';
+import EnTete from '../components/EnTete.astro';
+import { modulesDuJeu } from '../lib/jeux';
+import { url } from '../lib/url';
+
+interface Props {
+  slug: string;
+  // Nom du module affiché (sans le préfixe du jeu) ; absent sur l'accueil du jeu.
+  module?: string;
+}
+const { slug, module } = Astro.props;
+
+const jeu = await getEntry('jeux', slug);
+if (!jeu) throw new Error(`Jeu introuvable : ${slug}`);
+const { data } = jeu;
+
+const modules = await modulesDuJeu(slug);
+const actif = modules.find((m) => m.id === `${slug}/${module}`);
+if (module && !actif) throw new Error(`Module introuvable : ${slug}/${module}`);
+
+const ROMAINS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+const items = modules.map((m, i) => {
+  const nom = m.id.slice(slug.length + 1);
+  return { nom, href: url(`${slug}/${nom}/`), titre: m.data.titre, num: ROMAINS[i] ?? String(i + 1) };
+});
+
+const titrePage = actif
+  ? `${actif.data.titre} — ${data.titre}`
+  : `${data.titre} — ${data.sousTitre ?? 'Aide de jeu'}`;
+---
+
+<Page titre={titrePage} theme={data.theme}>
+  <EnTete
+    eyebrow="La Guilde des Joueurs"
+    eyebrowHref={url()}
+    titre={data.titre}
+    titreHref={url(`${slug}/`)}
+    sous={`${data.joueurs} joueurs · ${data.duree}`}
+  />
+
+  {
+    actif && (
+      <nav class="nav" aria-label="Modules de l'aide de jeu">
+        {items.map((it) => (
+          <a href={it.href} aria-current={it.nom === module ? 'page' : undefined}>
+            <span class="num">{it.num}</span>
+            <span class="lib">{it.titre}</span>
+          </a>
+        ))}
+      </nav>
+    )
+  }
+
+  <main>
+    <slot />
+  </main>
+
+  <footer class="pied">
+    {data.auteurs} · {data.editeur}{data.annee ? ` · ${data.annee}` : ''}
+  </footer>
+</Page>

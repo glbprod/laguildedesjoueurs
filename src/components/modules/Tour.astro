@@ -1,0 +1,11 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Bloc from '../Bloc.astro';
+
+interface Props {
+  data: Extract<CollectionEntry<'modules'>['data'], { type: 'tour' }>;
+}
+const { data } = Astro.props;
+---
+
+{data.blocs.map((bloc) => <Bloc bloc={bloc} />)}

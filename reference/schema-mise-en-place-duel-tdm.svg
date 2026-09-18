@@ -1,0 +1,248 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 800" width="900" height="800" font-family="Helvetica, Arial, sans-serif" role="img" aria-labelledby="titre desc">
+  <title id="titre">Schéma de mise en place — Duel pour la Terre du Milieu</title>
+  <desc id="desc">Vue de dessus de la table : tuiles Haut-Lieu, plateau central des sept régions, piste de la Quête de l'Anneau, pyramide de vingt cartes du chapitre, et les deux zones de jeu.</desc>
+
+  <defs>
+    <style>
+      .ink   { fill:#221f1a; }
+      .pale  { fill:#6d6455; }
+      .red   { fill:#98291f; }
+      .green { fill:#2e5a4c; }
+      .lbl   { font-size:11px; fill:#6d6455; letter-spacing:.06em; }
+      .lblb  { font-size:11.5px; fill:#221f1a; font-weight:bold; }
+      .tiny  { font-size:9px; fill:#6d6455; }
+      .head  { font-family:Georgia, 'Times New Roman', serif; font-size:15px; fill:#221f1a; }
+      .card  { stroke:#221f1a; stroke-opacity:.35; stroke-width:1; }
+      .slot  { fill:none; stroke:#8c8062; stroke-width:1.2; stroke-dasharray:4 4; }
+    </style>
+  </defs>
+
+  <rect width="900" height="800" fill="#e7ddc6"/>
+
+  <!-- ===== titre ===== -->
+  <text x="40" y="46" class="head" font-size="20">Duel pour la Terre du Milieu</text>
+  <text x="40" y="66" class="lbl" font-size="12">Schéma de mise en place — début du chapitre 1</text>
+  <line x1="40" y1="80" x2="860" y2="80" stroke="#221f1a" stroke-opacity=".3"/>
+
+  <!-- ===== tuiles Haut-Lieu ===== -->
+  <g>
+    <text x="450" y="104" class="lblb" text-anchor="middle">Tuiles Haut-Lieu — 3 face visible</text>
+    <rect x="330" y="112" width="46" height="34" rx="3" class="card" fill="#c8b78e"/>
+    <rect x="384" y="112" width="46" height="34" rx="3" class="card" fill="#c8b78e"/>
+    <rect x="438" y="112" width="46" height="34" rx="3" class="card" fill="#c8b78e"/>
+    <rect x="500" y="112" width="46" height="34" rx="3" class="card" fill="#5a4632"/>
+    <rect x="504" y="116" width="46" height="34" rx="3" class="card" fill="#6b543d"/>
+    <text x="527" y="137" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#c9a227">R</text>
+    <text x="560" y="134" class="tiny">pile</text>
+  </g>
+
+  <!-- ===== plateau central ===== -->
+  <g>
+    <rect x="285" y="164" width="330" height="182" rx="6" fill="#d3c6a4" stroke="#221f1a" stroke-opacity=".45" stroke-width="1.5"/>
+    <text x="450" y="184" class="lblb" text-anchor="middle">Terre du Milieu — 7 régions</text>
+
+    <!-- liaisons -->
+    <g stroke="#8c8062" stroke-width="1.4" fill="none">
+      <path d="M340 230 L410 214"/>
+      <path d="M410 214 L480 230"/>
+      <path d="M340 230 L390 280"/>
+      <path d="M410 214 L450 268"/>
+      <path d="M480 230 L520 280"/>
+      <path d="M390 280 L450 268"/>
+      <path d="M450 268 L520 280"/>
+      <path d="M520 280 L565 232"/>
+      <path d="M480 230 L565 232"/>
+    </g>
+
+    <!-- régions -->
+    <g>
+      <!-- Arnor -->
+      <circle cx="340" cy="230" r="19" fill="#e7ddc6" stroke="#2e5a4c" stroke-width="2"/>
+      <rect x="332" y="222" width="7" height="9" fill="#2e5a4c"/>
+      <circle cx="346" cy="227" r="3.2" fill="#2e5a4c"/>
+      <circle cx="344" cy="236" r="3.2" fill="#2e5a4c"/>
+      <text x="340" y="262" class="tiny" text-anchor="middle" fill="#2e5a4c">Arnor</text>
+
+      <circle cx="410" cy="214" r="19" fill="#e7ddc6" stroke="#8c8062" stroke-width="1.4"/>
+      <rect x="403" y="208" width="7" height="9" class="slot"/>
+      <circle cx="416" cy="219" r="3.2" class="slot"/>
+
+      <circle cx="480" cy="230" r="19" fill="#e7ddc6" stroke="#8c8062" stroke-width="1.4"/>
+      <rect x="473" y="224" width="7" height="9" class="slot"/>
+      <circle cx="486" cy="235" r="3.2" class="slot"/>
+
+      <circle cx="390" cy="280" r="19" fill="#e7ddc6" stroke="#8c8062" stroke-width="1.4"/>
+      <rect x="383" y="274" width="7" height="9" class="slot"/>
+      <circle cx="396" cy="285" r="3.2" class="slot"/>
+
+      <circle cx="450" cy="268" r="19" fill="#e7ddc6" stroke="#8c8062" stroke-width="1.4"/>
+      <rect x="443" y="262" width="7" height="9" class="slot"/>
+      <circle cx="456" cy="273" r="3.2" class="slot"/>
+
+      <circle cx="520" cy="280" r="19" fill="#e7ddc6" stroke="#8c8062" stroke-width="1.4"/>
+      <rect x="513" y="274" width="7" height="9" class="slot"/>
+      <circle cx="526" cy="285" r="3.2" class="slot"/>
+
+      <!-- Mordor -->
+      <circle cx="565" cy="232" r="19" fill="#e7ddc6" stroke="#98291f" stroke-width="2"/>
+      <rect x="557" y="224" width="7" height="9" fill="#98291f"/>
+      <circle cx="571" cy="229" r="3.2" fill="#98291f"/>
+      <circle cx="569" cy="238" r="3.2" fill="#98291f"/>
+      <text x="565" y="264" class="tiny" text-anchor="middle" fill="#98291f">Mordor</text>
+    </g>
+
+    <text x="450" y="330" class="tiny" text-anchor="middle">Chaque région : 1 emplacement de Forteresse ▪ et des emplacements d'Unités ●</text>
+  </g>
+
+  <!-- ===== réserves latérales ===== -->
+  <g>
+    <text x="150" y="184" class="lblb" text-anchor="middle" fill="#2e5a4c">Communauté</text>
+    <text x="150" y="199" class="tiny" text-anchor="middle">7 Forteresses · 15 Unités</text>
+    <g fill="#2e5a4c">
+      <rect x="112" y="210" width="10" height="14"/><rect x="126" y="210" width="10" height="14"/>
+      <rect x="140" y="210" width="10" height="14"/><rect x="154" y="210" width="10" height="14"/>
+      <rect x="168" y="210" width="10" height="14"/>
+      <circle cx="117" cy="240" r="5"/><circle cx="133" cy="240" r="5"/><circle cx="149" cy="240" r="5"/>
+      <circle cx="165" cy="240" r="5"/><circle cx="181" cy="240" r="5"/>
+      <circle cx="117" cy="256" r="5"/><circle cx="133" cy="256" r="5"/><circle cx="149" cy="256" r="5"/>
+    </g>
+    <circle cx="126" cy="286" r="9" fill="#c9a227" stroke="#221f1a" stroke-opacity=".3"/>
+    <circle cx="144" cy="286" r="9" fill="#c9a227" stroke="#221f1a" stroke-opacity=".3"/>
+    <circle cx="162" cy="286" r="9" fill="#c9a227" stroke="#221f1a" stroke-opacity=".3"/>
+    <text x="150" y="308" class="tiny" text-anchor="middle">3 pièces</text>
+
+    <text x="750" y="184" class="lblb" text-anchor="middle" fill="#98291f">Sauron</text>
+    <text x="750" y="199" class="tiny" text-anchor="middle">7 Forteresses · 15 Unités</text>
+    <g fill="#98291f">
+      <rect x="712" y="210" width="10" height="14"/><rect x="726" y="210" width="10" height="14"/>
+      <rect x="740" y="210" width="10" height="14"/><rect x="754" y="210" width="10" height="14"/>
+      <rect x="768" y="210" width="10" height="14"/>
+      <circle cx="717" cy="240" r="5"/><circle cx="733" cy="240" r="5"/><circle cx="749" cy="240" r="5"/>
+      <circle cx="765" cy="240" r="5"/><circle cx="781" cy="240" r="5"/>
+      <circle cx="717" cy="256" r="5"/><circle cx="733" cy="256" r="5"/><circle cx="749" cy="256" r="5"/>
+    </g>
+    <circle cx="735" cy="286" r="9" fill="#c9a227" stroke="#221f1a" stroke-opacity=".3"/>
+    <circle cx="753" cy="286" r="9" fill="#c9a227" stroke="#221f1a" stroke-opacity=".3"/>
+    <text x="750" y="308" class="tiny" text-anchor="middle">2 pièces · commence</text>
+  </g>
+
+  <!-- jetons Alliance -->
+  <g>
+    <text x="660" y="336" class="tiny" text-anchor="middle">Jetons Alliance</text>
+    <circle cx="630" cy="352" r="10" fill="#8f8a7d" stroke="#221f1a" stroke-opacity=".3"/>
+    <circle cx="654" cy="352" r="10" fill="#8f8a7d" stroke="#221f1a" stroke-opacity=".3"/>
+    <circle cx="678" cy="352" r="10" fill="#7a5c3a" stroke="#221f1a" stroke-opacity=".3"/>
+    <circle cx="702" cy="352" r="10" fill="#7a5c3a" stroke="#221f1a" stroke-opacity=".3"/>
+    <text x="666" y="374" class="tiny" text-anchor="middle">gris = immédiat · marron = permanent</text>
+  </g>
+
+  <!-- ===== piste Quête de l'Anneau ===== -->
+  <g>
+    <text x="180" y="400" class="lblb">Piste Quête de l'Anneau</text>
+    <rect x="180" y="410" width="500" height="42" rx="6" fill="#d3c6a4" stroke="#221f1a" stroke-opacity=".35"/>
+    <g fill="none" stroke="#8c8062" stroke-width="1.2">
+      <circle cx="206" cy="431" r="9"/><circle cx="238" cy="431" r="9"/><circle cx="270" cy="431" r="9"/>
+      <circle cx="302" cy="431" r="9"/><circle cx="334" cy="431" r="9"/><circle cx="366" cy="431" r="9"/>
+      <circle cx="398" cy="431" r="9"/><circle cx="430" cy="431" r="9"/><circle cx="462" cy="431" r="9"/>
+      <circle cx="494" cy="431" r="9"/><circle cx="526" cy="431" r="9"/><circle cx="558" cy="431" r="9"/>
+      <circle cx="590" cy="431" r="9"/><circle cx="622" cy="431" r="9"/>
+    </g>
+    <circle cx="206" cy="431" r="9" fill="#98291f"/>
+    <circle cx="334" cy="431" r="9" fill="#2e5a4c"/>
+    <polygon points="660,420 650,444 670,444" fill="#98291f"/>
+    <text x="206" y="470" class="tiny" text-anchor="middle" fill="#98291f">Nazgûl</text>
+    <text x="334" y="470" class="tiny" text-anchor="middle" fill="#2e5a4c">Frodon &amp; Sam</text>
+    <text x="660" y="470" class="tiny" text-anchor="middle" fill="#98291f">Montagne du Destin</text>
+    <text x="700" y="435" class="tiny">positions de départ à</text>
+    <text x="700" y="447" class="tiny">reporter du livret</text>
+  </g>
+
+  <!-- ===== pyramide ===== -->
+  <g>
+    <text x="450" y="502" class="lblb" text-anchor="middle">Pyramide du chapitre — 20 cartes, 3 écartées face cachée</text>
+
+    <!-- rangée 1 : 6 faces visibles -->
+    <g>
+      <rect x="285" y="514" width="46" height="66" rx="3" class="card" fill="#7b7a74"/>
+      <rect x="337" y="514" width="46" height="66" rx="3" class="card" fill="#9c3225"/>
+      <rect x="389" y="514" width="46" height="66" rx="3" class="card" fill="#b8860b"/>
+      <rect x="441" y="514" width="46" height="66" rx="3" class="card" fill="#2f5f8a"/>
+      <rect x="493" y="514" width="46" height="66" rx="3" class="card" fill="#4a7a3c"/>
+      <rect x="545" y="514" width="46" height="66" rx="3" class="card" fill="#7b7a74"/>
+    </g>
+    <!-- rangée 2 : 5 faces cachées -->
+    <g fill="#5a4632">
+      <rect x="311" y="556" width="46" height="66" rx="3" class="card"/>
+      <rect x="363" y="556" width="46" height="66" rx="3" class="card"/>
+      <rect x="415" y="556" width="46" height="66" rx="3" class="card"/>
+      <rect x="467" y="556" width="46" height="66" rx="3" class="card"/>
+      <rect x="519" y="556" width="46" height="66" rx="3" class="card"/>
+    </g>
+    <g font-family="Georgia, serif" font-size="20" fill="#c9a227" text-anchor="middle">
+      <text x="334" y="597">R</text><text x="386" y="597">R</text><text x="438" y="597">R</text>
+      <text x="490" y="597">R</text><text x="542" y="597">R</text>
+    </g>
+    <!-- rangée 3 : 4 faces visibles -->
+    <g>
+      <rect x="337" y="598" width="46" height="66" rx="3" class="card" fill="#4a7a3c"/>
+      <rect x="389" y="598" width="46" height="66" rx="3" class="card" fill="#9c3225"/>
+      <rect x="441" y="598" width="46" height="66" rx="3" class="card" fill="#2f5f8a"/>
+      <rect x="493" y="598" width="46" height="66" rx="3" class="card" fill="#b8860b"/>
+    </g>
+    <!-- rangée 4 : 3 faces cachées -->
+    <g fill="#5a4632">
+      <rect x="363" y="640" width="46" height="66" rx="3" class="card"/>
+      <rect x="415" y="640" width="46" height="66" rx="3" class="card"/>
+      <rect x="467" y="640" width="46" height="66" rx="3" class="card"/>
+    </g>
+    <g font-family="Georgia, serif" font-size="20" fill="#c9a227" text-anchor="middle">
+      <text x="386" y="681">R</text><text x="438" y="681">R</text><text x="490" y="681">R</text>
+    </g>
+    <!-- rangée 5 : 2 faces visibles, accessibles -->
+    <g>
+      <rect x="389" y="682" width="46" height="66" rx="3" class="card" fill="#7b7a74" stroke="#98291f" stroke-opacity="1" stroke-width="2.5"/>
+      <rect x="441" y="682" width="46" height="66" rx="3" class="card" fill="#6d4479" stroke="#98291f" stroke-opacity="1" stroke-width="2.5"/>
+    </g>
+    <text x="438" y="766" class="tiny" text-anchor="middle" fill="#98291f">seules cartes accessibles au premier tour</text>
+
+    <line x1="600" y1="716" x2="545" y2="716" stroke="#98291f" stroke-width="1"/>
+    <text x="606" y="712" class="tiny" fill="#98291f">une carte devient accessible</text>
+    <text x="606" y="724" class="tiny" fill="#98291f">dès que rien ne la recouvre</text>
+  </g>
+
+  <!-- ===== zones de jeu ===== -->
+  <g>
+    <text x="145" y="502" class="lblb" text-anchor="middle" fill="#2e5a4c">Zone de la Communauté</text>
+    <text x="145" y="516" class="tiny" text-anchor="middle">cartes rangées par couleur</text>
+    <g>
+      <rect x="60" y="528" width="170" height="26" rx="3" class="card" fill="#7b7a74"/>
+      <rect x="60" y="560" width="170" height="26" rx="3" class="card" fill="#b8860b"/>
+      <rect x="60" y="592" width="170" height="26" rx="3" class="card" fill="#2f5f8a"/>
+      <rect x="60" y="624" width="170" height="26" rx="3" class="card" fill="#4a7a3c"/>
+      <rect x="60" y="656" width="170" height="26" rx="3" class="card" fill="#9c3225"/>
+      <rect x="60" y="688" width="170" height="26" rx="3" class="card" fill="#6d4479"/>
+    </g>
+    <g class="tiny" fill="#e7ddc6" font-size="10">
+      <text x="70" y="545">Grises — Compétences</text>
+      <text x="70" y="577">Jaunes — Pièces</text>
+      <text x="70" y="609">Bleues — Quête</text>
+      <text x="70" y="641">Vertes — Peuples</text>
+      <text x="70" y="673">Rouges — Unités</text>
+      <text x="70" y="705">Violettes — Manœuvres</text>
+    </g>
+
+    <text x="755" y="502" class="lblb" text-anchor="middle" fill="#98291f">Zone de Sauron</text>
+    <text x="755" y="516" class="tiny" text-anchor="middle">même disposition, en miroir</text>
+    <g opacity=".55">
+      <rect x="670" y="528" width="170" height="26" rx="3" class="card" fill="#7b7a74"/>
+      <rect x="670" y="560" width="170" height="26" rx="3" class="card" fill="#b8860b"/>
+      <rect x="670" y="592" width="170" height="26" rx="3" class="card" fill="#2f5f8a"/>
+      <rect x="670" y="624" width="170" height="26" rx="3" class="card" fill="#4a7a3c"/>
+      <rect x="670" y="656" width="170" height="26" rx="3" class="card" fill="#9c3225"/>
+      <rect x="670" y="688" width="170" height="26" rx="3" class="card" fill="#6d4479"/>
+    </g>
+  </g>
+
+  <line x1="40" y1="782" x2="860" y2="782" stroke="#221f1a" stroke-opacity=".2"/>
+  <text x="40" y="796" class="tiny">Les rangées face cachée se révèlent au fur et à mesure que les cartes qui les recouvrent sont prises.</text>
+</svg>

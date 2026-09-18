@@ -1,0 +1,119 @@
+type: effets
+titre: Les effets
+validation:
+  statut: brouillon # repris des pages HTML existantes, à relire contre le livret
+
+groupes:
+  - id: peuples
+    titre: Les six Peuples
+    fiches:
+      - nom: Elfes
+        effets:
+          - "Carte Jaune jouée : jouez un tour supplémentaire à la fin de celui-ci."
+          - "Carte Rouge jouée : placez toutes les Unités concernées dans 1 seule des 7 régions, au choix."
+          - "Une fois par tour, bénéficiez d'1 Compétence au choix."
+      - nom: Nains
+        effets:
+          - "Tuile Haut-Lieu prise : ignorez le surcoût en Pièces."
+          - "Tuile Haut-Lieu prise : jouez un tour supplémentaire à la fin de celui-ci."
+          - "Carte Verte jouée : bénéficiez de 2 déplacements sur le plateau central."
+      - nom: Hobbits
+        effets:
+          - "Le symbole Aigles compte comme un des 6 Peuples nécessaires à la victoire Soutien."
+          - "Carte Bleue jouée : placez aussi 1 Unité dans la région de votre choix."
+          - "Carte jouée grâce à son chaînage : prenez 3 Pièces."
+      - nom: Humains
+        effets:
+          - "Carte Jaune jouée : faites aussi progresser votre personnage d'1 case sur la piste."
+          - "Carte Rouge jouée : placez 1 Unité supplémentaire dans la région choisie."
+          - "Carte défaussée : prenez 2 fois le gain du chapitre en cours, soit 2, 4 ou 6 Pièces."
+      - nom: Ents
+        immediat: true
+        effets:
+          - "Jouez un tour supplémentaire à la fin de celui-ci."
+          - "Retirez 1 Forteresse adverse d'une région de votre choix et rendez-la à votre adversaire."
+          - "Trois fois, au choix : retirer 1 Unité adverse, faire perdre 1 Pièce, ou 1 déplacement."
+      - nom: Sorciers
+        immediat: true
+        effets:
+          - "Faites progresser votre personnage de 2 cases sur la piste."
+          - "Placez 2 Unités dans 1 région, ou 1 Unité dans 2 régions au choix."
+          - "Prenez toute la défausse, choisissez-en 1 carte secrètement et jouez-la sans en payer le coût."
+
+  - id: lieux
+    titre: Les sept Hauts-Lieux
+    note: "Un Haut-Lieu par région : c'est par eux que se gagne la conquête."
+    fiches:
+      - nom: Barad-Dûr
+        sousTitre: Mordor
+        immediat: true
+        effets:
+          - "Placez 1 Forteresse."
+          - "Prenez toute la défausse, choisissez-en 1 carte secrètement et jouez-la sans en payer le coût."
+      - nom: Bree
+        sousTitre: Arnor
+        immediat: true
+        effets:
+          - "Placez 1 Forteresse et 2 Unités."
+          - "Bénéficiez de 2 déplacements sur le plateau central."
+      - nom: Erebor
+        sousTitre: Rhovanion
+        immediat: true
+        effets:
+          - "Placez 1 Forteresse."
+          - "Prenez 5 Pièces de la réserve."
+          - "Bénéficiez de 1 déplacement sur le plateau central."
+      - nom: Havres Gris
+        sousTitre: Lindon
+        immediat: true
+        effets:
+          - "Placez 1 Forteresse."
+          - "Prenez les 2 premiers jetons d'un Peuple au choix, révélez-les, gardez-en 1 et remettez l'autre face cachée sur sa pile."
+      - nom: Gouffre de Helm
+        sousTitre: Rohan
+        immediat: true
+        effets:
+          - "Placez 1 Forteresse et 3 Unités."
+      - nom: Isengard
+        sousTitre: Enedwaith
+        immediat: true
+        effets:
+          - "Placez 1 Forteresse."
+          - "Défaussez 1 carte Grise de la zone de jeu adverse."
+          - "Progressez de 1 case sur la piste de la Quête."
+      - nom: Minas Tirith
+        sousTitre: Gondor
+        immediat: true
+        effets:
+          - "Placez 1 Forteresse et 1 Unité."
+          - "Progressez de 2 cases sur la piste de la Quête."
+
+  - id: quete
+    titre: La piste de la Quête
+    note: "Les effets de la Quête, des Hauts-Lieux, des Ents et des Sorciers sont immédiats et ne servent qu'une fois, au moment où on les obtient."
+    fiches:
+      - nom: Cases bonus
+        immediat: true
+        effets:
+          - "Prenez 1 Pièce de la réserve."
+          - "Jouez un tour supplémentaire à la fin de celui-ci."
+          - "Placez 1 Unité dans la région de votre choix."
+          - "Retirez 1 Forteresse adverse d'une région de votre choix et rendez-la à votre adversaire."
+          - "Anneau : Sauron remporte immédiatement la partie."
+          - "Montagne du Destin : la Communauté remporte immédiatement la partie."
+
+entrainement:
+  paquets:
+    - id: peuples
+      libelle: Peuples
+      groupe: peuples
+      question: Les trois effets de
+    - id: lieux
+      libelle: Hauts-Lieux
+      groupe: lieux
+      question: Que fait ce Haut-Lieu
+    - id: regions
+      libelle: Régions → tuile
+      groupe: lieux
+      question: Quel Haut-Lieu pour cette région
+      montre: sousTitre

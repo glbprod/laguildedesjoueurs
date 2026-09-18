@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import Jeu from '../../layouts/Jeu.astro';
+import { modulesDuJeu } from '../../lib/jeux';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const jeux = await getCollection('jeux');
+  return jeux.map((jeu) => ({ params: { jeu: jeu.id } }));
+}
+
+const { jeu } = Astro.params;
+const modules = await modulesDuJeu(jeu);
+const ROMAINS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+---
+
+<Jeu slug={jeu}>
+  <nav class="cartes" aria-label="Modules de l'aide de jeu">
+    {
+      modules.map((m, i) => (
+        <a class="carte" href={url(`${jeu}/${m.id.slice(jeu.length + 1)}/`)}>
+          <span class="num">{ROMAINS[i] ?? i + 1}</span>
+          <span class="titre">{m.data.titre}</span>
+        </a>
+      ))
+    }
+  </nav>
+</Jeu>

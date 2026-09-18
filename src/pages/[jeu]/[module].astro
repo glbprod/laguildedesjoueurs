@@ -1,0 +1,27 @@
+---
+import { getCollection } from 'astro:content';
+import Jeu from '../../layouts/Jeu.astro';
+import Module from '../../components/modules/Module.astro';
+import { modulesDuJeu } from '../../lib/jeux';
+
+// Une page par module listé dans jeu.yaml : /<jeu>/<module>/
+export async function getStaticPaths() {
+  const jeux = await getCollection('jeux');
+  const chemins = await Promise.all(
+    jeux.map(async (jeu) =>
+      (await modulesDuJeu(jeu.id)).map((m) => ({
+        params: { jeu: jeu.id, module: m.id.slice(jeu.id.length + 1) },
+        props: { module: m },
+      })),
+    ),
+  );
+  return chemins.flat();
+}
+
+const { jeu, module: nom } = Astro.params;
+const { module } = Astro.props;
+---
+
+<Jeu slug={jeu} module={nom}>
+  <Module module={module} />
+</Jeu>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duel pour la Terre du Milieu — Aide de jeu débutant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Karla:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --velin:#e7ddc6;
+  --velin-fonce:#dbcfb2;
+  --velin-creux:#d2c49f;
+  --encre:#221f1a;
+  --encre-pale:#6d6455;
+  --rouge:#98291f;
+  --bien:#2e5a4c;
+  --c-grise:#7b7a74;
+  --c-jaune:#b8860b;
+  --c-bleue:#2f5f8a;
+  --c-verte:#4a7a3c;
+  --c-rouge:#9c3225;
+  --c-violette:#6d4479;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:0 0 4rem;
+  background:var(--velin);
+  color:var(--encre);
+  font-family:'Karla',system-ui,sans-serif;font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:640px;margin:0 auto;padding:0 1.1rem}
+
+header{padding:2rem 0 .8rem;text-align:center}
+.eyebrow{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--rouge)}
+h1{
+  font-family:'IM Fell English SC',Georgia,serif;font-weight:400;
+  font-size:clamp(1.5rem,6.5vw,2.1rem);line-height:1.15;margin:.5rem 0 .3rem;
+}
+.sous{font-size:.85rem;color:var(--encre-pale)}
+.filet{height:1px;background:var(--encre);opacity:.35;margin:1.1rem 0 0}
+
+nav{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin:1.3rem 0 1.3rem}
+.tab{
+  background:transparent;border:1px solid var(--velin-creux);border-radius:3px;
+  padding:.55rem .2rem;cursor:pointer;color:var(--encre-pale);font-family:inherit;text-align:center;
+  transition:background .18s,color .18s,border-color .18s;
+}
+.tab .num{display:block;font-family:'IM Fell English SC',serif;font-size:1.05rem}
+.tab .lib{display:block;font-size:.63rem;letter-spacing:.11em;text-transform:uppercase;margin-top:.1rem}
+.tab[aria-selected="true"]{background:var(--encre);border-color:var(--encre);color:var(--velin)}
+.tab:focus-visible{outline:2px solid var(--rouge);outline-offset:2px}
+section[hidden]{display:none}
+
+h2{
+  font-family:'IM Fell English SC',serif;font-weight:400;font-size:1.15rem;
+  margin:1.9rem 0 .6rem;padding-bottom:.25rem;border-bottom:1px solid var(--velin-creux);
+}
+h2:first-of-type{margin-top:.2rem}
+p{margin:.45rem 0}
+.note{color:var(--encre-pale);font-size:.88rem}
+b,strong{font-weight:700}
+
+.bloc{background:var(--velin-fonce);border-radius:4px;padding:.9rem 1rem}
+.bloc + .bloc{margin-top:.6rem}
+
+/* camps */
+.camps{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.camp{background:var(--velin-fonce);border-top:3px solid;border-radius:4px;padding:.8rem .85rem}
+.camp.bien{border-color:var(--bien)}
+.camp.mal{border-color:var(--rouge)}
+.camp h3{font-family:'IM Fell English SC',serif;font-weight:400;font-size:1rem;margin:0 0 .35rem}
+.camp ul{margin:0;padding-left:1.1rem;font-size:.87rem}
+.camp li{margin-bottom:.2rem}
+
+ul.check{list-style:none;padding:0;margin:.3rem 0 0}
+ul.check li{padding:.4rem 0 .4rem 1.4rem;position:relative;border-bottom:1px solid var(--velin-creux);font-size:.93rem}
+ul.check li:last-child{border-bottom:0}
+ul.check li::before{content:"§";position:absolute;left:0;color:var(--rouge);font-size:.8rem;top:.45rem;font-family:'IM Fell English SC',serif}
+
+.deux{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.55rem;margin-top:.5rem}
+.chiffre{background:var(--velin-fonce);border-radius:4px;padding:.65rem .75rem}
+.chiffre b{display:block;font-size:1.5rem;line-height:1.1;color:var(--rouge);font-weight:700}
+.chiffre span{font-size:.78rem;color:var(--encre-pale);display:block;margin-top:.15rem;line-height:1.3}
+
+/* couleurs de cartes */
+.coul{display:flex;gap:.7rem;align-items:baseline;padding:.5rem .7rem;border-left:4px solid;background:var(--velin-fonce);border-radius:3px;margin-bottom:.35rem}
+.coul strong{min-width:4.6rem;font-size:.9rem}
+.coul em{font-style:normal;font-size:.86rem;color:#4a4438}
+
+/* --- les trois courses --- */
+.course{background:var(--velin-fonce);border-radius:4px;padding:1rem;margin-bottom:.9rem}
+.course h3{font-family:'IM Fell English SC',serif;font-weight:400;font-size:1.05rem;margin:0 0 .15rem}
+.course .quoi{font-size:.85rem;color:var(--encre-pale);margin-bottom:.8rem}
+
+.piste{width:100%;height:76px;display:block}
+.compteurs{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:.5rem}
+.ctr{text-align:center}
+.ctr .titre{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--encre-pale);margin-bottom:.3rem}
+.ctr .rangee{display:flex;align-items:center;justify-content:center;gap:.55rem}
+.pas{
+  width:2rem;height:2rem;border-radius:50%;border:1px solid var(--encre-pale);
+  background:transparent;color:var(--encre);font-size:1.1rem;line-height:1;cursor:pointer;font-family:inherit;
+}
+.pas:disabled{opacity:.25;cursor:default}
+.pas:focus-visible{outline:2px solid var(--rouge);outline-offset:2px}
+.ctr .val{font-size:1.5rem;font-weight:700;min-width:1.4ch}
+
+.alerte{margin-top:.7rem;padding:.5rem .7rem;border-radius:3px;font-size:.87rem;background:var(--velin-creux)}
+.alerte.chaud{background:var(--rouge);color:var(--velin)}
+.alerte.gagne{background:var(--encre);color:var(--velin);font-weight:700}
+
+.piste-camp{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-top:1px solid var(--velin-creux)}
+.piste-camp .qui{width:5.6rem;font-size:.83rem;font-weight:700}
+.piste-camp .qui.bien{color:var(--bien)}
+.piste-camp .qui.mal{color:var(--rouge)}
+.pips{display:flex;gap:.28rem;flex:1;flex-wrap:wrap}
+.pip{
+  width:1.55rem;height:1.55rem;border-radius:3px;border:1px solid var(--encre-pale);
+  background:transparent;cursor:pointer;padding:0;font-family:'Karla',sans-serif;font-size:.7rem;color:transparent;
+}
+.pip:focus-visible{outline:2px solid var(--rouge);outline-offset:1px}
+.pip.on.bien{background:var(--bien);border-color:var(--bien)}
+.pip.on.mal{background:var(--rouge);border-color:var(--rouge)}
+
+.remise{margin-top:1rem;text-align:center}
+.btn{
+  background:transparent;border:1px solid var(--encre-pale);border-radius:3px;color:var(--encre-pale);
+  padding:.45rem 1.1rem;font-family:inherit;font-size:.85rem;cursor:pointer;
+}
+.btn:focus-visible{outline:2px solid var(--rouge);outline-offset:2px}
+
+.averti{border:1px solid var(--rouge);border-radius:4px;padding:.8rem .95rem;margin-top:1.4rem}
+.averti h3{font-family:'IM Fell English SC',serif;font-weight:400;font-size:.95rem;margin:0 0 .35rem;color:var(--rouge)}
+.averti ul{margin:0;padding-left:1.1rem;font-size:.85rem;color:#4a4438}
+footer{text-align:center;color:var(--encre-pale);font-size:.7rem;letter-spacing:.09em;margin-top:2.5rem;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Aide de jeu · première partie</div>
+  <h1>Duel pour la Terre du Milieu</h1>
+  <div class="sous">2 joueurs · 3 chapitres · environ 30 minutes</div>
+  <div class="filet"></div>
+</header>
+
+<nav role="tablist" aria-label="Étapes">
+  <button class="tab" role="tab" id="t1" aria-controls="p1" aria-selected="true"><span class="num">I</span><span class="lib">Mise en place</span></button>
+  <button class="tab" role="tab" id="t2" aria-controls="p2" aria-selected="false"><span class="num">II</span><span class="lib">Un tour</span></button>
+  <button class="tab" role="tab" id="t3" aria-controls="p3" aria-selected="false"><span class="num">III</span><span class="lib">Les 3 courses</span></button>
+</nav>
+
+<!-- ===== I ===== -->
+<section id="p1" role="tabpanel" aria-labelledby="t1">
+  <h2>Les deux camps</h2>
+  <div class="camps">
+    <div class="camp bien">
+      <h3>La Communauté</h3>
+      <ul>
+        <li>3 pièces</li>
+        <li>2 Unités en Arnor</li>
+        <li>Mène Frodon et Sam vers la Montagne du Destin</li>
+      </ul>
+    </div>
+    <div class="camp mal">
+      <h3>Sauron</h3>
+      <ul>
+        <li>2 pièces</li>
+        <li>2 Unités au Mordor</li>
+        <li>Lance le Nazgûl à leur poursuite</li>
+        <li><b>Commence la partie</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Sur la table</h2>
+  <div class="bloc">
+    <ul class="check">
+      <li>Le plateau de la Terre du Milieu au centre, la piste Quête de l'Anneau (4 éléments) à côté.</li>
+      <li>Trois paquets de cartes, un par chapitre : <i>La Communauté de l'Anneau</i>, <i>Les Deux Tours</i>, <i>Le Retour du Roi</i>.</li>
+      <li>Les tuiles Haut-Lieu à côté du plateau, <b>3 face visible</b>.</li>
+      <li>Réserve de pièces, jetons Alliance, Unités et Forteresses de chaque camp.</li>
+      <li>Disposez le chapitre 1 selon le schéma du livret : <b>20 cartes</b>, certaines visibles, d'autres cachées, qui se chevauchent. Les <b>3 cartes restantes</b> partent à la défausse, face cachée.</li>
+    </ul>
+  </div>
+
+  <h2>Ce qui change à chaque chapitre</h2>
+  <div class="bloc">
+    <p>Le chapitre s'achève quand la dernière carte a été prise. On dispose alors le chapitre suivant <b>selon un schéma différent</b>, et on révèle des tuiles Haut-Lieu pour en avoir de nouveau 3 face visible.</p>
+    <p class="note">Le plateau, les pièces, les cartes déjà posées devant vous : rien n'est remis à zéro. Tout se cumule jusqu'à la fin.</p>
+  </div>
+</section>
+
+<!-- ===== II ===== -->
+<section id="p2" role="tabpanel" aria-labelledby="t2" hidden>
+  <h2>À votre tour, une seule action</h2>
+  <div class="bloc">
+    <ul class="check">
+      <li><b>Prendre une carte accessible</b> — celle qu'aucune autre carte ne recouvre — puis la <b>jouer</b> devant vous en payant son coût, ou la <b>défausser</b> pour prendre <b>1, 2 ou 3 pièces</b> selon le chapitre en cours.</li>
+      <li><b>Ou prendre une tuile Haut-Lieu</b> : posez une Forteresse dans la région indiquée et appliquez son effet. Ce sont les coups les plus puissants du jeu.</li>
+    </ul>
+  </div>
+
+  <h2>Payer une carte</h2>
+  <div class="bloc">
+    <p>Le coût s'exprime en <b>Compétences</b>, que vous obtenez avec les cartes grises déjà posées devant vous. Elles restent acquises toute la partie.</p>
+    <p>Chaque symbole qui vous manque se paie <b>1 pièce</b> à la réserve. Pas de calcul selon l'adversaire, contrairement à 7 Wonders Duel.</p>
+    <p>Un <b>pictogramme de chaînage</b> en haut de la carte la rend gratuite si vous possédez déjà la carte au même pictogramme, prise à un chapitre précédent.</p>
+  </div>
+
+  <h2>Les six couleurs</h2>
+  <div id="couleurs"></div>
+
+  <h2>Quand les armées se croisent</h2>
+  <div class="bloc">
+    <p>Vous placez ou déplacez des Unités : si aucune Unité adverse n'est présente dans la région, il ne se passe rien.</p>
+    <p>Si l'adversaire est là, <b>conflit</b> : chacun retire une de ses Unités de la région et la reprend devant lui, et on recommence jusqu'à ce qu'au moins un camp n'ait plus rien sur place. La majorité l'emporte, sans dé.</p>
+    <p class="note">Un déplacement fait passer une Unité vers une région <b>adjacente</b>.</p>
+  </div>
+
+  <h2>Les alliances</h2>
+  <div class="bloc">
+    <ul class="check">
+      <li><b>Deux symboles Peuple identiques</b> : prenez les 2 premiers jetons Alliance de ce Peuple, révélez-les, gardez-en un, remettez l'autre face cachée sur sa pile.</li>
+      <li><b>Trois symboles Peuple différents</b>, une seule fois dans la partie : récupérez le premier jeton Alliance de chacun de ces 3 Peuples.</li>
+      <li>Jetons gris : un pouvoir immédiat, utilisable une fois. Jetons marron : un bonus permanent, sous la condition inscrite dessus.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== III ===== -->
+<section id="p3" role="tabpanel" aria-labelledby="t3" hidden>
+  <p class="note" style="margin-bottom:1rem">Pas de points de victoire dans ce jeu : trois courses se jouent en parallèle, et la première franchie arrête la partie sur-le-champ. Ce tableau sert à garder les trois sous les yeux — c'est le vrai piège de la première partie.</p>
+
+  <!-- course 1 -->
+  <div class="course">
+    <h3>La Quête de l'Anneau</h3>
+    <div class="quoi">Les cartes bleues font avancer votre pion sur la piste.</div>
+    <svg class="piste" viewBox="0 0 320 76" role="img" aria-labelledby="pisteT">
+      <title id="pisteT">Position du Nazgûl et de Frodon sur la piste de la Quête</title>
+      <line x1="20" y1="46" x2="300" y2="46" stroke="#c2b490" stroke-width="2" stroke-dasharray="5 6"/>
+      <g id="mtDoom">
+        <polygon points="300,46 290,60 310,60" fill="#98291f"/>
+        <text x="300" y="72" text-anchor="middle" font-family="Karla" font-size="8" fill="#6d6455">Montagne du Destin</text>
+      </g>
+      <g id="pFrodon">
+        <circle cx="200" cy="46" r="8" fill="#2e5a4c"/>
+        <text x="200" y="30" text-anchor="middle" font-family="IM Fell English SC, serif" font-size="11" fill="#2e5a4c">Frodon</text>
+      </g>
+      <g id="pNazgul">
+        <circle cx="60" cy="46" r="8" fill="#98291f"/>
+        <text x="60" y="30" text-anchor="middle" font-family="IM Fell English SC, serif" font-size="11" fill="#98291f">Nazgûl</text>
+      </g>
+    </svg>
+    <div class="compteurs">
+      <div class="ctr">
+        <div class="titre">Écart</div>
+        <div class="rangee">
+          <button class="pas" data-ring="ecart" data-d="-1" aria-label="Réduire l'écart">−</button>
+          <span class="val" id="vEcart">6</span>
+          <button class="pas" data-ring="ecart" data-d="1" aria-label="Augmenter l'écart">+</button>
+        </div>
+      </div>
+      <div class="ctr">
+        <div class="titre">Cases restantes</div>
+        <div class="rangee">
+          <button class="pas" data-ring="reste" data-d="-1" aria-label="Réduire les cases restantes">−</button>
+          <span class="val" id="vReste">10</span>
+          <button class="pas" data-ring="reste" data-d="1" aria-label="Augmenter les cases restantes">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="alerte" id="aRing"></div>
+  </div>
+
+  <!-- course 2 -->
+  <div class="course">
+    <h3>Le soutien des Peuples</h3>
+    <div class="quoi">Six symboles Peuple <b>différents</b> sur vos cartes vertes, et la partie s'arrête.</div>
+    <div class="piste-camp"><span class="qui bien">Communauté</span><div class="pips" data-jauge="peuples" data-camp="bien" data-max="6"></div></div>
+    <div class="piste-camp"><span class="qui mal">Sauron</span><div class="pips" data-jauge="peuples" data-camp="mal" data-max="6"></div></div>
+    <div class="alerte" id="aPeuples"></div>
+  </div>
+
+  <!-- course 3 -->
+  <div class="course">
+    <h3>La conquête</h3>
+    <div class="quoi">Être présent dans les <b>7 régions</b> — Lindon, Arnor, Enedwaith, Rhovanion, Rohan, Gondor, Mordor — avec une Forteresse et/ou au moins une Unité.</div>
+    <div class="piste-camp"><span class="qui bien">Communauté</span><div class="pips" data-jauge="regions" data-camp="bien" data-max="7"></div></div>
+    <div class="piste-camp"><span class="qui mal">Sauron</span><div class="pips" data-jauge="regions" data-camp="mal" data-max="7"></div></div>
+    <div class="alerte" id="aRegions"></div>
+  </div>
+
+  <div class="bloc">
+    <p><b>Si personne n'a gagné à la fin du chapitre 3</b>, la victoire revient à celui qui est présent dans le plus de régions. À égalité, la victoire est partagée.</p>
+  </div>
+
+  <div class="remise"><button class="btn" id="reset">Nouvelle partie</button></div>
+
+  <div class="averti">
+    <h3>À reporter du plateau</h3>
+    <ul>
+      <li>La position de départ des deux pions sur la piste de la Quête, à saisir ci-dessus au début de la partie.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>Bauza &amp; Cathala · Repos Production · 2024</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var tabs = [].slice.call(document.querySelectorAll('.tab'));
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      tabs.forEach(function(t){
+        var a = (t === tab);
+        t.setAttribute('aria-selected', a ? 'true' : 'false');
+        document.getElementById(t.getAttribute('aria-controls')).hidden = !a;
+      });
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+
+  /* couleurs */
+  var C = [
+    ['Grises','var(--c-grise)','Des Compétences, qui servent à payer les cartes suivantes.'],
+    ['Jaunes','var(--c-jaune)','Des pièces, immédiatement.'],
+    ['Bleues','var(--c-bleue)','Avancer sur la piste de la Quête, selon le nombre d\u2019anneaux.'],
+    ['Vertes','var(--c-verte)','Des symboles Peuple, et les jetons Alliance qui vont avec.'],
+    ['Rouges','var(--c-rouge)','Placer des Unités dans les régions du plateau.'],
+    ['Violettes','var(--c-violette)','Des manœuvres variées. Elles n\u2019arrivent qu\u2019au chapitre 3.']
+  ];
+  document.getElementById('couleurs').innerHTML = C.map(function(c){
+    return '<div class="coul" style="border-left-color:'+c[1]+'"><strong>'+c[0]+'</strong><em>'+c[2]+'</em></div>';
+  }).join('');
+
+  /* --- piste de la Quête --- */
+  var ring = {ecart:6, reste:10};
+  var X0 = 40, X1 = 296;
+
+  function majRing(){
+    document.getElementById('vEcart').textContent = ring.ecart;
+    document.getElementById('vReste').textContent = ring.reste;
+    var span = ring.ecart + ring.reste;
+    var fx = span > 0 ? X0 + (ring.ecart / span) * (X1 - X0) : X1;
+    document.getElementById('pFrodon').setAttribute('transform','translate('+(fx-200)+',0)');
+    document.getElementById('pNazgul').setAttribute('transform','translate('+(X0-60)+',0)');
+
+    var a = document.getElementById('aRing');
+    a.className = 'alerte';
+    if(ring.ecart === 0){ a.className = 'alerte gagne'; a.textContent = 'Le Nazgûl rattrape Frodon : Sauron remporte la partie.'; }
+    else if(ring.reste === 0){ a.className = 'alerte gagne'; a.textContent = 'Frodon et Sam atteignent la Montagne du Destin : la Communauté remporte la partie.'; }
+    else if(ring.ecart <= 2){ a.className = 'alerte chaud'; a.textContent = 'Le Nazgûl est sur leurs talons.'; }
+    else if(ring.reste <= 2){ a.className = 'alerte chaud'; a.textContent = 'La Montagne du Destin est à portée.'; }
+    else { a.textContent = 'Le Nazgûl a ' + span + ' cases à combler avant le Mordor.'; }
+  }
+
+  [].forEach.call(document.querySelectorAll('[data-ring]'), function(b){
+    b.addEventListener('click', function(){
+      var k = b.dataset.ring, d = parseInt(b.dataset.d,10);
+      ring[k] = Math.max(0, Math.min(30, ring[k] + d));
+      majRing();
+    });
+  });
+
+  /* --- jauges Peuples et Régions --- */
+  var etat = {peuples:{bien:0,mal:0}, regions:{bien:0,mal:0}};
+
+  function dessinerJauges(){
+    [].forEach.call(document.querySelectorAll('[data-jauge]'), function(z){
+      var j = z.dataset.jauge, camp = z.dataset.camp, max = parseInt(z.dataset.max,10);
+      var n = etat[j][camp], h = '';
+      for(var i=1;i<=max;i++){
+        h += '<button class="pip '+(i<=n?'on '+camp:'')+'" data-j="'+j+'" data-camp="'+camp
+           + '" data-n="'+i+'" aria-label="'+i+' sur '+max+'">'+i+'</button>';
+      }
+      z.innerHTML = h;
+    });
+    majAlertes();
+  }
+
+  function majAlertes(){
+    var p = document.getElementById('aPeuples');
+    p.className = 'alerte';
+    if(etat.peuples.bien >= 6){ p.className='alerte gagne'; p.textContent='La Communauté rassemble les Peuples et remporte la partie.'; }
+    else if(etat.peuples.mal >= 6){ p.className='alerte gagne'; p.textContent='Sauron rassemble les Peuples et remporte la partie.'; }
+    else if(Math.max(etat.peuples.bien, etat.peuples.mal) >= 5){ p.className='alerte chaud'; p.textContent='Un sixième Peuple suffit. Cette carte verte ne doit pas passer.'; }
+    else { p.textContent = 'Communauté ' + etat.peuples.bien + ' — Sauron ' + etat.peuples.mal + ', sur 6.'; }
+
+    var r = document.getElementById('aRegions');
+    r.className = 'alerte';
+    if(etat.regions.bien >= 7){ r.className='alerte gagne'; r.textContent='La Communauté tient les 7 régions et remporte la partie.'; }
+    else if(etat.regions.mal >= 7){ r.className='alerte gagne'; r.textContent='Sauron tient les 7 régions et remporte la partie.'; }
+    else if(Math.max(etat.regions.bien, etat.regions.mal) >= 6){ r.className='alerte chaud'; r.textContent='Il ne manque qu\u2019une région. Occupez-la, ou videz-en une autre.'; }
+    else { r.textContent = 'Communauté ' + etat.regions.bien + ' — Sauron ' + etat.regions.mal + ', sur 7.'; }
+  }
+
+  document.getElementById('p3').addEventListener('click', function(e){
+    var pip = e.target.closest('.pip');
+    if(!pip) return;
+    var j = pip.dataset.j, camp = pip.dataset.camp, n = parseInt(pip.dataset.n,10);
+    etat[j][camp] = (etat[j][camp] === n) ? n - 1 : n;
+    dessinerJauges();
+  });
+
+  document.getElementById('reset').addEventListener('click', function(){
+    etat = {peuples:{bien:0,mal:0}, regions:{bien:0,mal:0}};
+    ring = {ecart:6, reste:10};
+    dessinerJauges(); majRing();
+  });
+
+  dessinerJauges();
+  majRing();
+})();
+</script>
+</body>
+</html>

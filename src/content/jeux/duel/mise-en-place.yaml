@@ -1,0 +1,39 @@
+type: mise-en-place
+titre: Mise en place
+validation:
+  statut: brouillon
+  source: "page de référence, non comparée au livret"
+
+titreCamps: Les deux camps
+camps:
+  - id: communaute
+    nom: La Communauté
+    couleur: bien
+    points:
+      - "3 pièces"
+      - "2 Unités en Arnor"
+      - "Mène Frodon et Sam vers la Montagne du Destin"
+  - id: sauron
+    nom: Sauron
+    couleur: rouge
+    points:
+      - "2 pièces"
+      - "2 Unités au Mordor"
+      - "Lance le Nazgûl à leur poursuite"
+      - "**Commence la partie**"
+
+# Le schéma SVG est une étape à part : champ `schema` laissé vide.
+
+blocs:
+  - titre: Sur la table
+    liste:
+      - "Le plateau de la Terre du Milieu au centre, la piste Quête de l'Anneau (4 éléments) à côté."
+      - "Trois paquets de cartes, un par chapitre : *La Communauté de l'Anneau*, *Les Deux Tours*, *Le Retour du Roi*."
+      - "Les tuiles Haut-Lieu à côté du plateau, **3 face visible**."
+      - "Réserve de pièces, jetons Alliance, Unités et Forteresses de chaque camp."
+      - "Disposez le chapitre 1 selon le schéma du livret : **20 cartes**, certaines visibles, d'autres cachées, qui se chevauchent. Les **3 cartes restantes** partent à la défausse, face cachée."
+
+  - titre: Ce qui change à chaque chapitre
+    paragraphes:
+      - "Le chapitre s'achève quand la dernière carte a été prise. On dispose alors le chapitre suivant **selon un schéma différent**, et on révèle des tuiles Haut-Lieu pour en avoir de nouveau 3 face visible."
+    note: "Le plateau, les pièces, les cartes déjà posées devant vous : rien n'est remis à zéro. Tout se cumule jusqu'à la fin."

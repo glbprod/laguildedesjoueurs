@@ -1,0 +1,19 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import MiseEnPlace from './MiseEnPlace.astro';
+import Tour from './Tour.astro';
+
+interface Props {
+  module: CollectionEntry<'modules'>;
+}
+const { module } = Astro.props;
+const { data } = module;
+
+// Un type de module sans composant fait échouer le build : pas de page vide.
+if (data.type !== 'mise-en-place' && data.type !== 'tour') {
+  throw new Error(`Pas de composant de rendu pour le type « ${data.type} » (${module.id})`);
+}
+---
+
+{data.type === 'mise-en-place' && <MiseEnPlace data={data} />}
+{data.type === 'tour' && <Tour data={data} />}

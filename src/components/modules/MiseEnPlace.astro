@@ -1,0 +1,29 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Bloc from '../Bloc.astro';
+import { enrichir } from '../../lib/texte';
+
+interface Props {
+  data: Extract<CollectionEntry<'modules'>['data'], { type: 'mise-en-place' }>;
+}
+const { data } = Astro.props;
+---
+
+{
+  data.camps.length > 0 && (
+    <section class="section">
+      {data.titreCamps && <h2>{data.titreCamps}</h2>}
+      <div class="camps">
+        {data.camps.map((camp) => (
+          <div class="camp" style={`--couleur: var(--${camp.couleur})`}>
+            <h3>{camp.nom}</h3>
+            <ul>
+              {camp.points.map((p) => <li set:html={enrichir(p)} />)}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+{data.blocs.map((bloc) => <Bloc bloc={bloc} />)}

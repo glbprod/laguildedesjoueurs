@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duel pour la Terre du Milieu — Les effets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Karla:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --velin:#e7ddc6; --velin-fonce:#dbcfb2; --velin-creux:#d2c49f;
+  --encre:#221f1a; --encre-pale:#6d6455;
+  --rouge:#98291f; --bien:#2e5a4c; --or:#b8860b;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 4rem;background:var(--velin);color:var(--encre);
+  font-family:'Karla',system-ui,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding:0 1.1rem}
+
+header{padding:1.9rem 0 .7rem;text-align:center}
+.eyebrow{font-size:.64rem;letter-spacing:.3em;text-transform:uppercase;color:var(--rouge)}
+h1{font-family:'IM Fell English SC',Georgia,serif;font-weight:400;
+  font-size:clamp(1.4rem,6vw,1.95rem);margin:.45rem 0 .2rem}
+.sous{font-size:.84rem;color:var(--encre-pale)}
+.filet{height:1px;background:var(--encre);opacity:.3;margin:1rem 0 0}
+
+nav{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin:1.2rem 0}
+.tab{background:transparent;border:1px solid var(--velin-creux);border-radius:3px;padding:.6rem .3rem;
+  cursor:pointer;color:var(--encre-pale);font-family:inherit;font-size:.82rem;letter-spacing:.1em;
+  text-transform:uppercase;transition:background .18s,color .18s,border-color .18s}
+.tab[aria-selected="true"]{background:var(--encre);border-color:var(--encre);color:var(--velin)}
+.tab:focus-visible{outline:2px solid var(--rouge);outline-offset:2px}
+section[hidden]{display:none}
+
+h2{font-family:'IM Fell English SC',serif;font-weight:400;font-size:1.1rem;margin:1.7rem 0 .5rem;
+  padding-bottom:.22rem;border-bottom:1px solid var(--velin-creux)}
+h2:first-of-type{margin-top:.2rem}
+.note{color:var(--encre-pale);font-size:.87rem}
+
+.fiche{background:var(--velin-fonce);border-radius:4px;padding:.85rem 1rem;margin-bottom:.55rem;border-left:4px solid var(--encre-pale)}
+.fiche.imm{border-left-color:var(--rouge)}
+.fiche h3{font-family:'IM Fell English SC',serif;font-weight:400;font-size:1.02rem;margin:0 0 .1rem}
+.fiche .lieu{font-size:.78rem;color:var(--rouge);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.4rem}
+.fiche ul{margin:.35rem 0 0;padding-left:1.05rem;font-size:.9rem}
+.fiche li{margin-bottom:.28rem}
+.tagimm{display:inline-block;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--rouge);color:var(--velin);border-radius:2px;padding:.08rem .35rem;margin-left:.4rem;vertical-align:.1rem}
+
+/* entraînement */
+.reglages{display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap}
+.chip{background:transparent;border:1px solid var(--velin-creux);border-radius:99px;padding:.35rem .85rem;
+  font-family:inherit;font-size:.82rem;color:var(--encre-pale);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--encre);border-color:var(--encre);color:var(--velin)}
+.chip:focus-visible{outline:2px solid var(--rouge);outline-offset:2px}
+
+.jauge{height:4px;background:var(--velin-creux);border-radius:2px;overflow:hidden;margin-bottom:.9rem}
+.jauge div{height:100%;background:var(--bien);width:0;transition:width .3s}
+
+.carte{background:var(--velin-fonce);border-radius:5px;padding:1.4rem 1.1rem;min-height:220px;
+  display:flex;flex-direction:column;justify-content:center;text-align:center}
+.question{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--encre-pale);margin-bottom:.6rem}
+.sujet{font-family:'IM Fell English SC',serif;font-size:1.6rem;line-height:1.2}
+.reponse{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--velin-creux);text-align:left}
+.reponse .lieu{font-size:.78rem;color:var(--rouge);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.35rem}
+.reponse ul{margin:0;padding-left:1.05rem;font-size:.92rem}
+.reponse li{margin-bottom:.3rem}
+
+.actions{display:flex;gap:.5rem;margin-top:.9rem}
+.btn{flex:1;border:1px solid var(--encre);background:transparent;color:var(--encre);border-radius:3px;
+  padding:.65rem;font-family:inherit;font-size:.9rem;cursor:pointer}
+.btn.plein{background:var(--encre);color:var(--velin)}
+.btn.revoir{border-color:var(--rouge);color:var(--rouge)}
+.btn.su{border-color:var(--bien);color:var(--bien)}
+.btn:focus-visible{outline:2px solid var(--rouge);outline-offset:2px}
+
+.bilan{background:var(--velin-fonce);border-radius:5px;padding:1.4rem 1.1rem;text-align:center}
+.bilan .gros{font-family:'IM Fell English SC',serif;font-size:1.8rem;margin:.3rem 0}
+.bilan ul{text-align:left;display:inline-block;margin:.7rem 0 0;font-size:.9rem}
+.compteur{text-align:center;font-size:.78rem;color:var(--encre-pale);margin-top:.7rem}
+footer{text-align:center;color:var(--encre-pale);font-size:.68rem;letter-spacing:.08em;margin-top:2.5rem;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Duel pour la Terre du Milieu</div>
+  <h1>Les effets</h1>
+  <div class="sous">Peuples · Hauts-Lieux · piste de la Quête</div>
+  <div class="filet"></div>
+</header>
+
+<nav role="tablist">
+  <button class="tab" role="tab" id="tc" aria-controls="pc" aria-selected="true">Consulter</button>
+  <button class="tab" role="tab" id="te" aria-controls="pe" aria-selected="false">S'entraîner</button>
+</nav>
+
+<section id="pc" role="tabpanel" aria-labelledby="tc">
+  <h2>Les six Peuples</h2>
+  <div id="listePeuples"></div>
+  <h2>Les sept Hauts-Lieux</h2>
+  <p class="note">Un Haut-Lieu par région : c'est par eux que se gagne la conquête.</p>
+  <div id="listeLieux"></div>
+  <h2>La piste de la Quête</h2>
+  <div id="listeQuete"></div>
+  <p class="note" style="margin-top:.8rem">Les effets de la Quête, des Hauts-Lieux, des Ents et des Sorciers sont <b>immédiats</b> et ne servent qu'une fois, au moment où on les obtient.</p>
+</section>
+
+<section id="pe" role="tabpanel" aria-labelledby="te" hidden>
+  <div class="reglages">
+    <button class="chip" data-deck="peuples" aria-pressed="true">Peuples</button>
+    <button class="chip" data-deck="lieux" aria-pressed="true">Hauts-Lieux</button>
+    <button class="chip" data-deck="regions" aria-pressed="true">Régions → tuile</button>
+  </div>
+  <div class="jauge"><div id="barre"></div></div>
+  <div id="zoneCarte"></div>
+  <div class="compteur" id="compteur"></div>
+</section>
+
+<footer>Bauza &amp; Cathala · Repos Production</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var PEUPLES = [
+  {nom:"Elfes", imm:false, effets:[
+    "Carte Jaune jouée : jouez un tour supplémentaire à la fin de celui-ci.",
+    "Carte Rouge jouée : placez toutes les Unités concernées dans 1 seule des 7 régions, au choix.",
+    "Une fois par tour, bénéficiez d'1 Compétence au choix."]},
+  {nom:"Nains", imm:false, effets:[
+    "Tuile Haut-Lieu prise : ignorez le surcoût en Pièces.",
+    "Tuile Haut-Lieu prise : jouez un tour supplémentaire à la fin de celui-ci.",
+    "Carte Verte jouée : bénéficiez de 2 déplacements sur le plateau central."]},
+  {nom:"Hobbits", imm:false, effets:[
+    "Le symbole Aigles compte comme un des 6 Peuples nécessaires à la victoire Soutien.",
+    "Carte Bleue jouée : placez aussi 1 Unité dans la région de votre choix.",
+    "Carte jouée grâce à son chaînage : prenez 3 Pièces."]},
+  {nom:"Humains", imm:false, effets:[
+    "Carte Jaune jouée : faites aussi progresser votre personnage d'1 case sur la piste.",
+    "Carte Rouge jouée : placez 1 Unité supplémentaire dans la région choisie.",
+    "Carte défaussée : prenez 2 fois le gain du chapitre en cours, soit 2, 4 ou 6 Pièces."]},
+  {nom:"Ents", imm:true, effets:[
+    "Jouez un tour supplémentaire à la fin de celui-ci.",
+    "Retirez 1 Forteresse adverse d'une région de votre choix et rendez-la à votre adversaire.",
+    "Trois fois, au choix : retirer 1 Unité adverse, faire perdre 1 Pièce, ou 1 déplacement."]},
+  {nom:"Sorciers", imm:true, effets:[
+    "Faites progresser votre personnage de 2 cases sur la piste.",
+    "Placez 2 Unités dans 1 région, ou 1 Unité dans 2 régions au choix.",
+    "Prenez toute la défausse, choisissez-en 1 carte secrètement et jouez-la sans en payer le coût."]}
+];
+
+var LIEUX = [
+  {nom:"Barad-Dûr", region:"Mordor", effets:[
+    "Placez 1 Forteresse.",
+    "Prenez toute la défausse, choisissez-en 1 carte secrètement et jouez-la sans en payer le coût."]},
+  {nom:"Bree", region:"Arnor", effets:[
+    "Placez 1 Forteresse et 2 Unités.",
+    "Bénéficiez de 2 déplacements sur le plateau central."]},
+  {nom:"Erebor", region:"Rhovanion", effets:[
+    "Placez 1 Forteresse.",
+    "Prenez 5 Pièces de la réserve.",
+    "Bénéficiez de 1 déplacement sur le plateau central."]},
+  {nom:"Havres Gris", region:"Lindon", effets:[
+    "Placez 1 Forteresse.",
+    "Prenez les 2 premiers jetons d'un Peuple au choix, révélez-les, gardez-en 1 et remettez l'autre face cachée sur sa pile."]},
+  {nom:"Gouffre de Helm", region:"Rohan", effets:[
+    "Placez 1 Forteresse et 3 Unités."]},
+  {nom:"Isengard", region:"Enedwaith", effets:[
+    "Placez 1 Forteresse.",
+    "Défaussez 1 carte Grise de la zone de jeu adverse.",
+    "Progressez de 1 case sur la piste de la Quête."]},
+  {nom:"Minas Tirith", region:"Gondor", effets:[
+    "Placez 1 Forteresse et 1 Unité.",
+    "Progressez de 2 cases sur la piste de la Quête."]}
+];
+
+var QUETE = [
+  "Prenez 1 Pièce de la réserve.",
+  "Jouez un tour supplémentaire à la fin de celui-ci.",
+  "Placez 1 Unité dans la région de votre choix.",
+  "Retirez 1 Forteresse adverse d'une région de votre choix et rendez-la à votre adversaire.",
+  "Anneau : Sauron remporte immédiatement la partie.",
+  "Montagne du Destin : la Communauté remporte immédiatement la partie."
+];
+
+/* ---------- consultation ---------- */
+function ul(items){ return '<ul>' + items.map(function(e){return '<li>'+e+'</li>';}).join('') + '</ul>'; }
+
+document.getElementById('listePeuples').innerHTML = PEUPLES.map(function(p){
+  return '<div class="fiche'+(p.imm?' imm':'')+'"><h3>'+p.nom
+    + (p.imm ? '<span class="tagimm">immédiat</span>' : '') + '</h3>' + ul(p.effets) + '</div>';
+}).join('');
+
+document.getElementById('listeLieux').innerHTML = LIEUX.map(function(l){
+  return '<div class="fiche imm"><h3>'+l.nom+'</h3><div class="lieu">'+l.region+'</div>'+ul(l.effets)+'</div>';
+}).join('');
+
+document.getElementById('listeQuete').innerHTML = '<div class="fiche imm">'+ul(QUETE)+'</div>';
+
+/* ---------- onglets ---------- */
+var tabs = [].slice.call(document.querySelectorAll('.tab'));
+tabs.forEach(function(tab){
+  tab.addEventListener('click', function(){
+    tabs.forEach(function(t){
+      var a = (t === tab);
+      t.setAttribute('aria-selected', a ? 'true' : 'false');
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !a;
+    });
+    window.scrollTo({top:0, behavior:'smooth'});
+    if(tab.id === 'te' && !file.length) demarrer();
+  });
+});
+
+/* ---------- entraînement ---------- */
+var decks = {peuples:true, lieux:true, regions:true};
+var file = [], courante = null, revele = false, vus = 0, sus = 0, aRevoir = [];
+
+function construire(){
+  var c = [];
+  if(decks.peuples) PEUPLES.forEach(function(p){
+    c.push({q:'Les trois effets de', s:p.nom, lieu:p.imm?'jetons immédiats':'', r:p.effets});
+  });
+  if(decks.lieux) LIEUX.forEach(function(l){
+    c.push({q:'Que fait ce Haut-Lieu', s:l.nom, lieu:l.region, r:l.effets});
+  });
+  if(decks.regions) LIEUX.forEach(function(l){
+    c.push({q:'Quel Haut-Lieu pour cette région', s:l.region, lieu:l.nom, r:l.effets});
+  });
+  for(var i=c.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=c[i]; c[i]=c[j]; c[j]=t; }
+  return c;
+}
+
+function demarrer(){
+  file = construire(); vus = 0; sus = 0; aRevoir = [];
+  suivante();
+}
+
+function suivante(){
+  revele = false;
+  courante = file.shift() || null;
+  rendre();
+}
+
+function rendre(){
+  var z = document.getElementById('zoneCarte');
+  var total = vus + file.length + (courante ? 1 : 0);
+  document.getElementById('barre').style.width = total ? (vus/total*100)+'%' : '0';
+
+  if(!courante){
+    z.innerHTML = '<div class="bilan"><div class="question">Session terminée</div>'
+      + '<div class="gros">'+sus+' / '+vus+'</div>'
+      + (aRevoir.length ? '<div class="note">À reprendre :</div><ul>'
+          + aRevoir.filter(function(v,i,a){return a.indexOf(v)===i;}).map(function(n){return '<li>'+n+'</li>';}).join('')
+          + '</ul>' : '<div class="note">Rien à revoir. Vous pouvez sortir la boîte.</div>')
+      + '<div class="actions"><button class="btn plein" id="rejouer">Recommencer</button></div></div>';
+    document.getElementById('rejouer').addEventListener('click', demarrer);
+    document.getElementById('compteur').textContent = '';
+    return;
+  }
+
+  var corps = '<div class="carte"><div class="question">'+courante.q+'</div>'
+    + '<div class="sujet">'+courante.s+'</div>';
+  if(revele){
+    corps += '<div class="reponse">'
+      + (courante.lieu ? '<div class="lieu">'+courante.lieu+'</div>' : '')
+      + '<ul>'+courante.r.map(function(e){return '<li>'+e+'</li>';}).join('')+'</ul></div>';
+  }
+  corps += '</div>';
+  corps += revele
+    ? '<div class="actions"><button class="btn revoir" id="bRevoir">À revoir</button>'
+      + '<button class="btn su" id="bSu">Je savais</button></div>'
+    : '<div class="actions"><button class="btn plein" id="bVoir">Retourner la carte</button></div>';
+  z.innerHTML = corps;
+
+  if(revele){
+    document.getElementById('bSu').addEventListener('click', function(){ juger(true); });
+    document.getElementById('bRevoir').addEventListener('click', function(){ juger(false); });
+  } else {
+    document.getElementById('bVoir').addEventListener('click', function(){ revele = true; rendre(); });
+  }
+  document.getElementById('compteur').textContent = (file.length + 1) + ' carte(s) restante(s)';
+}
+
+function juger(ok){
+  vus++;
+  if(ok){ sus++; }
+  else {
+    aRevoir.push(courante.s);
+    var pos = Math.min(file.length, 3 + Math.floor(Math.random()*3));
+    file.splice(pos, 0, courante);
+  }
+  suivante();
+}
+
+[].forEach.call(document.querySelectorAll('.chip'), function(ch){
+  ch.addEventListener('click', function(){
+    var d = ch.dataset.deck;
+    if(decks[d] && Object.keys(decks).filter(function(k){return decks[k];}).length === 1) return;
+    decks[d] = !decks[d];
+    ch.setAttribute('aria-pressed', decks[d] ? 'true' : 'false');
+    demarrer();
+  });
+});
+
+})();
+</script>
+</body>
+</html>

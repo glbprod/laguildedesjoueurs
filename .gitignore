@@ -1,0 +1,22 @@
+# sortie de build
+dist/
+# types générés par Astro
+.astro/
+
+# dépendances
+node_modules/
+
+# sources de règles des éditeurs : consultées en local, jamais publiées
+sources/
+
+# logs
+npm-debug.log*
+
+# variables d'environnement
+.env
+.env.production
+
+# fichiers système et éditeurs
+.DS_Store
+Thumbs.db
+.idea/

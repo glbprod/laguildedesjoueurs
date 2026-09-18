@@ -1,0 +1,118 @@
+/* Structure et composants communs. Aucune couleur ni police en dur :
+   tout vient des tokens du thème du jeu (src/styles/themes/). */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 0 4rem;
+  background: var(--velin);
+  color: var(--encre);
+  font-family: var(--police-texte);
+  font-size: 1.0625rem; /* 17 px : lisible à bout de bras sur une tablette */
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 44rem; margin: 0 auto; padding: 0 1.1rem; }
+
+:focus-visible { outline: 2px solid var(--rouge); outline-offset: 2px; }
+
+a { color: inherit; }
+p { margin: 0.45rem 0; }
+strong { font-weight: 700; }
+em { font-style: italic; }
+
+/* ---- en-tête ---- */
+.entete { padding: 2rem 0 0.8rem; text-align: center; }
+.eyebrow {
+  font-size: 0.8rem; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--rouge);
+}
+.eyebrow a { text-decoration: none; }
+h1 {
+  font-family: var(--police-titre); font-weight: 400;
+  font-size: clamp(1.6rem, 6.5vw, 2.3rem); line-height: 1.15;
+  margin: 0.5rem 0 0.3rem;
+}
+h1 a { text-decoration: none; }
+.sous { font-size: 0.95rem; color: var(--encre-pale); }
+.filet { height: 1px; background: var(--encre); opacity: 0.35; margin: 1.1rem 0 0; }
+
+/* ---- navigation entre modules : liens, cibles ≥ 44 px ---- */
+.nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: 0.5rem;
+  margin: 1.3rem 0;
+}
+.nav a {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 3.5rem; padding: 0.4rem 0.3rem;
+  border: 1px solid var(--encre-pale); border-radius: 3px;
+  color: var(--encre-pale); text-decoration: none; text-align: center;
+  transition: background 0.18s, color 0.18s;
+}
+.nav a[aria-current='page'] { background: var(--encre); border-color: var(--encre); color: var(--velin); }
+.nav .num { font-family: var(--police-titre); font-size: 1.15rem; line-height: 1.2; }
+.nav .lib { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ---- sections et blocs ---- */
+.section + .section { margin-top: 1.9rem; }
+h2 {
+  font-family: var(--police-titre); font-weight: 400; font-size: 1.25rem;
+  margin: 0 0 0.6rem; padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--velin-creux);
+}
+.bloc { background: var(--velin-fonce); border-radius: 4px; padding: 0.9rem 1rem; }
+.note { color: var(--encre-pale); font-size: 0.95rem; }
+
+ul.check { list-style: none; padding: 0; margin: 0.3rem 0 0; }
+ul.check li {
+  padding: 0.5rem 0 0.5rem 1.4rem; position: relative;
+  border-bottom: 1px solid var(--velin-creux);
+}
+ul.check li:last-child { border-bottom: 0; }
+ul.check li::before {
+  content: '§'; position: absolute; left: 0; top: 0.5rem;
+  color: var(--rouge); font-size: 0.85rem; font-family: var(--police-titre);
+}
+
+/* légende colorée : la couleur vient du token cité dans le YAML */
+.legende { margin-top: 0.6rem; }
+.coul {
+  display: flex; gap: 0.8rem; align-items: baseline;
+  padding: 0.55rem 0.8rem; margin-bottom: 0.35rem;
+  border-left: 4px solid var(--couleur);
+  background: var(--velin-fonce); border-radius: 3px;
+}
+.coul strong { min-width: 5rem; }
+.coul span { font-size: 0.95rem; color: var(--encre-douce); }
+
+/* ---- camps ---- */
+.camps { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.6rem; }
+.camp {
+  background: var(--velin-fonce); border-top: 3px solid var(--couleur);
+  border-radius: 4px; padding: 0.8rem 0.9rem;
+}
+.camp h3 { font-family: var(--police-titre); font-weight: 400; font-size: 1.1rem; margin: 0 0 0.35rem; }
+.camp ul { margin: 0; padding-left: 1.1rem; }
+.camp li { margin-bottom: 0.2rem; }
+
+/* ---- grandes cartes tactiles (accueil du site, accueil d'un jeu) ---- */
+.cartes { display: grid; gap: 0.7rem; margin-top: 1.3rem; }
+.carte {
+  display: flex; align-items: center; gap: 1rem;
+  min-height: 4.5rem; padding: 0.8rem 1rem;
+  background: var(--velin-fonce); border: 1px solid var(--encre-pale); border-radius: 4px;
+  text-decoration: none;
+}
+.carte .num { font-family: var(--police-titre); font-size: 1.6rem; min-width: 2.2rem; text-align: center; color: var(--rouge); }
+.carte .titre { font-family: var(--police-titre); font-size: 1.3rem; line-height: 1.2; display: block; }
+.carte .detail { font-size: 0.95rem; color: var(--encre-pale); display: block; }
+
+/* ---- pied de page ---- */
+.pied {
+  text-align: center; color: var(--encre-pale); font-size: 0.8rem;
+  letter-spacing: 0.09em; margin-top: 2.5rem; text-transform: uppercase;
+}

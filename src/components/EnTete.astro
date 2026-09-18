@@ -1,0 +1,19 @@
+---
+interface Props {
+  eyebrow: string;
+  eyebrowHref?: string;
+  titre: string;
+  titreHref?: string;
+  sous?: string;
+}
+const { eyebrow, eyebrowHref, titre, titreHref, sous } = Astro.props;
+---
+
+<header class="entete">
+  <div class="eyebrow">
+    {eyebrowHref ? <a href={eyebrowHref}>{eyebrow}</a> : eyebrow}
+  </div>
+  <h1>{titreHref ? <a href={titreHref}>{titre}</a> : titre}</h1>
+  {sous && <div class="sous">{sous}</div>}
+  <div class="filet"></div>
+</header>

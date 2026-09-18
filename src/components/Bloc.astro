@@ -1,0 +1,48 @@
+---
+import { enrichir } from '../lib/texte';
+
+// Bloc générique du schéma (titre, paragraphes, liste, légende, note).
+// Le type est reconstruit ici pour ne pas exporter le schéma de content.config.ts.
+interface Props {
+  bloc: {
+    titre: string;
+    paragraphes: string[];
+    liste: string[];
+    note?: string;
+    legende: { nom: string; couleur: string; texte: string }[];
+  };
+}
+const { bloc } = Astro.props;
+const aUneBoite = bloc.paragraphes.length > 0 || bloc.liste.length > 0 || !!bloc.note;
+---
+
+<section class="section">
+  <h2>{bloc.titre}</h2>
+  {
+    aUneBoite && (
+      <div class="bloc">
+        {bloc.paragraphes.map((p) => <p set:html={enrichir(p)} />)}
+        {
+          bloc.liste.length > 0 && (
+            <ul class="check">
+              {bloc.liste.map((li) => <li set:html={enrichir(li)} />)}
+            </ul>
+          )
+        }
+        {bloc.note && <p class="note" set:html={enrichir(bloc.note)} />}
+      </div>
+    )
+  }
+  {
+    bloc.legende.length > 0 && (
+      <div class="legende">
+        {bloc.legende.map((l) => (
+          <div class="coul" style={`--couleur: var(--${l.couleur})`}>
+            <strong>{l.nom}</strong>
+            <span set:html={enrichir(l.texte)} />
+          </div>
+        ))}
+      </div>
+    )
+  }
+</section>

@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import Page from '../layouts/Page.astro';
+import EnTete from '../components/EnTete.astro';
+import { url } from '../lib/url';
+
+const jeux = await getCollection('jeux');
+---
+
+<!-- Le site n'a pas de thème propre : on emprunte celui du jeu pilote. -->
+<Page titre="La Guilde des Joueurs — Aides de jeu" theme="duel">
+  <EnTete eyebrow="Aides de jeu" titre="La Guilde des Joueurs" />
+  <main>
+    <div class="cartes">
+      {
+        jeux.map((jeu) => (
+          <a class="carte" href={url(`${jeu.id}/`)}>
+            <span>
+              <span class="titre">{jeu.data.titre}</span>
+              <span class="detail">
+                {jeu.data.sousTitre ? `${jeu.data.sousTitre} · ` : ''}
+                {jeu.data.joueurs} joueurs · {jeu.data.duree}
+              </span>
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </main>
+</Page>

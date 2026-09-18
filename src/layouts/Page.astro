@@ -1,0 +1,36 @@
+---
+// Coquille HTML commune : polices locales, styles de base, thème.
+import '@fontsource/im-fell-english-sc/latin-400.css';
+import '@fontsource/karla/latin-400.css';
+import '@fontsource/karla/latin-400-italic.css';
+import '@fontsource/karla/latin-700.css';
+import '../styles/base.css';
+
+interface Props {
+  titre: string;
+  theme: string;
+}
+const { titre, theme } = Astro.props;
+
+// Import eager : les fichiers de thème sont tous bundlés (leurs tokens sont
+// bornés à [data-theme]). On vérifie l'existence pour qu'un `theme:` erroné
+// dans jeu.yaml casse le build au lieu de produire une page sans couleurs.
+const themes = import.meta.glob('../styles/themes/*.css', { eager: true });
+if (!(`../styles/themes/${theme}.css` in themes)) {
+  throw new Error(`Thème introuvable : src/styles/themes/${theme}.css`);
+}
+---
+
+<!doctype html>
+<html lang="fr" data-theme={theme}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titre}</title>
+  </head>
+  <body>
+    <div class="wrap">
+      <slot />
+    </div>
+  </body>
+</html>

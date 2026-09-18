@@ -1,0 +1,26 @@
+/* Thème « Duel pour la Terre du Milieu » : tokens uniquement.
+   Ils sont bornés à data-theme pour que plusieurs thèmes puissent coexister
+   dans le même bundle CSS sans s'écraser. */
+:root[data-theme='duel'] {
+  --velin: #e7ddc6;
+  --velin-fonce: #dbcfb2;
+  --velin-creux: #d2c49f;
+  --encre: #221f1a;
+  /* Référence : #6d6455, soit 3,77:1 sur --velin-fonce. Foncé à #5c5447
+     pour atteindre 4,83:1 (AA, principe 4 : lisible à bout de bras). */
+  --encre-pale: #5c5447;
+  --encre-douce: #4a4438; /* texte secondaire des légendes (7,1:1 sur --velin) */
+  --rouge: #98291f;
+  --bien: #2e5a4c;
+
+  /* Couleurs de cartes */
+  --c-grise: #7b7a74;
+  --c-jaune: #b8860b;
+  --c-bleue: #2f5f8a;
+  --c-verte: #4a7a3c;
+  --c-rouge: #9c3225;
+  --c-violette: #6d4479;
+
+  --police-titre: 'IM Fell English SC', Georgia, serif;
+  --police-texte: 'Karla', system-ui, sans-serif;
+}

@@ -1,0 +1,50 @@
+type: tour
+titre: Un tour
+validation:
+  statut: brouillon
+  source: "page de référence, non comparée au livret"
+
+blocs:
+  - titre: À votre tour, une seule action
+    liste:
+      - "**Prendre une carte accessible** — celle qu'aucune autre carte ne recouvre — puis la **jouer** devant vous en payant son coût, ou la **défausser** pour prendre **1, 2 ou 3 pièces** selon le chapitre en cours."
+      - "**Ou prendre une tuile Haut-Lieu** : posez une Forteresse dans la région indiquée et appliquez son effet. Ce sont les coups les plus puissants du jeu."
+
+  - titre: Payer une carte
+    paragraphes:
+      - "Le coût s'exprime en **Compétences**, que vous obtenez avec les cartes grises déjà posées devant vous. Elles restent acquises toute la partie."
+      - "Chaque symbole qui vous manque se paie **1 pièce** à la réserve. Pas de calcul selon l'adversaire, contrairement à 7 Wonders Duel."
+      - "Un **pictogramme de chaînage** en haut de la carte la rend gratuite si vous possédez déjà la carte au même pictogramme, prise à un chapitre précédent."
+
+  - titre: Les six couleurs
+    legende:
+      - nom: Grises
+        couleur: c-grise
+        texte: "Des Compétences, qui servent à payer les cartes suivantes."
+      - nom: Jaunes
+        couleur: c-jaune
+        texte: "Des pièces, immédiatement."
+      - nom: Bleues
+        couleur: c-bleue
+        texte: "Avancer sur la piste de la Quête, selon le nombre d’anneaux."
+      - nom: Vertes
+        couleur: c-verte
+        texte: "Des symboles Peuple, et les jetons Alliance qui vont avec."
+      - nom: Rouges
+        couleur: c-rouge
+        texte: "Placer des Unités dans les régions du plateau."
+      - nom: Violettes
+        couleur: c-violette
+        texte: "Des manœuvres variées. Elles n’arrivent qu’au chapitre 3."
+
+  - titre: Quand les armées se croisent
+    paragraphes:
+      - "Vous placez ou déplacez des Unités : si aucune Unité adverse n'est présente dans la région, il ne se passe rien."
+      - "Si l'adversaire est là, **conflit** : chacun retire une de ses Unités de la région et la reprend devant lui, et on recommence jusqu'à ce qu'au moins un camp n'ait plus rien sur place. La majorité l'emporte, sans dé."
+    note: "Un déplacement fait passer une Unité vers une région **adjacente**."
+
+  - titre: Les alliances
+    liste:
+      - "**Deux symboles Peuple identiques** : prenez les 2 premiers jetons Alliance de ce Peuple, révélez-les, gardez-en un, remettez l'autre face cachée sur sa pile."
+      - "**Trois symboles Peuple différents**, une seule fois dans la partie : récupérez le premier jeton Alliance de chacun de ces 3 Peuples."
+      - "Jetons gris : un pouvoir immédiat, utilisable une fois. Jetons marron : un bonus permanent, sous la condition inscrite dessus."
