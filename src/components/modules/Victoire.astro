@@ -1,0 +1,123 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { enrichir } from '../../lib/texte';
+
+type Camp = CollectionEntry<'jeux'>['data']['camps'][number];
+
+interface Props {
+  data: Extract<CollectionEntry<'modules'>['data'], { type: 'victoire' }>;
+  camps: Camp[];
+  slug: string;
+  nom: string;
+}
+const { data, camps, slug, nom } = Astro.props;
+
+// Clé localStorage préfixée : l'origine glbprod.github.io est partagée.
+const stockage = `guilde:${slug}:${nom}`;
+
+const entiers = (n: number) => Array.from({ length: n }, (_, i) => i + 1);
+---
+
+<!--
+  Le balisage est entièrement rendu ici. src/scripts/suivi.js ne fait que
+  lire/écrire l'état, poser les classes et écrire le message.
+  Chaque élément `data-cle` est une valeur suivie (compteur, camp ou valeur
+  unique) avec son `data-depart` et son `data-max`.
+-->
+<div data-suivi data-stockage={stockage}>
+  {data.intro && <p class="note" set:html={enrichir(data.intro)} />}
+
+  {
+    data.conditions.map((c) => {
+      const s = c.suivi;
+      // Jauge : une ligne par camp, ou une seule si le suivi n'est pas par camp.
+      const parCamp = s?.type === 'jauge' && (s.parCamp ?? camps.length > 0);
+      const config = s && {
+        max: s.type === 'jauge' ? s.max : null,
+        alertes: s.alertes,
+        defaut: s.defaut ?? '',
+      };
+      return (
+        <section class="course" data-condition={c.id} data-config={config && JSON.stringify(config)}>
+          <h2>{c.titre}</h2>
+          <div class="quoi" set:html={enrichir(c.description)} />
+
+          {
+            s?.type === 'poursuite' && (
+              <div class="compteurs">
+                {s.compteurs.map((k) => (
+                  <div class="ctr" data-cle={k.id} data-nom={k.libelle} data-depart={k.depart} data-max={k.max}>
+                    <div class="titre">{k.libelle}</div>
+                    <div class="rangee">
+                      <button type="button" class="pas" data-pas="-1" aria-label={`Diminuer : ${k.libelle}`}>−</button>
+                      <span class="val" data-val>{k.depart}</span>
+                      <button type="button" class="pas" data-pas="1" aria-label={`Augmenter : ${k.libelle}`}>+</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          }
+
+          {
+            s?.type === 'jauge' &&
+              (parCamp ? camps : [{ id: '_', nom: c.titre, couleur: 'encre' }]).map((camp) => (
+                <div
+                  class="ligne-jauge"
+                  style={`--couleur: var(--${camp.couleur})`}
+                  data-cle={camp.id}
+                  data-nom={camp.nom}
+                  data-depart="0"
+                  data-max={s.max}
+                >
+                  {parCamp && <span class="qui">{camp.nom}</span>}
+                  <div class="pips">
+                    {entiers(s.max).map((n) => (
+                      <button
+                        type="button"
+                        class="pip"
+                        data-n={n}
+                        aria-pressed="false"
+                        aria-label={`${camp.nom} : ${n} sur ${s.max}`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))
+          }
+
+          {s && <div class="alerte" data-message aria-live="polite" />}
+        </section>
+      );
+    })
+  }
+
+  {
+    data.finDePartie && (
+      <div class="bloc">
+        <p set:html={enrichir(data.finDePartie)} />
+      </div>
+    )
+  }
+
+  <div class="remise">
+    <button type="button" class="btn" data-nouvelle-partie>Nouvelle partie</button>
+  </div>
+
+  {
+    data.aReporter && (
+      <section class="averti">
+        <h2>{data.aReporter.titre}</h2>
+        <ul>
+          {data.aReporter.points.map((p) => <li set:html={enrichir(p)} />)}
+        </ul>
+      </section>
+    )
+  }
+</div>
+
+<script>
+  import '../../scripts/suivi.js';
+</script>

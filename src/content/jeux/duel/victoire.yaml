@@ -1,0 +1,85 @@
+type: victoire
+titre: Les 3 courses
+validation:
+  statut: brouillon
+  source: "page de référence, non comparée au livret"
+
+intro: "Pas de points de victoire dans ce jeu : trois courses se jouent en parallèle, et la première franchie arrête la partie sur-le-champ. Ce tableau sert à garder les trois sous les yeux — c'est le vrai piège de la première partie."
+
+conditions:
+  - id: quete
+    titre: La Quête de l'Anneau
+    description: "Les cartes bleues font avancer votre pion sur la piste."
+    suivi:
+      type: poursuite
+      compteurs:
+        - id: ecart
+          libelle: Écart
+          depart: 6
+        - id: reste
+          libelle: Cases restantes
+          depart: 10
+      # Évaluées dans l'ordre : la première qui correspond gagne.
+      alertes:
+        - compteur: ecart
+          comparaison: "<="
+          seuil: 0
+          niveau: gagne
+          texte: "Le Nazgûl rattrape Frodon : Sauron remporte la partie."
+        - compteur: reste
+          comparaison: "<="
+          seuil: 0
+          niveau: gagne
+          texte: "Frodon et Sam atteignent la Montagne du Destin : la Communauté remporte la partie."
+        - compteur: ecart
+          comparaison: "<="
+          seuil: 2
+          niveau: chaud
+          texte: "Le Nazgûl est sur leurs talons."
+        - compteur: reste
+          comparaison: "<="
+          seuil: 2
+          niveau: chaud
+          texte: "La Montagne du Destin est à portée."
+      defaut: "Le Nazgûl a {somme} cases à combler avant le Mordor."
+
+  - id: peuples
+    titre: Le soutien des Peuples
+    description: "Six symboles Peuple **différents** sur vos cartes vertes, et la partie s'arrête."
+    suivi:
+      type: jauge
+      max: 6
+      alertes:
+        - comparaison: ">="
+          seuil: 6
+          niveau: gagne
+          texte: "{camp} rassemble les Peuples et remporte la partie."
+        - comparaison: ">="
+          seuil: 5
+          niveau: chaud
+          texte: "Un sixième Peuple suffit. Cette carte verte ne doit pas passer."
+      defaut: "Communauté {communaute} — Sauron {sauron}, sur {max}."
+
+  - id: conquete
+    titre: La conquête
+    description: "Être présent dans les **7 régions** — Lindon, Arnor, Enedwaith, Rhovanion, Rohan, Gondor, Mordor — avec une Forteresse et/ou au moins une Unité."
+    suivi:
+      type: jauge
+      max: 7
+      alertes:
+        - comparaison: ">="
+          seuil: 7
+          niveau: gagne
+          texte: "{camp} tient les 7 régions et remporte la partie."
+        - comparaison: ">="
+          seuil: 6
+          niveau: chaud
+          texte: "Il ne manque qu’une région. Occupez-la, ou videz-en une autre."
+      defaut: "Communauté {communaute} — Sauron {sauron}, sur {max}."
+
+finDePartie: "**Si personne n'a gagné à la fin du chapitre 3**, la victoire revient à celui qui est présent dans le plus de régions. À égalité, la victoire est partagée."
+
+aReporter:
+  titre: À reporter du plateau
+  points:
+    - "La position de départ des deux pions sur la piste de la Quête, à saisir ci-dessus au début de la partie."

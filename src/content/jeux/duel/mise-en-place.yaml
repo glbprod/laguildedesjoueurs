@@ -5,17 +5,14 @@ validation:
   source: "page de référence, non comparée au livret"
 
 titreCamps: Les deux camps
-camps:
-  - id: communaute
-    nom: La Communauté
-    couleur: bien
+# Nom et couleur de chaque camp : voir `camps` dans jeu.yaml.
+departs:
+  - camp: communaute
     points:
       - "3 pièces"
       - "2 Unités en Arnor"
       - "Mène Frodon et Sam vers la Montagne du Destin"
-  - id: sauron
-    nom: Sauron
-    couleur: rouge
+  - camp: sauron
     points:
       - "2 pièces"
       - "2 Unités au Mordor"

@@ -99,6 +99,56 @@ ul.check li::before {
 .camp ul { margin: 0; padding-left: 1.1rem; }
 .camp li { margin-bottom: 0.2rem; }
 
+/* ---- suivi de victoire : compteurs et jauges (îlot suivi.js) ---- */
+.course { background: var(--velin-fonce); border-radius: 4px; padding: 1rem; margin-top: 0.9rem; }
+.course h2 { border-bottom: 0; padding-bottom: 0; margin-bottom: 0.15rem; font-size: 1.2rem; }
+.course .quoi { font-size: 0.95rem; color: var(--encre-pale); margin-bottom: 0.8rem; }
+
+.compteurs { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.7rem; margin-top: 0.5rem; }
+.ctr { text-align: center; }
+.ctr .titre {
+  font-size: 0.8rem; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--encre-pale); margin-bottom: 0.3rem;
+}
+.ctr .rangee { display: flex; align-items: center; justify-content: center; gap: 0.7rem; }
+.ctr .val { font-size: 1.8rem; font-weight: 700; min-width: 2ch; }
+
+/* cibles tactiles : 44 px minimum */
+.pas {
+  width: 2.75rem; height: 2.75rem; border-radius: 50%;
+  border: 1px solid var(--encre-pale); background: transparent; color: var(--encre);
+  font-family: inherit; font-size: 1.4rem; line-height: 1; cursor: pointer;
+}
+.pas:disabled { opacity: 0.3; cursor: default; }
+
+.ligne-jauge { padding: 0.5rem 0; border-top: 1px solid var(--velin-creux); }
+.ligne-jauge .qui { display: block; font-size: 0.95rem; font-weight: 700; color: var(--couleur); margin-bottom: 0.3rem; }
+.pips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.pip {
+  width: 2.75rem; height: 2.75rem; padding: 0; border-radius: 4px;
+  border: 1px solid var(--encre-pale); background: transparent; color: var(--encre-pale);
+  font-family: inherit; font-size: 1rem; cursor: pointer;
+}
+.pip.on { background: var(--couleur); border-color: var(--couleur); color: var(--velin); }
+
+.alerte {
+  min-height: 2.6rem; margin-top: 0.7rem; padding: 0.5rem 0.7rem;
+  border-radius: 3px; background: var(--velin-creux); color: var(--encre);
+}
+.alerte.chaud { background: var(--rouge); color: var(--velin); }
+.alerte.gagne { background: var(--encre); color: var(--velin); font-weight: 700; }
+
+.remise { margin-top: 1rem; text-align: center; }
+.btn {
+  min-height: 2.75rem; padding: 0.45rem 1.4rem;
+  background: transparent; border: 1px solid var(--encre-pale); border-radius: 3px;
+  color: var(--encre-pale); font-family: inherit; font-size: 1rem; cursor: pointer;
+}
+
+.averti { border: 1px solid var(--rouge); border-radius: 4px; padding: 0.8rem 0.95rem; margin-top: 1.4rem; }
+.averti h2 { border-bottom: 0; padding-bottom: 0; font-size: 1.05rem; color: var(--rouge); margin-bottom: 0.35rem; }
+.averti ul { margin: 0; padding-left: 1.1rem; color: var(--encre-douce); }
+
 /* ---- grandes cartes tactiles (accueil du site, accueil d'un jeu) ---- */
 .cartes { display: grid; gap: 0.7rem; margin-top: 1.3rem; }
 .carte {
