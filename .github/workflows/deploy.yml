@@ -1,0 +1,42 @@
+name: Déploiement sur GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Lancement manuel depuis l'onglet Actions.
+  workflow_dispatch:
+
+# Droits minimaux : lire le code, publier la page.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un seul déploiement à la fois ; on laisse finir celui en cours.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v7
+      - name: Installer, construire et téléverser le site
+        uses: withastro/action@v6
+        with:
+          # L'action utilise Node 24 par défaut. On fixe la 22 (dernière 22.x,
+          # donc >= 22.12) pour rester dans le cadre de `engines` de package.json.
+          node-version: 22
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publier sur GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

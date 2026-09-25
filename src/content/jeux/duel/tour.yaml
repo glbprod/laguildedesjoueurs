@@ -13,7 +13,7 @@ blocs:
   - titre: Payer une carte
     paragraphes:
       - "Le coût s'exprime en **Compétences**, que vous obtenez avec les cartes grises déjà posées devant vous. Elles restent acquises toute la partie."
-      - "Chaque symbole qui vous manque se paie **1 pièce** à la réserve. Pas de calcul selon l'adversaire, contrairement à 7 Wonders Duel."
+      - "Chaque symbole qui vous manque se paie **1 pièce** à la réserve. Pas de calcul selon l'adversaire."
       - "Un **pictogramme de chaînage** en haut de la carte la rend gratuite si vous possédez déjà la carte au même pictogramme, prise à un chapitre précédent."
 
   - titre: Les six couleurs
