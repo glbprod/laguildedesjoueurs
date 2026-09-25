@@ -6,9 +6,19 @@ annee: 2024
 joueurs: "2"
 duree: environ 30 minutes
 theme: duel
+# Camps : `couleur` est un token du thème (sans « -- »). Un jeu coopératif
+# aurait une liste vide.
+camps:
+  - id: communaute
+    nom: La Communauté
+    couleur: bien
+  - id: sauron
+    nom: Sauron
+    couleur: rouge
 # Ordre de la navigation. Cible : mise-en-place, tour, victoire, effets.
 # Seuls les modules qui ont déjà un composant de rendu sont listés :
-# `victoire` et `effets` sont ajoutés à leur étape.
+# `effets` est ajouté à son étape.
 modules:
   - mise-en-place
   - tour
+  - victoire

@@ -1,7 +1,9 @@
 import { getCollection, getEntry } from 'astro:content';
+import { verifierModule } from './coherence';
 
 // Modules d'un jeu dans l'ordre déclaré par jeu.yaml.
 // Échoue au build si jeu.yaml cite un module absent : pas de page vide en prod.
+// Vérifie aussi la cohérence de chaque module avec jeu.yaml (camps, gabarits).
 export async function modulesDuJeu(slug: string) {
   const jeu = await getEntry('jeux', slug);
   if (!jeu) throw new Error(`Jeu introuvable : ${slug}`);
@@ -9,6 +11,7 @@ export async function modulesDuJeu(slug: string) {
   return jeu.data.modules.map((nom) => {
     const m = tous.find((e) => e.id === `${slug}/${nom}`);
     if (!m) throw new Error(`${slug}/jeu.yaml cite « ${nom} », fichier ${nom}.yaml absent`);
+    verifierModule(jeu, m);
     return m;
   });
 }

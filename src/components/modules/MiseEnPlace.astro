@@ -3,25 +3,33 @@ import type { CollectionEntry } from 'astro:content';
 import Bloc from '../Bloc.astro';
 import { enrichir } from '../../lib/texte';
 
+type Camp = CollectionEntry<'jeux'>['data']['camps'][number];
+
 interface Props {
   data: Extract<CollectionEntry<'modules'>['data'], { type: 'mise-en-place' }>;
+  camps: Camp[];
 }
-const { data } = Astro.props;
+const { data, camps } = Astro.props;
+// Cohérence camp <-> jeu.yaml déjà vérifiée par lib/coherence.ts.
+const parId = new Map(camps.map((c) => [c.id, c]));
 ---
 
 {
-  data.camps.length > 0 && (
+  data.departs.length > 0 && (
     <section class="section">
       {data.titreCamps && <h2>{data.titreCamps}</h2>}
       <div class="camps">
-        {data.camps.map((camp) => (
-          <div class="camp" style={`--couleur: var(--${camp.couleur})`}>
-            <h3>{camp.nom}</h3>
-            <ul>
-              {camp.points.map((p) => <li set:html={enrichir(p)} />)}
-            </ul>
-          </div>
-        ))}
+        {data.departs.map((depart) => {
+          const camp = parId.get(depart.camp)!;
+          return (
+            <div class="camp" style={`--couleur: var(--${camp.couleur})`}>
+              <h3>{camp.nom}</h3>
+              <ul>
+                {depart.points.map((p) => <li set:html={enrichir(p)} />)}
+              </ul>
+            </div>
+          );
+        })}
       </div>
     </section>
   )

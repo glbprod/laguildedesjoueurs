@@ -1,7 +1,8 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { getEntry, type CollectionEntry } from 'astro:content';
 import MiseEnPlace from './MiseEnPlace.astro';
 import Tour from './Tour.astro';
+import Victoire from './Victoire.astro';
 
 interface Props {
   module: CollectionEntry<'modules'>;
@@ -9,11 +10,17 @@ interface Props {
 const { module } = Astro.props;
 const { data } = module;
 
+// id d'un module = <slug du jeu>/<nom du module>
+const [slug, nom] = module.id.split('/');
+const jeu = await getEntry('jeux', slug);
+if (!jeu) throw new Error(`Jeu introuvable : ${slug}`);
+
 // Un type de module sans composant fait échouer le build : pas de page vide.
-if (data.type !== 'mise-en-place' && data.type !== 'tour') {
+if (data.type !== 'mise-en-place' && data.type !== 'tour' && data.type !== 'victoire') {
   throw new Error(`Pas de composant de rendu pour le type « ${data.type} » (${module.id})`);
 }
 ---
 
-{data.type === 'mise-en-place' && <MiseEnPlace data={data} />}
+{data.type === 'mise-en-place' && <MiseEnPlace data={data} camps={jeu.data.camps} />}
 {data.type === 'tour' && <Tour data={data} />}
+{data.type === 'victoire' && <Victoire data={data} camps={jeu.data.camps} slug={slug} nom={nom} />}
