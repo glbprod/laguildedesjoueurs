@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7 Wonders Duel — Aide de jeu</title>
+<!-- Polices actuelles de la référence : à remplacer par Fontsource à l'intégration Astro. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Karla:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ===== THÈME « sable et lapis » : tokens uniquement =====
+   Ce bloc deviendra src/styles/themes/7wduel.css à l'intégration. */
+:root{
+  --sable:#efe6d2;
+  --sable-fonce:#e4d9bf;
+  --sable-creux:#cdbf9a;
+  --encre:#1c2832;
+  --encre-pale:#46525c;
+  --accent:#1d4a73;        /* lapis */
+  --danger:#8c2f1b;
+  --j1:#1d4a73;
+  --j2:#9a3b22;
+  /* couleurs de cartes : repères visuels, jamais seul porteur d'information */
+  --c-marron:#7b5230;
+  --c-grise:#6c7378;
+  --c-jaune:#b58900;
+  --c-bleue:#2b64a8;
+  --c-verte:#3f7d3a;
+  --c-rouge:#b0382a;
+  --c-violette:#6e4585;
+  /* structures d'Âge et piste militaire */
+  --face-v:#fbf6e8;
+  --zone-a:#dccb90;
+  --zone-b:#cba453;
+  --zone-c:#b0732f;
+  --zone-inconnue:#d8ccaa;
+  --capitale:#4a3a2a;
+  --neutre:#f3ecd9;
+}
+
+/* ===== COMPOSANTS (mêmes composants que Duel pour la Terre du Milieu) ===== */
+*{box-sizing:border-box}
+body{
+  margin:0;padding:0 0 4rem;
+  background:var(--sable);color:var(--encre);
+  font-family:'Karla',system-ui,sans-serif;font-size:18px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,summary{touch-action:manipulation}
+button:focus-visible,input:focus-visible,summary:focus-visible,.coche:focus-within{outline:3px solid var(--j2);outline-offset:2px}
+.wrap{max-width:760px;margin:0 auto;padding:0 1.1rem}
+
+header{padding:2rem 0 .8rem;text-align:center}
+.eyebrow{font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--j2)}
+h1{
+  font-family:'IM Fell English SC',Georgia,serif;font-weight:400;
+  font-size:clamp(1.7rem,6.5vw,2.4rem);line-height:1.15;margin:.5rem 0 .3rem;
+}
+.sous{font-size:.9rem;color:var(--encre-pale)}
+.filet{height:1px;background:var(--encre);opacity:.35;margin:1.1rem 0 0}
+
+nav{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin:1.3rem 0}
+.tab{
+  min-height:3.6rem;background:transparent;border:1px solid var(--sable-creux);border-radius:4px;
+  padding:.5rem .2rem;cursor:pointer;color:var(--encre-pale);font-family:inherit;text-align:center;
+  transition:background .18s,color .18s,border-color .18s;
+}
+.tab .num{display:block;font-family:'IM Fell English SC',serif;font-size:1.15rem}
+.tab .lib{display:block;font-size:.7rem;letter-spacing:.11em;text-transform:uppercase;margin-top:.1rem}
+.tab[aria-selected="true"]{background:var(--encre);border-color:var(--encre);color:var(--sable)}
+section[hidden]{display:none}
+
+h2{
+  font-family:'IM Fell English SC',serif;font-weight:400;font-size:1.3rem;
+  margin:1.9rem 0 .6rem;padding-bottom:.25rem;border-bottom:1px solid var(--sable-creux);
+}
+h2:first-child{margin-top:.2rem}
+h3{font-family:'IM Fell English SC',serif;font-weight:400;font-size:1.15rem;margin:0 0 .15rem}
+p{margin:.45rem 0}
+.note{color:var(--encre-pale);font-size:.9rem}
+b,strong{font-weight:700}
+
+.bloc{background:var(--sable-fonce);border-radius:4px;padding:.9rem 1rem}
+.bloc + .bloc{margin-top:.6rem}
+
+ul.check{list-style:none;padding:0;margin:.3rem 0 0}
+ul.check li{padding:.4rem 0 .4rem 1.4rem;position:relative;border-bottom:1px solid var(--sable-creux)}
+ul.check li:last-child{border-bottom:0}
+ul.check li::before{content:"§";position:absolute;left:0;color:var(--j2);font-size:.85rem;top:.5rem;font-family:'IM Fell English SC',serif}
+ul.check.sans-puce li{padding-left:0}
+ul.check.sans-puce li::before{content:none}
+
+.coul{display:flex;gap:.7rem;align-items:baseline;padding:.5rem .7rem;border-left:4px solid;background:var(--sable-fonce);border-radius:3px;margin-bottom:.35rem}
+
+.course{background:var(--sable-fonce);border-radius:4px;padding:1rem;margin-bottom:.9rem}
+.course .quoi{font-size:.9rem;color:var(--encre-pale);margin-bottom:.8rem}
+
+.rangee{display:flex;align-items:center;justify-content:center;gap:.5rem}
+.pas{
+  width:44px;height:44px;flex:none;border-radius:50%;border:1px solid var(--encre-pale);
+  background:transparent;color:var(--encre);font-size:1.5rem;line-height:1;cursor:pointer;font-family:inherit;padding:0;
+}
+.pas:disabled{opacity:.25;cursor:default}
+.val{font-size:1.6rem;font-weight:700;min-width:1.7ch;text-align:center}
+.saisie{
+  width:3.7rem;height:44px;font:700 1.4rem 'Karla',sans-serif;text-align:center;color:var(--encre);
+  background:var(--sable);border:1px solid var(--encre-pale);border-radius:4px;-moz-appearance:textfield;appearance:textfield;
+}
+.saisie::-webkit-outer-spin-button,.saisie::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+.alerte{margin-top:.7rem;padding:.6rem .8rem;border-radius:4px;background:var(--sable-creux)}
+.alerte.chaud{background:var(--danger);color:var(--sable)}
+.alerte.gagne{background:var(--encre);color:var(--sable);font-weight:700}
+.alerte:empty{display:none}
+
+.btn{
+  min-height:44px;background:transparent;border:1px solid var(--encre-pale);border-radius:4px;color:var(--encre);
+  padding:.5rem 1.2rem;font-family:inherit;font-size:.95rem;cursor:pointer;
+}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.confirme{background:var(--danger);border-color:var(--danger);color:var(--sable);font-weight:700}
+.remise{margin-top:1.6rem;text-align:center}
+
+.averti{border:1px solid var(--j2);border-radius:4px;padding:.8rem .95rem;margin:.8rem 0}
+.averti h4{font-family:'IM Fell English SC',serif;font-weight:400;font-size:1.05rem;margin:0 0 .35rem;color:var(--j2)}
+.averti p{font-size:.9rem;margin:.2rem 0}
+.badge{display:inline-block;margin-left:.4rem;padding:0 .45rem;border:1px solid var(--j2);border-radius:3px;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--j2);vertical-align:middle;font-weight:500}
+footer{text-align:center;color:var(--encre-pale);font-size:.72rem;letter-spacing:.09em;margin-top:2.5rem;text-transform:uppercase}
+
+/* ----- spécifique à cette page ----- */
+.j1{color:var(--j1)} .j2{color:var(--j2)}
+.puce-joueur{display:inline-block;padding:0 .5rem;border-radius:3px;color:var(--sable);font-weight:700;font-size:.9em}
+.puce-joueur.j1{background:var(--j1);color:var(--sable)} .puce-joueur.j2{background:var(--j2);color:var(--sable)}
+
+.coche{display:flex;align-items:center;gap:.8rem;min-height:48px;cursor:pointer;padding:.15rem 0}
+.coche input{width:28px;height:28px;flex:none;accent-color:var(--accent);margin:0}
+.coche input:checked + span{opacity:.55}
+
+.bascule-mode{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin:.6rem 0}
+.bascule-mode button,.bascule{
+  min-height:48px;background:transparent;border:1px solid var(--encre-pale);border-radius:4px;color:var(--encre);
+  font-family:inherit;font-size:.95rem;cursor:pointer;padding:.4rem .6rem;
+}
+.bascule-mode button[aria-pressed="true"],.bascule[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--sable);font-weight:700}
+.etape-courante{background:var(--sable);border:2px solid var(--accent);border-radius:4px;padding:.8rem 1rem;margin:.6rem 0;text-align:center}
+.etape-courante .rang{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--encre-pale)}
+.etape-courante .texte{font-size:1.5rem;line-height:1.25;margin-top:.2rem}
+.commandes{display:grid;grid-template-columns:1fr 2fr;gap:.5rem}
+.commandes .btn{min-height:56px;font-size:1.05rem}
+.commandes .btn.primaire{background:var(--accent);border-color:var(--accent);color:var(--sable);font-weight:700}
+ol.etapes{margin:.6rem 0 0;padding-left:1.6rem;font-size:.92rem;color:var(--encre-pale)}
+ol.etapes li{padding:.1rem 0}
+ol.etapes li.fait{text-decoration:line-through;opacity:.6}
+ol.etapes li.courant{color:var(--encre);font-weight:700}
+.lots{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem}
+.lot{background:var(--sable);border-top:4px solid;border-radius:4px;padding:.7rem .9rem}
+.lot.j1{border-color:var(--j1)} .lot.j2{border-color:var(--j2)}
+.lot h3{color:var(--encre)}
+.lot ul{margin:.3rem 0 0;padding-left:1.1rem}
+.lot li{padding:.15rem 0}
+
+.structure{margin-top:.6rem;text-align:center}
+.structure figcaption{font-size:.9rem;margin-top:.3rem;color:var(--encre-pale)}
+.structure figcaption strong{color:var(--encre)}
+svg.schema{width:100%;max-width:340px;height:auto;display:block;margin:0 auto}
+.schema .carte.v{fill:var(--face-v);stroke:var(--accent);stroke-width:1.6}
+.schema .carte.c{stroke:var(--encre);stroke-width:1.6}
+.schema .hach-fond{fill:var(--sable-creux)}
+.schema .hachure{stroke:var(--encre-pale);stroke-width:2}
+.schema .lettre{font:700 13px 'Karla',sans-serif;fill:var(--encre);paint-order:stroke;stroke:var(--sable);stroke-width:3px}
+
+.actions{display:grid;gap:.5rem;margin-top:.5rem}
+.action{display:flex;gap:.9rem;align-items:flex-start;background:var(--sable-fonce);border-radius:4px;padding:.8rem 1rem}
+.action .n{flex:none;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--encre);color:var(--sable);display:grid;place-items:center;font:1.2rem 'IM Fell English SC',serif}
+.action p{margin:.15rem 0 0}
+
+.merveilles-compteur{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.choix-joueur{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.6rem}
+
+.ress{border:1px solid var(--sable-creux);border-radius:4px;margin:.6rem 0 0;padding:.4rem .9rem .9rem;background:var(--sable-fonce)}
+.ress legend{padding:0 .4rem;font-weight:700;font-size:1.1rem}
+.pastille{display:inline-block;width:.9rem;height:.9rem;border-radius:2px;margin-right:.45rem;vertical-align:-1px}
+.champs{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:.6rem}
+.champ{display:flex;flex-direction:column;justify-content:space-between;gap:.35rem;text-align:center}
+.champ .lib{font-size:.78rem;line-height:1.25;color:var(--encre-pale)}
+.bascule{width:100%}
+.total{
+  position:sticky;bottom:0;z-index:5;margin-top:.8rem;padding:.7rem 1rem;border-radius:4px;
+  background:var(--accent);color:var(--sable);box-shadow:0 -2px 10px rgba(28,40,50,.3);
+}
+.total .grand{font-size:1.6rem;font-weight:700;line-height:1.2}
+.total .detail{font-size:.9rem;opacity:.95}
+.ligne-pieces{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+
+svg.piste{width:100%;height:auto;display:block;margin:.4rem 0}
+.piste .case{stroke:var(--encre);stroke-width:.7}
+.piste .z-centre{fill:var(--neutre)}
+.piste .z-A{fill:var(--zone-a)} .piste .z-B{fill:var(--zone-b)} .piste .z-C{fill:var(--zone-c)}
+.piste .z-inconnue{fill:var(--zone-inconnue)}
+.piste .z-capitale{fill:var(--capitale)}
+.piste .jeton{fill:var(--accent);stroke:var(--sable);stroke-width:1.5}
+.piste .jeton-val{font:700 11px 'Karla',sans-serif;fill:var(--sable)}
+.piste .jeton-groupe.pris{opacity:.25}
+.piste .pion{fill:var(--j2);stroke:var(--sable);stroke-width:2.5}
+.piste #pion{transition:transform .25s}
+.piste .lettre-zone{font:700 12px 'Karla',sans-serif;fill:var(--encre)}
+.piste .etiquette{font:500 10px 'Karla',sans-serif;fill:var(--encre-pale)}
+@media (prefers-reduced-motion:reduce){.piste #pion{transition:none}}
+.legende-zones{font-size:.88rem;color:var(--encre-pale);margin:.2rem 0 .5rem}
+.etat-pion{font-weight:700;font-size:1.05rem;margin:.4rem 0}
+.boutons-boucliers{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.5rem 0}
+.gros{min-height:64px;border:0;border-radius:4px;color:var(--sable);font:700 1.1rem 'Karla',sans-serif;cursor:pointer;padding:.5rem}
+.gros.j1{background:var(--j1)} .gros.j2{background:var(--j2)}
+.gros:disabled{opacity:.35;cursor:default}
+.gros:focus-visible{outline:3px solid var(--encre);outline-offset:2px}
+
+.grille-sci,.grille-civil{display:grid;gap:.4rem .6rem;align-items:center}
+.grille-sci{grid-template-columns:minmax(4rem,1fr) auto auto}
+.grille-sci .entete,.grille-civil .entete{font-weight:700;text-align:center;font-size:.95rem}
+.num-symbole{display:inline-grid;place-items:center;width:2rem;height:2rem;border-radius:50%;background:var(--encre);color:var(--sable);font-weight:700;margin-right:.5rem}
+.jauge-lecture{display:flex;gap:.25rem;align-items:center;margin:.5rem 0 0}
+.jauge-lecture .pastille-ronde{width:14px;height:14px;border-radius:3px;border:1px solid var(--encre-pale)}
+.jauge-lecture .pastille-ronde.on.j1{background:var(--j1);border-color:var(--j1)}
+.jauge-lecture .pastille-ronde.on.j2{background:var(--j2);border-color:var(--j2)}
+.ligne-joueur{display:flex;align-items:center;gap:.7rem;padding:.4rem 0;border-top:1px solid var(--sable-creux)}
+.ligne-joueur .qui{width:6.5rem;font-weight:700;flex:none}
+.ligne-joueur .lisible{font-size:.9rem}
+
+.grille-civil{grid-template-columns:minmax(7rem,1fr) auto auto}
+.grille-civil .lib-cat{display:flex;align-items:center;gap:.5rem;font-weight:500}
+.grille-civil .lib-cat .barre{width:5px;align-self:stretch;min-height:1.6rem;border-radius:2px;background:var(--sable-creux)}
+.grille-civil .petit{display:block;font-size:.75rem;color:var(--encre-pale);font-weight:400}
+.cellule{text-align:center}
+.cellule .auto{font-size:1.6rem;font-weight:700;display:block;min-height:44px;line-height:44px}
+.cellule .conv{font-size:.8rem;color:var(--encre-pale)}
+.ligne-total{display:contents}
+.ligne-total > *{border-top:2px solid var(--encre);padding-top:.5rem;margin-top:.3rem}
+.ligne-total .gros-total{font-size:2rem;font-weight:700;text-align:center;line-height:1.1}
+
+details.progres{margin:.8rem 0 .9rem;background:var(--sable-fonce);border-radius:4px;padding:0 1rem}
+details.progres summary{min-height:48px;display:flex;align-items:center;cursor:pointer;font-weight:700}
+details.progres dl{margin:0 0 .8rem}
+details.progres dt{font-weight:700;margin-top:.7rem}
+details.progres dd{margin:.1rem 0 0}
+
+@media (max-width:560px){
+  body{font-size:17px}
+  .champs{grid-template-columns:1fr}
+  .champ{flex-direction:row;align-items:center;text-align:left;gap:.6rem}
+  .champ .lib{flex:1}
+  .grille-civil{grid-template-columns:auto auto}
+  .grille-civil .lib-cat{grid-column:1/-1;margin-top:.5rem}
+  .ligne-total .lib-cat{grid-column:1/-1}
+  .grille-sci{grid-template-columns:auto auto auto}
+  .grille-sci .lib-symbole .texte{display:none}
+  .lots{grid-template-columns:1fr}
+  .ligne-joueur{flex-wrap:wrap}
+}
+
+/* mode ?test */
+#tests{margin-top:2rem;padding:1rem;border:2px dashed var(--encre-pale);border-radius:4px;font-size:.85rem}
+#tests li.ok::marker{content:"✔ "} #tests li.echec{color:var(--danger);font-weight:700}
+#tests li.echec::marker{content:"✘ "} #tests li.info{color:var(--encre-pale)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow" id="eyebrow"></div>
+  <h1 id="titreJeu"></h1>
+  <div class="sous" id="sousTitre"></div>
+  <div class="filet"></div>
+</header>
+
+<noscript><p class="averti">Cette aide de jeu a besoin de JavaScript.</p></noscript>
+
+<nav role="tablist" aria-label="Étapes">
+  <button class="tab" role="tab" id="t1" aria-controls="p1" aria-selected="true"><span class="num">I</span><span class="lib">Mise en place</span></button>
+  <button class="tab" role="tab" id="t2" aria-controls="p2" aria-selected="false" tabindex="-1"><span class="num">II</span><span class="lib">Un tour</span></button>
+  <button class="tab" role="tab" id="t3" aria-controls="p3" aria-selected="false" tabindex="-1"><span class="num">III</span><span class="lib">Les 3 victoires</span></button>
+</nav>
+
+<section id="p1" role="tabpanel" aria-labelledby="t1" tabindex="0"></section>
+<section id="p2" role="tabpanel" aria-labelledby="t2" tabindex="0" hidden></section>
+<section id="p3" role="tabpanel" aria-labelledby="t3" tabindex="0" hidden></section>
+
+<div class="remise"><button class="btn" id="nouvelle" type="button">Nouvelle partie</button></div>
+<footer id="pied"></footer>
+<div id="tests" hidden></div>
+</div>
+
+<!-- ===== DONNÉES : JSON strict, prêt à migrer en content collection Zod =====
+     Les clés suivent src/content.config.ts (validation, blocs, textes en **gras**).
+     Seul manque connu : victoires.militaire.zones[].cases (à compter sur le plateau). -->
+<script type="application/json" id="donnees">
+{
+  "jeu": {
+    "titre": "7 Wonders Duel",
+    "eyebrow": "Aide de jeu · règles paraphrasées",
+    "sousTitre": "2 joueurs · 3 Âges",
+    "pied": "Aide de jeu non officielle",
+    "source": "7wduel_regles_v1.md",
+    "afficherBrouillons": true,
+    "camps": [
+      { "id": "j1", "nom": "Joueur 1", "court": "J1", "couleur": "j1" },
+      { "id": "j2", "nom": "Joueur 2", "court": "J2", "couleur": "j2" }
+    ]
+  },
+
+  "miseEnPlace": {
+    "validation": { "statut": "valide", "source": "7wduel_regles_v1.md §2" },
+    "checklists": [
+      {
+        "id": "plateau",
+        "titre": "Plateau et trésor",
+        "points": [
+          "Posez le plateau sur un côté de l'aire de jeu, entre les deux joueurs.",
+          "Pion Conflit sur la case neutre, au centre.",
+          "Les 4 jetons Militaire sur leurs emplacements, **face visible**.",
+          "Mélangez les jetons Progrès, posez-en **5 au hasard face visible** sur le plateau, rangez les autres dans la boîte.",
+          "Chaque joueur prend **7 pièces** à la Banque."
+        ]
+      },
+      {
+        "id": "paquets",
+        "titre": "Paquets d'Âge",
+        "points": [
+          "Retirez **3 cartes de chaque paquet d'Âge**, sans les regarder, et rangez-les dans la boîte.",
+          "Tirez au hasard **3 Guildes** (cartes violettes), sans les regarder, et ajoutez-les au paquet de l'Âge III. Rangez les autres Guildes."
+        ],
+        "note": "Les cartes retirées à la préparation **ne font pas partie de la défausse**."
+      }
+    ],
+    "selection": {
+      "titre": "Sélection des Merveilles",
+      "intro": "Désignez un premier joueur : c'est le **Joueur 1**, il commence aussi l'Âge I. Mélangez les 12 Merveilles.",
+      "phases": [
+        { "libelle": "Révélez 4 Merveilles.", "nombre": 4, "ordre": ["j1", "j2", "j2", "j1"] },
+        { "libelle": "Révélez 4 autres Merveilles.", "nombre": 4, "ordre": ["j2", "j1", "j1", "j2"] }
+      ],
+      "fin": "Chaque joueur pose ses 4 Merveilles en colonne devant lui."
+    },
+    "premierePartie": {
+      "titre": "Première partie",
+      "texte": "Sautez la sélection et utilisez ces lots fixes.",
+      "lots": {
+        "j1": ["Les Pyramides", "Le Grand Phare", "Le Temple d'Artémis", "La Statue de Zeus"],
+        "j2": ["Le Circus Maximus", "Le Pirée", "La Via Appia", "Le Colosse"]
+      },
+      "fin": "Chaque joueur pose ses 4 Merveilles en colonne devant lui."
+    },
+    "structures": {
+      "titre": "Structures d'Âge",
+      "intro": "Au début de chaque Âge, mélangez le paquet de l'Âge et disposez **20 cartes**. Les rangées alternent face visible (**V**) et face cachée (**C**), en commençant et en finissant par une rangée visible.",
+      "cartes": 20,
+      "note": "Schéma simplifié : il montre le nombre de cartes et la face de chaque rangée, de haut en bas, pas leur recouvrement exact.",
+      "liste": [
+        { "age": "I", "rangees": [2, 3, 4, 5, 6], "faces": "VCVCV" },
+        { "age": "II", "rangees": [6, 5, 4, 3, 2], "faces": "VCVCV" },
+        { "age": "III", "rangees": [2, 3, 4, 2, 4, 3, 2], "faces": "VCVCVCV" }
+      ]
+    }
+  },
+
+  "tour": {
+    "validation": { "statut": "valide", "source": "7wduel_regles_v1.md §3, §4" },
+    "titre": "À votre tour",
+    "intro": "Prenez une carte **accessible**, c'est-à-dire qu'aucune autre carte ne recouvre, même partiellement, puis jouez-la de l'une de ces trois façons :",
+    "actions": [
+      { "id": "construire", "titre": "Construire le bâtiment", "texte": "Payez son coût et posez la carte dans votre Cité. Ranger ses cartes par couleur est conseillé." },
+      { "id": "defausser", "titre": "Défausser", "texte": "Prenez **2 pièces + 1 pièce par carte jaune** de votre Cité. La carte va face cachée à côté du plateau. La défausse est consultable par les deux joueurs à tout moment." },
+      { "id": "merveille", "titre": "Construire une Merveille", "texte": "Payez le coût **de la Merveille, pas celui de la carte**, puis glissez la carte d'Âge face cachée sous la Merveille. Cette carte n'a aucun effet : elle sert de marqueur." }
+    ],
+    "apres": {
+      "titre": "Ensuite",
+      "liste": [
+        "Le joueur actif **retourne les cartes cachées** devenues accessibles.",
+        "**Rejouer** : le nouveau tour commence après la révélation des cartes. Un « Rejouer » obtenu alors que la structure est vide, en fin d'Âge, est perdu."
+      ]
+    },
+    "merveilles": {
+      "titre": "Merveilles construites",
+      "max": 7,
+      "texte": "**7 Merveilles maximum** dans la partie : dès que la 7e est construite, la Merveille restante non construite retourne dans la boîte.",
+      "alerte": "La 7e Merveille est construite : remettez la Merveille restante non construite dans la boîte."
+    },
+    "finAge": {
+      "titre": "Fin d'un Âge",
+      "points": [
+        "L'Âge se termine quand les **20 cartes** de la structure ont été jouées. Préparez la structure suivante.",
+        "Le joueur **mené militairement** choisit qui commence l'Âge suivant. Est mené le joueur du côté duquel se trouve le pion Conflit.",
+        "Si le pion est au centre, c'est le **dernier joueur actif** (celui qui a joué la dernière carte de l'Âge) qui choisit."
+      ],
+      "question": "Qui a joué la dernière carte de l'Âge ?",
+      "messages": {
+        "mene": "Le pion est du côté de {joueur} : {joueur} est mené militairement et choisit qui commence l'Âge suivant.",
+        "centre": "Le pion est au centre : c'est le dernier joueur actif qui choisit. Indiquez qui a joué la dernière carte.",
+        "centreChoisi": "Le pion est au centre et {joueur} a joué la dernière carte : {joueur} choisit qui commence l'Âge suivant."
+      }
+    },
+    "paiement": {
+      "titre": "Payer une carte",
+      "blocs": [
+        {
+          "titre": "Types de coût",
+          "liste": [
+            "**Gratuit** : zone de coût vide.",
+            "**Ressources** : produire chaque ressource demandée, ou acheter celles qui manquent (commerce).",
+            "**Pièces** : payer la somme à la Banque.",
+            "**Pièces et ressources** : payer les pièces, et produire ou acheter les ressources."
+          ],
+          "note": "Toutes les Merveilles ont un coût en ressources."
+        },
+        {
+          "titre": "Production",
+          "paragraphes": [
+            "Les ressources viennent des cartes marron et grises, de certaines cartes jaunes et de certaines Merveilles. Elles **ne se dépensent pas** : elles servent à chaque tour, toute la partie."
+          ],
+          "note": "Sauf exception, la production d'une Cité ne diminue jamais."
+        },
+        {
+          "titre": "Chaînage",
+          "paragraphes": [
+            "Certains bâtiments portent un symbole de chaînage blanc. Une carte des Âges II ou III qui affiche ce symbole sous son coût se construit **gratuitement** si vous possédez déjà le bâtiment qui le porte."
+          ],
+          "note": "Exemples : Bains → Aqueduc, Palissade → Fortifications."
+        }
+      ]
+    }
+  },
+
+  "commerce": {
+    "validation": { "statut": "valide", "source": "7wduel_regles_v1.md §4" },
+    "titre": "Commerce : calculateur",
+    "regle": "**Prix d'une ressource = 2 + nombre de symboles de cette ressource produits par les cartes marron et grises de l'adversaire.**",
+    "points": [
+      "On regarde la Cité adverse, mais on paie la Banque.",
+      "Pas de limite d'achats par tour.",
+      "Certaines cartes jaunes (les 3 Dépôts et la Douane) fixent le prix de certaines ressources à 1 pièce."
+    ],
+    "rappelAdverse": "Les ressources produites par les **cartes jaunes** et les **Merveilles** adverses ne comptent pas dans le prix.",
+    "noteChoix": {
+      "texte": "Une carte qui produit « une ressource au choix » (ressources séparées par des barres) ne compte pas dans le prix du commerce.",
+      "validation": { "statut": "brouillon", "source": "7wduel_regles_v1.md §8" }
+    },
+    "prixBase": 2,
+    "prixFixe": 1,
+    "libelles": {
+      "pieces": "Coût en pièces",
+      "besoin": "Besoin",
+      "mienne": "Ma production",
+      "adverse": "Production adverse (cartes marron et grises seulement)",
+      "fixe": "Prix fixé à 1 pièce (Dépôt, Douane)",
+      "effacer": "Effacer le coût"
+    },
+    "ressources": [
+      { "id": "bois", "nom": "Bois", "famille": "marron" },
+      { "id": "pierre", "nom": "Pierre", "famille": "marron" },
+      { "id": "argile", "nom": "Argile", "famille": "marron" },
+      { "id": "verre", "nom": "Verre", "famille": "grise" },
+      { "id": "papyrus", "nom": "Papyrus", "famille": "grise" }
+    ],
+    "sourceRessources": "Confirmées par GLB (aide de jeu, Dépôt de Bois ; livret, Chantier p. 5).",
+    "exemples": [
+      { "nom": "Fortifications", "pieces": 0, "besoin": { "pierre": 2, "argile": 1, "papyrus": 1 }, "mienne": { "pierre": 2 }, "adverse": { "argile": 1 }, "total": 5 },
+      { "nom": "Aqueduc", "pieces": 0, "besoin": { "pierre": 3 }, "mienne": {}, "adverse": { "pierre": 2 }, "total": 12 },
+      { "nom": "Caravansérail", "pieces": 2, "besoin": { "verre": 1, "papyrus": 1 }, "mienne": {}, "adverse": { "verre": 1 }, "total": 7 }
+    ],
+    "messages": {
+      "rien": "Votre production couvre tout : rien à acheter.",
+      "total": "Coût total"
+    }
+  },
+
+  "victoires": {
+    "intro": "La partie s'arrête **immédiatement** en cas de suprématie militaire ou scientifique. Sinon, elle se termine à l'issue de l'Âge III et la victoire civile décide.",
+
+    "militaire": {
+      "validation": { "statut": "valide", "source": "7wduel_regles_v1.md §5, §7" },
+      "titre": "Suprématie militaire",
+      "regle": "Chaque **Bouclier** d'une carte rouge ou d'une Merveille fait avancer le pion Conflit d'une case vers la capitale adverse. Le pion peut faire des allers-retours. S'il atteint la capitale adverse, le joueur actif **gagne immédiatement**.",
+      "cotes": "Chaque joueur a sa capitale de son côté : Joueur 1 à gauche, Joueur 2 à droite. Un Bouclier du Joueur 1 pousse le pion vers la droite, un Bouclier du Joueur 2 vers la gauche.",
+      "jetons": {
+        "regle": "Quand le pion entre dans une zone portant un jeton Militaire, le joueur actif applique l'effet du jeton, puis le jeton retourne dans la boîte.",
+        "effet": "L'adversaire perd 2 ou 5 pièces, rendues à la Banque. S'il n'en a pas assez, il perd tout son trésor.",
+        "validation": { "statut": "brouillon", "source": "7wduel_regles_v1.md §8" }
+      },
+      "casesTotal": 19,
+      "pointsCentre": 0,
+      "zones": [
+        { "id": "A", "cases": 2, "points": 2, "jeton": null },
+        { "id": "B", "cases": 3, "points": 5, "jeton": 2 },
+        { "id": "C", "cases": 3, "points": 10, "jeton": 5 }
+      ],
+      "sourceZones": "Découpage relevé sur le plateau (7wduel_regles_v1.md §5) : A + B + C = 8 cases de chaque côté du centre.",
+      "zonesManquantes": "Le nombre de cases de chaque zone n'est pas encore saisi (données : victoires → militaire → zones → cases). Sans lui, la piste ne repère ni les zones, ni les jetons, ni les points : le pion et la suprématie fonctionnent, mais les points militaires du décompte civil se saisissent à la main.",
+      "messages": {
+        "centre": "Pion au centre : 0 point militaire.",
+        "zone": "Pion à {cases} du centre, côté {cote} · zone {zone} · {points} points pour {leader}.",
+        "horsZone": "Pion à {cases} du centre, côté {cote}.",
+        "capitale": "Pion dans la capitale de {perdant} : suprématie militaire, {gagnant} gagne la partie.",
+        "jeton": "{perdant} perd {pieces} pièces, rendues à la Banque (tout son trésor s'il en a moins). Le jeton retourne dans la boîte.",
+        "supremacie": "Le pion atteint la capitale de {perdant} : suprématie militaire, {gagnant} gagne la partie.",
+        "annule": "Dernier coup annulé."
+      }
+    },
+
+    "science": {
+      "validation": { "statut": "valide", "source": "7wduel_regles_v1.md §6" },
+      "titre": "Suprématie scientifique",
+      "regle": "**7 symboles scientifiques** existent. On les trouve sur les cartes vertes et sur un jeton Progrès. À chaque **paire** de symboles identiques, choisissez immédiatement un jeton Progrès sur le plateau : vous le gardez jusqu'à la fin de la partie. **6 symboles différents** : victoire immédiate.",
+      "symboles": 7,
+      "pourVictoire": 6,
+      "seuilPaire": 2,
+      "noteAuDela": "Au-delà de deux exemplaires d'un même symbole, cette aide ne dit rien : voir le livret.",
+      "messages": {
+        "paire": "Paire du symbole {symbole} pour {joueur} : choisissez un jeton Progrès sur le plateau. Il reste à vous jusqu'à la fin de la partie.",
+        "presque": "{joueur} : {n} symboles différents sur {max}. Un de plus suffit.",
+        "victoire": "{joueur} réunit {max} symboles différents : suprématie scientifique, victoire immédiate.",
+        "defaut": "{joueur} : {n} sur {max} symboles différents."
+      }
+    },
+
+    "progres": {
+      "titre": "Les Progrès connus",
+      "total": 10,
+      "intro": "3 jetons Progrès sur 10 n'ont pas encore de texte dans cette aide : voir le livret.",
+      "liste": [
+        { "id": "mathematiques", "nom": "Mathématiques", "texte": "En fin de partie, 3 points par jeton Progrès possédé, celui-ci compris.", "validation": { "statut": "brouillon", "source": "7wduel_regles_v1.md §8" } },
+        { "id": "strategie", "nom": "Stratégie", "texte": "Les cartes rouges construites ensuite donnent 1 Bouclier de plus. Sans effet sur les Merveilles à Boucliers ni sur les cartes rouges déjà construites.", "validation": { "statut": "brouillon", "source": "7wduel_regles_v1.md §8" } },
+        { "id": "architecture", "nom": "Architecture", "texte": "Les Merveilles construites ensuite coûtent 2 ressources de moins, au choix à chaque construction.", "note": "Attribution déduite de l'icône.", "validation": { "statut": "brouillon", "source": "7wduel_regles_v1.md §8" } },
+        { "id": "maconnerie", "nom": "Maçonnerie", "texte": "Les cartes bleues construites ensuite coûtent 2 ressources de moins, au choix à chaque construction.", "note": "Attribution déduite de l'icône.", "validation": { "statut": "brouillon", "source": "7wduel_regles_v1.md §8" } },
+        { "id": "urbanisme", "nom": "Urbanisme", "texte": "6 pièces immédiatement, puis 4 pièces à chaque construction gratuite par chaînage.", "validation": { "statut": "brouillon", "source": "7wduel_regles_v1.md §8" } },
+        { "id": "economie", "nom": "Économie", "texte": "Vous récupérez les pièces que l'adversaire dépense pour acheter des ressources par le commerce. Seuls comptent les achats de ressources, pas les coûts en pièces des bâtiments. L'effet s'applique même quand l'adversaire bénéficie de réductions commerciales (Dépôts, Douane).", "validation": { "statut": "brouillon", "source": "7wduel_regles_v1.md §8" } },
+        { "id": "theologie", "nom": "Théologie", "texte": "Les Merveilles construites ensuite ont toutes l'effet « Rejouer ». Les Merveilles qui l'ont déjà ne sont pas concernées : pas de double effet.", "validation": { "statut": "brouillon", "source": "7wduel_regles_v1.md §8" } }
+      ]
+    },
+
+    "civil": {
+      "validation": { "statut": "valide", "source": "7wduel_regles_v1.md §7" },
+      "titre": "Victoire civile",
+      "regle": "Si personne n'a gagné par suprématie, la partie se termine à l'issue de l'Âge III : le plus de **points de victoire** l'emporte. On additionne les points ci-dessous.",
+      "egalite": "**Égalité** : le plus de points sur les cartes bleues l'emporte. Si l'égalité persiste, la victoire est partagée.",
+      "lotPieces": 3,
+      "departage": "bleues",
+      "categories": [
+        { "id": "militaire", "nom": "Militaire", "note": "0, 2, 5 ou 10 selon la position du pion" },
+        { "id": "bleues", "nom": "Bâtiments bleus", "couleur": "c-bleue" },
+        { "id": "vertes", "nom": "Bâtiments verts", "couleur": "c-verte" },
+        { "id": "jaunes", "nom": "Bâtiments jaunes", "couleur": "c-jaune" },
+        { "id": "violettes", "nom": "Bâtiments violets", "couleur": "c-violette" },
+        { "id": "merveilles", "nom": "Merveilles" },
+        { "id": "progres", "nom": "Progrès" },
+        { "id": "tresor", "nom": "Trésor", "note": "1 point par lot complet de 3 pièces", "pieces": true }
+      ],
+      "messages": {
+        "vide": "Saisissez les points de chaque joueur.",
+        "points": "{joueur} l'emporte : {a} points contre {b}.",
+        "bleues": "Égalité à {a} points. {joueur} l'emporte grâce aux cartes bleues ({x} points contre {y}).",
+        "partage": "Égalité parfaite (même total, mêmes points bleus) : victoire partagée.",
+        "supremacie": "Suprématie {type} : {joueur} a déjà gagné, la partie s'est arrêtée immédiatement."
+      }
+    }
+  }
+}
+</script>
+
+<script>
+(function(){
+"use strict";
+
+/* ================================================================== */
+/* Données et constantes                                               */
+/* ================================================================== */
+
+const D = JSON.parse(document.getElementById('donnees').textContent);
+const CLE = 'guilde:7wduel:partie';
+const JOUEURS = D.jeu.camps.map(c => c.id);
+const nom = id => D.jeu.camps.find(c => c.id === id).nom;
+const autre = id => (id === 'j1' ? 'j2' : 'j1');
+const MIL = D.victoires.militaire;
+const SCI = D.victoires.science;
+const CIV = D.victoires.civil;
+const COM = D.commerce;
+// Cases de chaque côté du centre, capitale comprise (19 cases : 9 + 1 + 9).
+const DEMI = (MIL.casesTotal - 1) / 2;
+const MAX_RESSOURCE = 20, MAX_SCIENCE = 9, MAX_CIVIL = 999;
+
+const gab = (t, v) => t.replace(/\{(\w+)\}/g, (m, k) => (v[k] !== undefined ? v[k] : m));
+const borner = (v, min, max) => Math.max(min, Math.min(max, v));
+
+/* ================================================================== */
+/* Logique pure (testée en mode ?test)                                 */
+/* ================================================================== */
+
+// --- Commerce : prix = 2 + symboles marron/gris adverses, ou 1 si prix fixé.
+function calculerCommerce(e) {
+  const lignes = [];
+  let total = e.pieces || 0;
+  COM.ressources.forEach(r => {
+    const manque = Math.max(0, (e.besoin[r.id] || 0) - (e.mienne[r.id] || 0));
+    if (!manque) return;
+    const prix = e.fixe && e.fixe[r.id] ? COM.prixFixe : COM.prixBase + (e.adverse[r.id] || 0);
+    lignes.push({ nom: r.nom, manque, prix, sous: manque * prix });
+    total += manque * prix;
+  });
+  return { total, lignes, pieces: e.pieces || 0 };
+}
+
+// --- Structures d'Âge : 20 cartes, rangées V/C alternées, V aux deux bouts.
+function verifierStructure(s) {
+  const somme = s.rangees.reduce((a, n) => a + n, 0);
+  if (somme !== D.miseEnPlace.structures.cartes) return 'total ' + somme;
+  if (s.faces.length !== s.rangees.length) return 'faces ≠ rangées';
+  if (s.faces[0] !== 'V' || s.faces[s.faces.length - 1] !== 'V') return 'bouts non visibles';
+  for (let i = 1; i < s.faces.length; i++) if (s.faces[i] === s.faces[i - 1]) return 'pas d\'alternance';
+  return null;
+}
+
+// --- Piste militaire. pos : -DEMI (capitale J1) … 0 … +DEMI (capitale J2).
+// Joueur 1 pousse vers +, joueur 2 vers −. Côté d'un joueur = côté de sa capitale.
+function zonesCompletes(zones) {
+  return zones.every(z => Number.isInteger(z.cases) && z.cases > 0)
+    && zones.reduce((a, z) => a + z.cases, 0) === DEMI - 1;
+}
+function zoneDe(distance, zones) {
+  if (distance <= 0) return { type: 'centre' };
+  if (distance >= DEMI) return { type: 'capitale' };
+  if (!zones) return { type: 'inconnue' };
+  let cumul = 0;
+  for (const z of zones) { cumul += z.cases; if (distance <= cumul) return { type: 'zone', zone: z }; }
+  return { type: 'inconnue' };
+}
+const cleJeton = (pos, zone) => (pos > 0 ? 'j2' : 'j1') + '-' + zone.id;
+
+function deplacer(mil, joueur, zones) {
+  if (Math.abs(mil.pos) >= DEMI) return null; // partie déjà finie
+  const np = mil.pos + (joueur === 'j1' ? 1 : -1);
+  const pris = mil.pris.slice();
+  const evenements = [];
+  const avant = zoneDe(Math.abs(mil.pos), zones), apres = zoneDe(Math.abs(np), zones);
+  if (apres.type === 'zone') {
+    const cleApres = cleJeton(np, apres.zone);
+    const cleAvant = avant.type === 'zone' ? cleJeton(mil.pos, avant.zone) : null;
+    if (cleApres !== cleAvant && apres.zone.jeton && !pris.includes(cleApres)) {
+      pris.push(cleApres);
+      evenements.push({ type: 'jeton', perdant: autre(joueur), pieces: apres.zone.jeton, cle: cleApres });
+    }
+  }
+  if (Math.abs(np) === DEMI) evenements.push({ type: 'supremacie', gagnant: joueur, perdant: autre(joueur) });
+  return { pos: np, pris, evenements };
+}
+
+// Points militaires : revient au joueur dont le pion s'éloigne de la capitale.
+function pointsMilitaires(pos, zones) {
+  const d = Math.abs(pos);
+  if (d === 0) return { etat: 'centre', joueur: null, points: MIL.pointsCentre };
+  const leader = pos > 0 ? 'j1' : 'j2';
+  const z = zoneDe(d, zones);
+  if (z.type === 'capitale') return { etat: 'capitale', joueur: leader, points: null };
+  if (z.type === 'zone') return { etat: 'zone', joueur: leader, points: z.zone.points, zone: z.zone };
+  return { etat: 'inconnu', joueur: leader, points: null };
+}
+
+// --- Fin d'Âge : le joueur mené choisit ; au centre, le dernier joueur actif.
+function quiChoisit(pos, dernierActif) {
+  if (pos < 0) return { choisit: 'j1', raison: 'mene' };
+  if (pos > 0) return { choisit: 'j2', raison: 'mene' };
+  return { choisit: dernierActif || null, raison: 'dernier-actif' };
+}
+
+// --- Science.
+const symbolesDifferents = compteurs => compteurs.filter(n => n > 0).length;
+
+// --- Civil.
+function verdictCivil(t1, t2, b1, b2) {
+  if (t1 !== t2) return { gagnant: t1 > t2 ? 'j1' : 'j2', type: 'points' };
+  if (b1 !== b2) return { gagnant: b1 > b2 ? 'j1' : 'j2', type: 'bleues' };
+  return { gagnant: null, type: 'partage' };
+}
+
+// --- État : tout ce qui n'a pas la forme attendue retombe sur la valeur par défaut.
+function normaliser(def, brut) {
+  if (Array.isArray(def)) {
+    if (!Array.isArray(brut)) return def;
+    if (!def.length) return brut.filter(x => typeof x === 'string' || (x && typeof x === 'object')).slice(0, 50);
+    return def.map((d, i) => normaliser(d, brut[i]));
+  }
+  if (def && typeof def === 'object') {
+    const src = brut && typeof brut === 'object' ? brut : {};
+    const sortie = {};
+    Object.keys(def).forEach(k => { sortie[k] = normaliser(def[k], src[k]); });
+    return sortie;
+  }
+  if (typeof def === 'number') return Number.isFinite(brut) ? brut : def;
+  if (typeof def === 'boolean') return typeof brut === 'boolean' ? brut : def;
+  if (typeof def === 'string') return typeof brut === 'string' ? brut : def;
+  return def;
+}
+
+/* ================================================================== */
+/* État de partie                                                      */
+/* ================================================================== */
+
+const ZONES = zonesCompletes(MIL.zones) ? MIL.zones : null;
+
+function etatDefaut() {
+  const parRessource = v => Object.fromEntries(COM.ressources.map(r => [r.id, v]));
+  const parJoueur = f => Object.fromEntries(JOUEURS.map(j => [j, f()]));
+  return {
+    v: 1,
+    onglet: 't1',
+    checklist: Object.fromEntries(
+      D.miseEnPlace.checklists.flatMap(g => g.points.map((p, i) => [g.id + '-' + i, false]))),
+    selection: { mode: 'hasard', etape: 0 },
+    merveilles: 0,
+    militaire: { pos: 0, pris: [], historique: [] },
+    science: parJoueur(() => new Array(SCI.symboles).fill(0)),
+    civil: parJoueur(() => Object.fromEntries(CIV.categories.map(c => [c.id, 0]))),
+    commerce: { mienne: parRessource(0), adverse: parRessource(0), fixe: parRessource(false) },
+    // Jamais enregistré : valeurs propres à un instant de la partie.
+    transitoire: {
+      pieces: 0, besoin: parRessource(0), dernierActif: null,
+      messagePaire: '', evenementMil: { niveau: '', texte: '' }, confirmation: false
+    }
+  };
+}
+
+function assainir(e) {
+  e.militaire.pos = borner(Math.round(e.militaire.pos), -DEMI, DEMI);
+  e.merveilles = borner(Math.round(e.merveilles), 0, D.tour.merveilles.max);
+  JOUEURS.forEach(j => {
+    e.science[j] = e.science[j].map(n => borner(Math.round(n), 0, MAX_SCIENCE));
+    Object.keys(e.civil[j]).forEach(k => { e.civil[j][k] = borner(Math.round(e.civil[j][k]), 0, MAX_CIVIL); });
+  });
+  ['mienne', 'adverse'].forEach(k => Object.keys(e.commerce[k]).forEach(r => {
+    e.commerce[k][r] = borner(Math.round(e.commerce[k][r]), 0, MAX_RESSOURCE);
+  }));
+  e.militaire.pris = e.militaire.pris.filter(x => typeof x === 'string');
+  e.militaire.historique = e.militaire.historique.filter(h =>
+    h && Number.isFinite(h.pos) && Array.isArray(h.pris) && Math.abs(h.pos) <= DEMI);
+  if (!['t1', 't2', 't3'].includes(e.onglet)) e.onglet = 't1';
+  e.selection.mode = e.selection.mode === 'premiere' ? 'premiere' : 'hasard';
+  e.selection.etape = borner(Math.round(e.selection.etape), 0, 99);
+  return e;
+}
+
+function charger() {
+  try {
+    const brut = localStorage.getItem(CLE);
+    if (brut) {
+      const o = JSON.parse(brut);
+      if (o && o.v === 1) return assainir(normaliser(etatDefaut(), o));
+    }
+  } catch (e) { /* stockage vide, illisible ou indisponible : on repart d'une partie neuve */ }
+  return etatDefaut();
+}
+
+function sauver() {
+  try {
+    const copie = Object.assign({}, etat);
+    delete copie.transitoire;
+    localStorage.setItem(CLE, JSON.stringify(copie));
+  } catch (e) { /* stockage indisponible : la partie reste jouable en mémoire */ }
+}
+
+let etat = charger();
+
+const lire = chemin => chemin.split('.').reduce((o, k) => o[k], etat);
+function ecrire(chemin, valeur) {
+  const cles = chemin.split('.');
+  const dernier = cles.pop();
+  cles.reduce((o, k) => o[k], etat)[dernier] = valeur;
+}
+
+/* ================================================================== */
+/* Outils DOM                                                          */
+/* ================================================================== */
+
+function h(tag, attrs, ...enfants) {
+  const e = document.createElement(tag);
+  Object.entries(attrs || {}).forEach(([k, v]) => {
+    if (v === null || v === undefined || v === false) return;
+    e.setAttribute(k, v === true ? '' : v);
+  });
+  enfants.flat(Infinity).forEach(c => {
+    if (c === null || c === undefined || c === false) return;
+    e.append(typeof c === 'object' ? c : document.createTextNode(c));
+  });
+  return e;
+}
+const NS = 'http://www.w3.org/2000/svg';
+function sv(tag, attrs, ...enfants) {
+  const e = document.createElementNS(NS, tag);
+  Object.entries(attrs || {}).forEach(([k, v]) => e.setAttribute(k, v));
+  enfants.flat(Infinity).forEach(c => {
+    if (c === null || c === undefined || c === false) return;
+    e.append(typeof c === 'object' ? c : document.createTextNode(c));
+  });
+  return e;
+}
+// Element.append convertirait un tableau en texte : on aplatit d'abord.
+function ajouter(parent, ...enfants) {
+  enfants.flat(Infinity).forEach(c => {
+    if (c === null || c === undefined || c === false) return;
+    parent.append(typeof c === 'object' ? c : document.createTextNode(c));
+  });
+  return parent;
+}
+// **gras** dans les textes des données
+function riche(t) {
+  return String(t).split(/\*\*(.+?)\*\*/).map((p, i) => (i % 2 ? h('strong', {}, p) : p));
+}
+const badge = v => (D.jeu.afficherBrouillons && v && v.statut === 'brouillon'
+  ? h('span', { class: 'badge', title: v.source || '' }, 'à valider') : null);
+const puce = j => h('span', { class: 'puce-joueur ' + j }, nom(j));
+
+function stepper(chemin, libelle, min = 0, max = MAX_RESSOURCE) {
+  const data = d => ({ 'data-pas': chemin, 'data-d': d, 'data-min': min, 'data-max': max });
+  return h('div', { class: 'rangee', role: 'group', 'aria-label': libelle },
+    h('button', Object.assign({ class: 'pas', type: 'button', 'aria-label': 'Diminuer : ' + libelle }, data(-1)), '−'),
+    h('span', { class: 'val', 'data-lit': chemin }),
+    h('button', Object.assign({ class: 'pas', type: 'button', 'aria-label': 'Augmenter : ' + libelle }, data(1)), '+'));
+}
+function saisie(chemin, libelle, max = MAX_CIVIL) {
+  const data = d => ({ 'data-pas': chemin, 'data-d': d, 'data-min': 0, 'data-max': max });
+  return h('div', { class: 'rangee', role: 'group', 'aria-label': libelle },
+    h('button', Object.assign({ class: 'pas', type: 'button', 'aria-label': 'Diminuer : ' + libelle }, data(-1)), '−'),
+    h('input', { class: 'saisie', type: 'number', inputmode: 'numeric', min: 0, max, 'data-saisie': chemin, 'aria-label': libelle }),
+    h('button', Object.assign({ class: 'pas', type: 'button', 'aria-label': 'Augmenter : ' + libelle }, data(1)), '+'));
+}
+const blocTexte = b => h('div', { class: 'bloc' },
+  b.titre ? h('h3', {}, b.titre) : null,
+  (b.paragraphes || []).map(p => h('p', {}, riche(p))),
+  b.liste && b.liste.length ? h('ul', { class: 'check' }, b.liste.map(l => h('li', {}, riche(l)))) : null,
+  b.note ? h('p', { class: 'note' }, riche(b.note)) : null);
+
+/* ================================================================== */
+/* Construction des onglets                                            */
+/* ================================================================== */
+
+function etapesSelection() {
+  const S = D.miseEnPlace.selection, etapes = [];
+  S.phases.forEach(ph => {
+    etapes.push({ texte: ph.libelle });
+    const groupes = [];
+    ph.ordre.forEach(j => {
+      const g = groupes[groupes.length - 1];
+      if (g && g.j === j) g.n++; else groupes.push({ j, n: 1 });
+    });
+    let restant = ph.nombre;
+    groupes.forEach(g => {
+      restant -= g.n;
+      etapes.push({ joueur: g.j, texte: restant === 0 ? 'prend la dernière' : 'en prend ' + g.n + (g.n > 1 ? ' Merveilles' : ' Merveille') });
+    });
+  });
+  etapes.push({ texte: S.fin });
+  return etapes;
+}
+const ETAPES = etapesSelection();
+
+function descriptionStructure(s) {
+  const lignes = s.rangees.map((n, i) => n + (s.faces[i] === 'V' ? ' visibles' : ' cachées'));
+  return 'Âge ' + s.age + ' : ' + s.rangees.length + ' rangées, de haut en bas : ' + lignes.join(', ')
+    + '. ' + s.rangees.reduce((a, n) => a + n, 0) + ' cartes.';
+}
+function schemaStructure(s, idx) {
+  const L = 40, H = 26, G = 6, V = 8, P = 8;
+  const nMax = Math.max(...s.rangees);
+  const W = nMax * (L + G) - G + 2 * P, Ht = s.rangees.length * (H + V) - V + 2 * P;
+  const idHach = 'hach' + idx;
+  const svg = sv('svg', { viewBox: '0 0 ' + W + ' ' + Ht, class: 'schema', role: 'img', 'aria-labelledby': 'sch' + idx },
+    sv('title', { id: 'sch' + idx }, descriptionStructure(s)),
+    sv('defs', {}, sv('pattern', { id: idHach, width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' },
+      sv('rect', { width: 6, height: 6, class: 'hach-fond' }),
+      sv('line', { x1: 0, y1: 0, x2: 0, y2: 6, class: 'hachure' }))));
+  s.rangees.forEach((n, i) => {
+    const y = P + i * (H + V), face = s.faces[i];
+    const x0 = (W - (n * (L + G) - G)) / 2;
+    for (let k = 0; k < n; k++) {
+      const x = x0 + k * (L + G);
+      svg.append(
+        sv('rect', Object.assign({ x, y, width: L, height: H, rx: 4, class: 'carte ' + (face === 'V' ? 'v' : 'c') },
+          face === 'C' ? { fill: 'url(#' + idHach + ')' } : {})),
+        sv('text', { x: x + L / 2, y: y + H / 2 + 4.5, 'text-anchor': 'middle', class: 'lettre' }, face));
+    }
+  });
+  return svg;
+}
+
+function construireMiseEnPlace(el) {
+  const M = D.miseEnPlace;
+  M.checklists.forEach(g => {
+    ajouter(el, h('h2', {}, g.titre),
+      h('div', { class: 'bloc' },
+        h('ul', { class: 'check sans-puce' }, g.points.map((p, i) =>
+          h('li', {}, h('label', { class: 'coche' },
+            h('input', { type: 'checkbox', 'data-coche': g.id + '-' + i }), h('span', {}, riche(p)))))),
+        g.note ? h('p', { class: 'note' }, riche(g.note)) : null));
+  });
+
+  const S = M.selection, P = M.premierePartie;
+  ajouter(el, h('h2', {}, S.titre),
+    h('div', { class: 'bloc' },
+      h('p', {}, riche(S.intro)),
+      h('div', { class: 'bascule-mode', role: 'group', 'aria-label': 'Mode de sélection' },
+        h('button', { type: 'button', 'data-mode': 'hasard', 'aria-pressed': 'true' }, 'Sélection des Merveilles'),
+        h('button', { type: 'button', 'data-mode': 'premiere', 'aria-pressed': 'false' }, P.titre)),
+      h('div', { id: 'modeHasard' },
+        h('div', { class: 'etape-courante', role: 'status', 'aria-live': 'polite' },
+          h('div', { class: 'rang', id: 'rangEtape' }), h('div', { class: 'texte', id: 'texteEtape' })),
+        h('div', { class: 'commandes' },
+          h('button', { class: 'btn', type: 'button', 'data-action': 'etape-prec', id: 'etapePrec' }, 'Revenir'),
+          h('button', { class: 'btn primaire', type: 'button', 'data-action': 'etape-suiv', id: 'etapeSuiv' }, 'Étape faite')),
+        h('ol', { class: 'etapes', id: 'listeEtapes' }, ETAPES.map((e, i) =>
+          h('li', { 'data-etape': i }, e.joueur ? [puce(e.joueur), ' '] : null, e.texte)))),
+      h('div', { id: 'modePremiere', hidden: true },
+        h('p', {}, P.texte),
+        h('div', { class: 'lots' }, JOUEURS.map(j =>
+          h('div', { class: 'lot ' + j }, h('h3', {}, nom(j)), h('ul', {}, P.lots[j].map(m => h('li', {}, m)))))),
+        h('p', { class: 'note' }, P.fin))));
+
+  const ST = M.structures;
+  ajouter(el, h('h2', {}, ST.titre), h('p', {}, riche(ST.intro)),
+    ST.liste.map((s, i) => h('figure', { class: 'bloc structure', style: 'margin:.6rem 0 0' },
+      schemaStructure(s, i),
+      h('figcaption', {}, h('strong', {}, 'Âge ' + s.age), ' · ' + s.rangees.join('-') + ' · ' + s.faces.split('').join('-')))),
+    h('p', { class: 'note' }, 'V = face visible · C = face cachée. ' + ST.note));
+}
+
+function construireTour(el) {
+  const T = D.tour, C = COM;
+  ajouter(el, h('h2', {}, T.titre),
+    h('div', { class: 'bloc' }, h('p', {}, riche(T.intro)),
+      h('div', { class: 'actions' }, T.actions.map((a, i) =>
+        h('div', { class: 'action' }, h('span', { class: 'n', 'aria-hidden': 'true' }, i + 1),
+          h('div', {}, h('strong', {}, a.titre), h('p', {}, riche(a.texte))))))),
+    blocTexte(T.apres));
+
+  ajouter(el, h('h2', {}, T.merveilles.titre),
+    h('div', { class: 'bloc' }, h('p', {}, riche(T.merveilles.texte)),
+      h('div', { class: 'merveilles-compteur' }, h('strong', {}, 'Construites'),
+        stepper('merveilles', 'Merveilles construites', 0, T.merveilles.max)),
+      h('div', { class: 'alerte chaud', id: 'alerteMerveilles', role: 'status' })));
+
+  ajouter(el, h('h2', {}, T.finAge.titre),
+    h('div', { class: 'bloc' }, h('ul', { class: 'check' }, T.finAge.points.map(p => h('li', {}, riche(p)))),
+      h('div', { class: 'alerte', id: 'alerteFinAge', role: 'status', 'aria-live': 'polite' }),
+      h('div', { id: 'questionDernier', hidden: true },
+        h('p', {}, h('strong', {}, T.finAge.question)),
+        h('div', { class: 'choix-joueur' }, JOUEURS.map(j =>
+          h('button', { class: 'bascule', type: 'button', 'data-action': 'dernier', 'data-joueur': j, 'aria-pressed': 'false' }, nom(j)))))));
+
+  ajouter(el, h('h2', {}, T.paiement.titre), T.paiement.blocs.map(blocTexte));
+
+  ajouter(el, h('h2', {}, C.titre),
+    h('div', { class: 'bloc' }, h('p', {}, riche(C.regle)),
+      h('ul', { class: 'check' }, C.points.map(p => h('li', {}, riche(p)))),
+      h('p', { class: 'note' }, riche(C.rappelAdverse)),
+      h('p', { class: 'note' }, riche(C.noteChoix.texte), badge(C.noteChoix.validation))));
+
+  const calc = h('div', { class: 'calc' },
+    h('div', { class: 'bloc ligne-pieces' },
+      h('strong', {}, C.libelles.pieces),
+      stepper('transitoire.pieces', C.libelles.pieces),
+      h('button', { class: 'btn', type: 'button', 'data-action': 'effacer-cout' }, C.libelles.effacer)),
+    C.ressources.map(r => h('fieldset', { class: 'ress' },
+      h('legend', {}, h('span', { class: 'pastille', style: 'background:var(--c-' + r.famille + ')', 'aria-hidden': 'true' }),
+        r.nom, h('span', { class: 'note', style: 'font-weight:400' }, ' · carte ' + r.famille)),
+      h('div', { class: 'champs' },
+        [['besoin', 'transitoire.besoin.'], ['mienne', 'commerce.mienne.'], ['adverse', 'commerce.adverse.']].map(([cle, base]) =>
+          h('div', { class: 'champ' }, h('span', { class: 'lib' }, C.libelles[cle]),
+            stepper(base + r.id, C.libelles[cle] + ' : ' + r.nom)))),
+      h('button', { class: 'bascule', type: 'button', 'data-bascule': 'commerce.fixe.' + r.id, 'aria-pressed': 'false' }, C.libelles.fixe))),
+    h('div', { class: 'total', id: 'totalCommerce', role: 'status', 'aria-live': 'polite' }));
+  ajouter(el, calc);
+}
+
+/* --- piste militaire (SVG) --- */
+const CX = 10, CW = 20, CY = 44, CH = 26;
+const xCase = pos => CX + (pos + DEMI) * CW;
+const pisteRefs = { jetons: {} };
+
+function construirePiste() {
+  const svg = sv('svg', { class: 'piste', viewBox: ZONES ? '0 0 400 116' : '0 36 400 80', role: 'img', id: 'svgPiste' });
+  for (let pos = -DEMI; pos <= DEMI; pos++) {
+    const z = zoneDe(Math.abs(pos), ZONES);
+    const cls = z.type === 'zone' ? 'z-' + z.zone.id : z.type === 'centre' ? 'z-centre' : z.type === 'capitale' ? 'z-capitale' : 'z-inconnue';
+    svg.append(sv('rect', { x: xCase(pos) + 1, y: CY, width: CW - 2, height: CH, rx: 2, class: 'case ' + cls }));
+  }
+  if (ZONES) {
+    ['j1', 'j2'].forEach(j => {
+      let cumul = 0;
+      ZONES.forEach(z => {
+        const debut = cumul + 1, fin = cumul + z.cases;
+        cumul = fin;
+        const pa = j === 'j1' ? -debut : debut, pb = j === 'j1' ? -fin : fin;
+        const cx = (xCase(pa) + xCase(pb)) / 2 + CW / 2;
+        svg.append(sv('text', { x: cx, y: 90, 'text-anchor': 'middle', class: 'lettre-zone' }, z.id));
+        if (z.jeton) {
+          const g = sv('g', { class: 'jeton-groupe', 'data-cle': j + '-' + z.id },
+            sv('circle', { cx, cy: 24, r: 11, class: 'jeton' }),
+            sv('text', { x: cx, y: 28, 'text-anchor': 'middle', class: 'jeton-val' }, z.jeton));
+          pisteRefs.jetons[j + '-' + z.id] = g;
+          svg.append(g);
+        }
+      });
+    });
+  }
+  svg.append(
+    sv('text', { x: CX, y: 108, class: 'etiquette' }, 'Capitale ' + nom('j1')),
+    sv('text', { x: 400 - CX, y: 108, 'text-anchor': 'end', class: 'etiquette' }, 'Capitale ' + nom('j2')),
+    sv('text', { x: 200, y: 108, 'text-anchor': 'middle', class: 'etiquette' }, 'Centre'));
+  const pion = sv('g', { id: 'pion' }, sv('circle', { r: 10, class: 'pion' }));
+  pisteRefs.pion = pion;
+  svg.append(pion);
+  pisteRefs.svg = svg;
+  return svg;
+}
+
+function construireVictoires(el) {
+  const V = D.victoires;
+  ajouter(el, h('p', { class: 'note', style: 'margin-bottom:1rem' }, riche(V.intro)));
+
+  /* militaire */
+  const legende = ZONES
+    ? h('div', { class: 'legende-zones' }, ZONES.map(z =>
+      h('div', {}, 'Zone ' + z.id + ' (' + z.cases + ' case' + (z.cases > 1 ? 's' : '') + ') : ' + z.points + ' points'
+        + (z.jeton ? ', jeton ' + z.jeton + ' pièces' : ', pas de jeton'))))
+    : null;
+  ajouter(el, h('div', { class: 'course', id: 'courseMilitaire' },
+    h('h3', {}, MIL.titre), h('div', { class: 'quoi' }, riche(MIL.regle)),
+    ZONES ? null : h('div', { class: 'averti', role: 'note' },
+      h('h4', {}, 'Données à compléter'), h('p', {}, MIL.zonesManquantes), h('p', { class: 'note' }, MIL.sourceZones)),
+    construirePiste(), legende,
+    h('p', { class: 'note' }, MIL.cotes),
+    h('div', { class: 'etat-pion', id: 'etatPion', role: 'status', 'aria-live': 'polite' }),
+    h('div', { class: 'boutons-boucliers' }, JOUEURS.map(j =>
+      h('button', { class: 'gros ' + j, type: 'button', 'data-action': 'bouclier', 'data-joueur': j },
+        nom(j) + ' · Bouclier +1 ' + (j === 'j1' ? '→' : '←')))),
+    h('div', { class: 'alerte', id: 'evenementMil', role: 'status', 'aria-live': 'polite' }),
+    h('p', {}, h('button', { class: 'btn', type: 'button', 'data-action': 'annuler', id: 'annulerMil' }, 'Annuler le dernier Bouclier')),
+    h('p', { class: 'note' }, riche(MIL.jetons.regle)),
+    h('p', { class: 'note' }, riche(MIL.jetons.effet), badge(MIL.jetons.validation))));
+
+  /* science */
+  const grille = h('div', { class: 'grille-sci' },
+    h('span', {}), JOUEURS.map(j => h('span', { class: 'entete ' + j }, nom(j))));
+  for (let i = 0; i < SCI.symboles; i++) {
+    ajouter(grille, 
+      h('span', { class: 'lib-symbole' }, h('span', { class: 'num-symbole' }, i + 1), h('span', { class: 'texte' }, 'Symbole ' + (i + 1))),
+      JOUEURS.map(j => stepper('science.' + j + '.' + i, nom(j) + ', symbole ' + (i + 1), 0, MAX_SCIENCE)));
+  }
+  ajouter(el, h('div', { class: 'course' },
+    h('h3', {}, SCI.titre), h('div', { class: 'quoi' }, riche(SCI.regle)), grille,
+    JOUEURS.map(j => h('div', { class: 'ligne-joueur' }, h('span', { class: 'qui ' + j }, nom(j)),
+      h('span', { class: 'jauge-lecture', 'data-jauge': j, 'aria-hidden': 'true' },
+        Array.from({ length: SCI.pourVictoire }, () => h('span', { class: 'pastille-ronde' }))),
+      h('span', { class: 'lisible', 'data-diff': j }))),
+    h('div', { class: 'alerte', id: 'alertePaire', role: 'status', 'aria-live': 'polite' }),
+    JOUEURS.map(j => h('div', { class: 'alerte', 'data-alerte-sci': j })),
+    h('p', { class: 'note' }, SCI.noteAuDela)));
+
+  /* progrès */
+  ajouter(el, h('details', { class: 'progres' },
+    h('summary', {}, V.progres.titre + ' (' + V.progres.liste.length + ' sur ' + V.progres.total + ' décrits)'),
+    h('dl', {}, V.progres.liste.map(p => [
+      h('dt', {}, p.nom, badge(p.validation)),
+      h('dd', {}, p.texte, p.note ? h('span', { class: 'note' }, ' (' + p.note.replace(/\.$/, '') + ')') : null)])),
+    h('p', { class: 'note' }, V.progres.intro)));
+
+  /* civil */
+  const cats = CIV.categories;
+  const grilleCivil = h('div', { class: 'grille-civil' },
+    h('span', {}), JOUEURS.map(j => h('span', { class: 'entete ' + j }, nom(j))));
+  cats.forEach(c => {
+    ajouter(grilleCivil, h('span', { class: 'lib-cat' },
+      h('span', { class: 'barre', style: c.couleur ? 'background:var(--' + c.couleur + ')' : null, 'aria-hidden': 'true' }),
+      h('span', {}, c.nom, c.note ? h('span', { class: 'petit' }, c.note) : null)));
+    JOUEURS.forEach(j => {
+      if (c.id === 'militaire' && ZONES) {
+        ajouter(grilleCivil, h('span', { class: 'cellule' }, h('span', { class: 'auto', 'data-mil': j })));
+      } else if (c.pieces) {
+        ajouter(grilleCivil, h('span', { class: 'cellule' }, saisie('civil.' + j + '.' + c.id, nom(j) + ', ' + c.nom + ' en pièces'),
+          h('span', { class: 'conv', 'data-tresor': j })));
+      } else {
+        ajouter(grilleCivil, h('span', { class: 'cellule' }, saisie('civil.' + j + '.' + c.id, nom(j) + ', ' + c.nom)));
+      }
+    });
+  });
+  ajouter(grilleCivil, h('div', { class: 'ligne-total' }, h('span', { class: 'lib-cat' }, h('strong', {}, 'Total')),
+    JOUEURS.map(j => h('span', { class: 'gros-total ' + j, 'data-total': j }))));
+
+  ajouter(el, h('div', { class: 'course' },
+    h('h3', {}, CIV.titre), h('div', { class: 'quoi' }, riche(CIV.regle)), grilleCivil,
+    h('div', { class: 'alerte', id: 'verdictCivil', role: 'status', 'aria-live': 'polite' }),
+    h('p', { class: 'note' }, riche(CIV.egalite))));
+}
+
+/* ================================================================== */
+/* Mise à jour de l'affichage                                          */
+/* ================================================================== */
+
+function victoireImmediate() {
+  if (Math.abs(etat.militaire.pos) >= DEMI) return { gagnant: etat.militaire.pos > 0 ? 'j1' : 'j2', type: 'militaire' };
+  for (const j of JOUEURS) if (symbolesDifferents(etat.science[j]) >= SCI.pourVictoire) return { gagnant: j, type: 'scientifique' };
+  return null;
+}
+function pointsMilJoueur(j) {
+  if (!ZONES) return etat.civil[j].militaire;
+  const p = pointsMilitaires(etat.militaire.pos, ZONES);
+  return p.joueur === j && p.points !== null ? p.points : 0;
+}
+function totalCivil(j) {
+  return CIV.categories.reduce((somme, c) => {
+    if (c.id === 'militaire') return somme + pointsMilJoueur(j);
+    const v = etat.civil[j][c.id];
+    return somme + (c.pieces ? Math.floor(v / CIV.lotPieces) : v);
+  }, 0);
+}
+function messageNiveau(el, niveau, texte) { el.className = 'alerte' + (niveau ? ' ' + niveau : ''); el.textContent = texte || ''; }
+
+function majGenerique() {
+  document.querySelectorAll('[data-lit]').forEach(e => { e.textContent = lire(e.dataset.lit); });
+  document.querySelectorAll('[data-pas]').forEach(b => {
+    const v = lire(b.dataset.pas), d = Number(b.dataset.d);
+    b.disabled = d < 0 ? v <= Number(b.dataset.min) : v >= Number(b.dataset.max);
+  });
+  document.querySelectorAll('[data-saisie]').forEach(i => {
+    if (document.activeElement !== i) i.value = lire(i.dataset.saisie);
+  });
+  document.querySelectorAll('[data-bascule]').forEach(b => {
+    b.setAttribute('aria-pressed', lire(b.dataset.bascule) ? 'true' : 'false');
+  });
+  document.querySelectorAll('[data-coche]').forEach(i => { i.checked = !!etat.checklist[i.dataset.coche]; });
+}
+
+function majOnglets() {
+  ['t1', 't2', 't3'].forEach((id, i) => {
+    const actif = etat.onglet === id, t = document.getElementById(id);
+    t.setAttribute('aria-selected', actif ? 'true' : 'false');
+    t.tabIndex = actif ? 0 : -1;
+    document.getElementById('p' + (i + 1)).hidden = !actif;
+  });
+}
+
+function majSelection() {
+  const premiere = etat.selection.mode === 'premiere';
+  document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.mode === 'premiere') === premiere)));
+  document.getElementById('modeHasard').hidden = premiere;
+  document.getElementById('modePremiere').hidden = !premiere;
+  const n = ETAPES.length, e = Math.min(etat.selection.etape, n);
+  const rang = document.getElementById('rangEtape'), texte = document.getElementById('texteEtape');
+  texte.textContent = '';
+  if (e >= n) { rang.textContent = 'Terminé'; texte.textContent = 'Sélection faite. Bonne partie !'; }
+  else {
+    rang.textContent = 'Étape ' + (e + 1) + ' sur ' + n;
+    const s = ETAPES[e];
+    if (s.joueur) texte.append(puce(s.joueur), ' ', s.texte); else texte.textContent = s.texte;
+  }
+  document.querySelectorAll('#listeEtapes li').forEach(li => {
+    const i = Number(li.dataset.etape);
+    li.className = i < e ? 'fait' : i === e ? 'courant' : '';
+    if (i === e) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+  });
+  document.getElementById('etapePrec').disabled = e <= 0;
+  document.getElementById('etapeSuiv').disabled = e >= n;
+}
+
+function majMerveilles() {
+  const max = D.tour.merveilles.max;
+  messageNiveau(document.getElementById('alerteMerveilles'), etat.merveilles >= max ? 'chaud' : '',
+    etat.merveilles >= max ? D.tour.merveilles.alerte : '');
+}
+
+function majFinAge() {
+  const F = D.tour.finAge.messages, r = quiChoisit(etat.militaire.pos, etat.transitoire.dernierActif);
+  let texte;
+  if (r.raison === 'mene') texte = gab(F.mene, { joueur: nom(r.choisit) });
+  else texte = r.choisit ? gab(F.centreChoisi, { joueur: nom(r.choisit) }) : F.centre;
+  messageNiveau(document.getElementById('alerteFinAge'), r.choisit ? 'gagne' : '', texte);
+  document.getElementById('questionDernier').hidden = r.raison !== 'dernier-actif';
+  document.querySelectorAll('[data-action="dernier"]').forEach(b =>
+    b.setAttribute('aria-pressed', String(etat.transitoire.dernierActif === b.dataset.joueur)));
+}
+
+function majCommerce() {
+  const r = calculerCommerce({
+    pieces: etat.transitoire.pieces, besoin: etat.transitoire.besoin,
+    mienne: etat.commerce.mienne, adverse: etat.commerce.adverse, fixe: etat.commerce.fixe
+  });
+  const morceaux = [];
+  if (r.pieces) morceaux.push(r.pieces + ' pièces');
+  r.lignes.forEach(l => morceaux.push(l.nom + ' ' + l.manque + ' × ' + l.prix + ' = ' + l.sous));
+  document.getElementById('totalCommerce').replaceChildren(
+    h('div', { class: 'grand' }, D.commerce.messages.total + ' : ' + r.total + (r.total > 1 ? ' pièces' : ' pièce')),
+    h('div', { class: 'detail' }, morceaux.length ? morceaux.join(' · ') : D.commerce.messages.rien));
+}
+
+function textePion(pos) {
+  const M = MIL.messages, d = Math.abs(pos);
+  if (d === 0) return M.centre;
+  const leader = pos > 0 ? 'j1' : 'j2';
+  const cote = nom(pos > 0 ? 'j2' : 'j1');
+  const cases = d + (d > 1 ? ' cases' : ' case');
+  if (d >= DEMI) return gab(M.capitale, { perdant: cote, gagnant: nom(leader) });
+  const p = pointsMilitaires(pos, ZONES);
+  if (p.etat === 'zone') return gab(M.zone, { cases, cote, zone: p.zone.id, points: p.points, leader: nom(leader) });
+  return gab(M.horsZone, { cases, cote });
+}
+
+function majMilitaire() {
+  const mil = etat.militaire, pos = mil.pos;
+  pisteRefs.pion.style.transform = 'translate(' + (xCase(pos) + CW / 2) + 'px,' + (CY + CH / 2) + 'px)';
+  Object.keys(pisteRefs.jetons).forEach(c => pisteRefs.jetons[c].classList.toggle('pris', mil.pris.includes(c)));
+  const t = textePion(pos);
+  document.getElementById('etatPion').textContent = t;
+  pisteRefs.svg.setAttribute('aria-label', 'Piste militaire. ' + t);
+  document.querySelectorAll('[data-action="bouclier"]').forEach(b => { b.disabled = Math.abs(pos) >= DEMI; });
+  document.getElementById('annulerMil').disabled = !mil.historique.length;
+  messageNiveau(document.getElementById('evenementMil'), etat.transitoire.evenementMil.niveau, etat.transitoire.evenementMil.texte);
+}
+
+function majScience() {
+  const S = SCI.messages;
+  messageNiveau(document.getElementById('alertePaire'), etat.transitoire.messagePaire ? 'chaud' : '', etat.transitoire.messagePaire);
+  JOUEURS.forEach(j => {
+    const n = symbolesDifferents(etat.science[j]);
+    document.querySelectorAll('[data-jauge="' + j + '"] .pastille-ronde').forEach((p, i) => p.classList.toggle('on', i < n));
+    document.querySelectorAll('[data-jauge="' + j + '"] .pastille-ronde').forEach(p => { p.classList.add(j); });
+    document.querySelector('[data-diff="' + j + '"]').textContent = n + ' sur ' + SCI.pourVictoire;
+    const v = { joueur: nom(j), n, max: SCI.pourVictoire };
+    const el = document.querySelector('[data-alerte-sci="' + j + '"]');
+    if (n >= SCI.pourVictoire) messageNiveau(el, 'gagne', gab(S.victoire, v));
+    else if (n === SCI.pourVictoire - 1) messageNiveau(el, 'chaud', gab(S.presque, v));
+    else messageNiveau(el, '', '');
+  });
+}
+
+function majCivil() {
+  const tot = {};
+  JOUEURS.forEach(j => {
+    tot[j] = totalCivil(j);
+    document.querySelector('[data-total="' + j + '"]').textContent = tot[j];
+    const m = document.querySelector('[data-mil="' + j + '"]');
+    if (m) m.textContent = pointsMilJoueur(j);
+    const tr = document.querySelector('[data-tresor="' + j + '"]');
+    if (tr) { const pts = Math.floor(etat.civil[j].tresor / CIV.lotPieces); tr.textContent = '= ' + pts + (pts > 1 ? ' points' : ' point'); }
+  });
+  const el = document.getElementById('verdictCivil'), M = CIV.messages;
+  const imm = victoireImmediate();
+  if (imm) { messageNiveau(el, 'gagne', gab(M.supremacie, { type: imm.type, joueur: nom(imm.gagnant) })); return; }
+  const rien = JOUEURS.every(j => tot[j] === 0);
+  if (rien) { messageNiveau(el, '', M.vide); return; }
+  const b = JOUEURS.map(j => etat.civil[j][CIV.departage]);
+  const v = verdictCivil(tot.j1, tot.j2, b[0], b[1]);
+  if (v.type === 'partage') messageNiveau(el, 'gagne', M.partage);
+  else if (v.type === 'points') messageNiveau(el, 'gagne', gab(M.points, { joueur: nom(v.gagnant), a: tot[v.gagnant], b: tot[autre(v.gagnant)] }));
+  else messageNiveau(el, 'gagne', gab(M.bleues, { joueur: nom(v.gagnant), a: tot.j1, x: etat.civil[v.gagnant][CIV.departage], y: etat.civil[autre(v.gagnant)][CIV.departage] }));
+}
+
+function majNouvelle() {
+  const b = document.getElementById('nouvelle');
+  b.classList.toggle('confirme', etat.transitoire.confirmation);
+  b.textContent = etat.transitoire.confirmation ? 'Confirmer : tout effacer ?' : 'Nouvelle partie';
+}
+
+function actualiser() {
+  majOnglets(); majGenerique(); majSelection(); majMerveilles(); majFinAge();
+  majCommerce(); majMilitaire(); majScience(); majCivil(); majNouvelle();
+}
+function valider() { sauver(); actualiser(); }
+
+/* ================================================================== */
+/* Interactions                                                        */
+/* ================================================================== */
+
+let minuteurConfirmation = null;
+
+function surChangement(chemin, avant, apres) {
+  if (/^science\./.test(chemin)) {
+    const num = Number(chemin.split('.')[2]) + 1;
+    etat.transitoire.messagePaire = (apres === SCI.seuilPaire && apres > avant)
+      ? gab(SCI.messages.paire, { symbole: num, joueur: nom(chemin.split('.')[1]) }) : '';
+  }
+}
+
+function bouclier(joueur) {
+  const mil = etat.militaire;
+  const r = deplacer(mil, joueur, ZONES);
+  if (!r) return;
+  mil.historique.push({ pos: mil.pos, pris: mil.pris.slice() });
+  if (mil.historique.length > 30) mil.historique.shift();
+  mil.pos = r.pos; mil.pris = r.pris;
+  const M = MIL.messages;
+  const lignes = r.evenements.map(e => e.type === 'jeton'
+    ? gab(M.jeton, { perdant: nom(e.perdant), pieces: e.pieces })
+    : gab(M.supremacie, { perdant: nom(e.perdant), gagnant: nom(e.gagnant) }));
+  const sup = r.evenements.some(e => e.type === 'supremacie');
+  etat.transitoire.evenementMil = { niveau: sup ? 'gagne' : lignes.length ? 'chaud' : '', texte: lignes.join(' ') };
+  etat.transitoire.dernierActif = null;
+  valider();
+}
+
+function annuler() {
+  const mil = etat.militaire, dernier = mil.historique.pop();
+  if (!dernier) return;
+  mil.pos = dernier.pos; mil.pris = dernier.pris;
+  etat.transitoire.evenementMil = { niveau: '', texte: MIL.messages.annule };
+  valider();
+}
+
+function nouvellePartie() {
+  clearTimeout(minuteurConfirmation);
+  try { localStorage.removeItem(CLE); } catch (e) { /* sans effet : l'état mémoire est remis à zéro */ }
+  etat = etatDefaut();
+  actualiser();
+  window.scrollTo({ top: 0 });
+}
+
+document.addEventListener('click', ev => {
+  const pas = ev.target.closest('[data-pas]');
+  if (pas) {
+    const chemin = pas.dataset.pas, avant = lire(chemin);
+    const apres = borner(avant + Number(pas.dataset.d), Number(pas.dataset.min), Number(pas.dataset.max));
+    if (apres === avant) return;
+    ecrire(chemin, apres); surChangement(chemin, avant, apres); valider();
+    return;
+  }
+  const bas = ev.target.closest('[data-bascule]');
+  if (bas) { ecrire(bas.dataset.bascule, !lire(bas.dataset.bascule)); valider(); return; }
+
+  const mode = ev.target.closest('[data-mode]');
+  if (mode) { etat.selection.mode = mode.dataset.mode; valider(); return; }
+
+  const act = ev.target.closest('[data-action]');
+  if (act) {
+    switch (act.dataset.action) {
+      case 'etape-suiv': etat.selection.etape = Math.min(ETAPES.length, etat.selection.etape + 1); valider(); break;
+      case 'etape-prec': etat.selection.etape = Math.max(0, etat.selection.etape - 1); valider(); break;
+      case 'bouclier': bouclier(act.dataset.joueur); break;
+      case 'annuler': annuler(); break;
+      case 'dernier':
+        etat.transitoire.dernierActif = etat.transitoire.dernierActif === act.dataset.joueur ? null : act.dataset.joueur;
+        actualiser(); break;
+      case 'effacer-cout':
+        etat.transitoire.pieces = 0;
+        COM.ressources.forEach(r => { etat.transitoire.besoin[r.id] = 0; });
+        actualiser(); break;
+    }
+  }
+});
+
+document.addEventListener('change', ev => {
+  const c = ev.target.closest('[data-coche]');
+  if (c) { etat.checklist[c.dataset.coche] = c.checked; valider(); }
+  if (ev.target.matches('[data-saisie]')) actualiser();
+});
+
+document.addEventListener('input', ev => {
+  const i = ev.target.closest('[data-saisie]');
+  if (!i) return;
+  const n = parseInt(i.value, 10);
+  ecrire(i.dataset.saisie, borner(Number.isFinite(n) ? n : 0, 0, MAX_CIVIL));
+  sauver(); actualiser();
+});
+
+// Deux appuis pour effacer la partie : un appui isolé sur une tablette ne doit rien détruire.
+document.getElementById('nouvelle').addEventListener('click', () => {
+  if (etat.transitoire.confirmation) { nouvellePartie(); return; }
+  etat.transitoire.confirmation = true; majNouvelle();
+  clearTimeout(minuteurConfirmation);
+  minuteurConfirmation = setTimeout(() => { etat.transitoire.confirmation = false; majNouvelle(); }, 4000);
+});
+
+// Onglets : clic et clavier (flèches, Début, Fin).
+const ONGLETS = ['t1', 't2', 't3'];
+ONGLETS.forEach((id, i) => {
+  const t = document.getElementById(id);
+  t.addEventListener('click', () => { etat.onglet = id; sauver(); majOnglets(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  t.addEventListener('keydown', ev => {
+    const cible = { ArrowRight: (i + 1) % 3, ArrowLeft: (i + 2) % 3, Home: 0, End: 2 }[ev.key];
+    if (cible === undefined) return;
+    ev.preventDefault();
+    etat.onglet = ONGLETS[cible]; sauver(); majOnglets();
+    document.getElementById(ONGLETS[cible]).focus();
+  });
+});
+
+/* ================================================================== */
+/* Démarrage                                                           */
+/* ================================================================== */
+
+document.getElementById('eyebrow').textContent = D.jeu.eyebrow;
+document.getElementById('titreJeu').textContent = D.jeu.titre;
+document.getElementById('sousTitre').textContent = D.jeu.sousTitre;
+document.getElementById('pied').textContent = D.jeu.pied;
+construireMiseEnPlace(document.getElementById('p1'));
+construireTour(document.getElementById('p2'));
+construireVictoires(document.getElementById('p3'));
+actualiser();
+
+/* ================================================================== */
+/* Tests : ouvrir la page avec ?test                                   */
+/* ================================================================== */
+
+if (/[?&]test\b/.test(location.search)) {
+  const liste = h('ul', {});
+  let echecs = 0;
+  const verif = (nomTest, ok, detail) => {
+    if (!ok) echecs++;
+    liste.append(h('li', { class: ok ? 'ok' : 'echec' }, nomTest + (ok ? '' : ' — ' + detail)));
+  };
+  const egal = (nomTest, obtenu, attendu) => verif(nomTest, obtenu === attendu, 'obtenu ' + obtenu + ', attendu ' + attendu);
+
+  // Les 3 exemples du livret
+  COM.exemples.forEach(x => egal('Commerce : ' + x.nom + ' = ' + x.total,
+    calculerCommerce({ pieces: x.pieces, besoin: x.besoin, mienne: x.mienne, adverse: x.adverse, fixe: {} }).total, x.total));
+  egal('Commerce : prix fixé à 1 (2 Pierres, adversaire 3 Pierres)',
+    calculerCommerce({ pieces: 0, besoin: { pierre: 2 }, mienne: {}, adverse: { pierre: 3 }, fixe: { pierre: true } }).total, 2);
+  egal('Commerce : production suffisante = 0',
+    calculerCommerce({ pieces: 0, besoin: { bois: 2 }, mienne: { bois: 3 }, adverse: { bois: 4 }, fixe: {} }).total, 0);
+
+  // Structures
+  D.miseEnPlace.structures.liste.forEach(s => {
+    const err = verifierStructure(s);
+    verif('Structure Âge ' + s.age + ' : 20 cartes, V/C alternées', err === null, err);
+  });
+
+  // Fin d'Âge
+  egal('Fin d\'Âge : pion côté J1 → J1 choisit', quiChoisit(-3, null).choisit, 'j1');
+  egal('Fin d\'Âge : pion côté J2 → J2 choisit', quiChoisit(4, 'j1').choisit, 'j2');
+  egal('Fin d\'Âge : centre, dernier actif J2 → J2', quiChoisit(0, 'j2').choisit, 'j2');
+  egal('Fin d\'Âge : centre, dernier actif J1 → J1', quiChoisit(0, 'j1').choisit, 'j1');
+  egal('Fin d\'Âge : centre, dernier actif inconnu → personne', quiChoisit(0, null).choisit, null);
+  egal('Fin d\'Âge : raison au centre', quiChoisit(0, null).raison, 'dernier-actif');
+
+  // Piste militaire, sur un découpage de TEST (3/3/2), indépendant des données du jeu
+  const Z = [{ id: 'A', cases: 3, points: 2, jeton: null }, { id: 'B', cases: 3, points: 5, jeton: 2 }, { id: 'C', cases: 2, points: 10, jeton: 5 }];
+  verif('Zones : découpage 3/3/2 complet', zonesCompletes(Z), 'refusé');
+  verif('Zones : cases non renseignées refusées', !zonesCompletes([{ cases: null }, { cases: null }, { cases: null }]), 'accepté');
+  verif('Zones : somme ≠ 8 refusée', !zonesCompletes([{ cases: 3 }, { cases: 3 }, { cases: 3 }]), 'accepté');
+  let m = { pos: 0, pris: [], historique: [] }, evts = [];
+  for (let i = 1; i <= 9; i++) { const r = deplacer(m, 'j1', Z); m = { pos: r.pos, pris: r.pris, historique: [] }; evts.push(r.evenements); }
+  egal('Piste : 3 Boucliers J1, aucun jeton', evts.slice(0, 3).flat().length, 0);
+  verif('Piste : 4e Bouclier → J2 perd 2 pièces', evts[3].length === 1 && evts[3][0].perdant === 'j2' && evts[3][0].pieces === 2, JSON.stringify(evts[3]));
+  egal('Piste : pas de jeton avant la zone C', evts.slice(4, 6).flat().length, 0);
+  verif('Piste : 7e Bouclier → J2 perd 5 pièces', evts[6].length === 1 && evts[6][0].pieces === 5, JSON.stringify(evts[6]));
+  verif('Piste : 9e Bouclier → suprématie de J1', evts[8].some(e => e.type === 'supremacie' && e.gagnant === 'j1'), JSON.stringify(evts[8]));
+  egal('Piste : plus de mouvement après la suprématie', deplacer(m, 'j1', Z), null);
+  egal('Piste : 2 jetons pris', m.pris.length, 2);
+  let a = { pos: 4, pris: ['j2-B'], historique: [] };
+  a = deplacer(a, 'j2', Z); egal('Piste : retour en zone A sans jeton', a.evenements.length, 0);
+  let b = deplacer({ pos: a.pos + 1, pris: a.pris }, 'j1', Z);
+  egal('Piste : un jeton déjà pris ne se redéclenche pas', b.evenements.length, 0);
+  let c = { pos: 0, pris: [] }, evC = [];
+  for (let i = 0; i < 4; i++) { const r = deplacer(c, 'j2', Z); c = { pos: r.pos, pris: r.pris }; evC = r.evenements; }
+  verif('Piste : côté J1, jeton B → J1 perd 2 pièces', evC.length === 1 && evC[0].perdant === 'j1' && evC[0].cle === 'j1-B', JSON.stringify(evC));
+  const sansZones = deplacer({ pos: 0, pris: [] }, 'j1', null);
+  egal('Piste : sans zones, le pion avance sans événement', sansZones.pos + ':' + sansZones.evenements.length, '1:0');
+  let s = { pos: 8, pris: [] }; s = deplacer(s, 'j1', null);
+  verif('Piste : suprématie détectée sans zones', s.evenements.some(e => e.type === 'supremacie'), 'non détectée');
+  verif('Points : pion +4 → J1, 5 points', (p => p.joueur === 'j1' && p.points === 5)(pointsMilitaires(4, Z)), 'faux');
+  verif('Points : pion −7 → J2, 10 points', (p => p.joueur === 'j2' && p.points === 10)(pointsMilitaires(-7, Z)), 'faux');
+  verif('Points : pion +1 → J1, 2 points', (p => p.joueur === 'j1' && p.points === 2)(pointsMilitaires(1, Z)), 'faux');
+  egal('Points : centre = 0', pointsMilitaires(0, Z).points, 0);
+  egal('Points : capitale = suprématie', pointsMilitaires(9, Z).etat, 'capitale');
+  egal('Points : zones inconnues → pas de points', pointsMilitaires(3, null).points, null);
+
+  // Science
+  egal('Science : symboles différents [1,0,2,0,0,3,1] = 4', symbolesDifferents([1, 0, 2, 0, 0, 3, 1]), 4);
+  egal('Science : 6 différents', symbolesDifferents([1, 1, 1, 1, 1, 1, 0]), SCI.pourVictoire);
+
+  // Civil
+  egal('Civil : plus de points gagne', verdictCivil(40, 38, 0, 9).gagnant, 'j1');
+  egal('Civil : égalité → bleues', verdictCivil(40, 40, 8, 12).gagnant, 'j2');
+  egal('Civil : égalité parfaite → partagée', verdictCivil(40, 40, 8, 8).type, 'partage');
+
+  // État
+  const def = { a: 1, b: { c: true, d: [0, 0] }, e: 'x' };
+  verif('État : valeurs invalides → défaut', JSON.stringify(normaliser(def, { a: 'zz', b: { c: 3, d: [5, 'q'] }, e: 4 })) === JSON.stringify({ a: 1, b: { c: true, d: [5, 0] }, e: 'x' }), 'écart');
+  verif('État : corps absent → défaut', JSON.stringify(normaliser(def, null)) === JSON.stringify(def), 'écart');
+
+  // Vrai découpage du plateau (md §5) : 2/3/3 cases, 2/5/10 points, jetons 2 et 5
+  verif('Données : zones du plateau complètes (2+3+3 = 8)', ZONES !== null, 'cases manquantes ou somme ≠ 8');
+  if (ZONES) {
+    egal('Plateau : cases A/B/C', ZONES.map(z => z.cases).join('/'), '2/3/3');
+    egal('Plateau : points A/B/C', ZONES.map(z => z.points).join('/'), '2/5/10');
+    egal('Plateau : jetons A/B/C', ZONES.map(z => z.jeton).join('/'), '/2/5');
+    egal('Plateau : total des cases', 1 + 2 * (ZONES.reduce((a, z) => a + z.cases, 0) + 1), MIL.casesTotal);
+    const pts = n => pointsMilitaires(n, ZONES).points;
+    egal('Plateau : points aux cases +1…+8', [1, 2, 3, 4, 5, 6, 7, 8].map(pts).join(','), '2,2,5,5,5,10,10,10');
+    egal('Plateau : points côté J1 (−6)', pointsMilitaires(-6, ZONES).joueur + ':' + pts(-6), 'j2:10');
+    let r = { pos: 0, pris: [] }, jetons = [];
+    for (let i = 1; i <= 9; i++) {
+      const x = deplacer(r, 'j1', ZONES);
+      x.evenements.forEach(e => jetons.push(i + ':' + (e.type === 'jeton' ? e.pieces : 'sup')));
+      r = { pos: x.pos, pris: x.pris };
+    }
+    egal('Plateau : jeton 2 à la 3e case, jeton 5 à la 6e, suprématie à la 9e', jetons.join(' '), '3:2 6:5 9:sup');
+  }
+  liste.append(h('li', { class: 'info' }, ZONES ? 'Données : zones militaires renseignées.' : 'Données : nombre de cases des zones militaires NON renseigné (attendu).'));
+  const zone = document.getElementById('tests');
+  zone.hidden = false;
+  ajouter(zone, h('strong', { id: 'bilanTests' }, echecs ? echecs + ' test(s) en échec' : 'Tous les tests passent'), liste);
+  console.log(echecs ? 'TESTS : ' + echecs + ' échec(s)' : 'TESTS : tout passe');
+}
+
+})();
+</script>
+</body>
+</html>
