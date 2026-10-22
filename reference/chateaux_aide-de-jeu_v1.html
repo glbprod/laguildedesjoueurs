@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Châteaux de Bourgogne — Aide de jeu</title>
+<!-- Aucune ressource tierce : les polices ci-dessous ne sont utilisées que si elles sont installées,
+     sinon la pile de repli prend le relais. Fontsource les fournira à l'intégration Astro. -->
+<style>
+/* ===== THÈME « parchemin et bordeaux » : tokens uniquement =====
+   Ce bloc deviendra src/styles/themes/chateaux.css à l'intégration. */
+:root{
+  --parchemin:#f0e8d6;
+  --parchemin-fonce:#e5dac0;
+  --parchemin-creux:#cdbf9a;
+  --encre:#2a2420;
+  --encre-pale:#54483f;
+  --accent:#5b1a2b;        /* bordeaux */
+  --danger:#8c2f1b;
+  --j1:#1d4a73;
+  --j2:#a0521d;
+  /* types de tuiles : repères visuels, jamais seul porteur d'information (le nom est toujours écrit) */
+  --t-vert-clair:#8cc063;
+  --t-vert-fonce:#2f6b3a;
+  --t-jaune:#e2b82c;
+  --t-beige:#d9c39a;
+  --t-bleu:#3b7fc4;
+  --t-gris:#8a9096;
+  /* pictogrammes */
+  --face-de:#fbf6e8;
+  --piece:#d9a82b;
+  --ouvrier:#8a5a2b;
+}
+
+/* ===== COMPOSANTS (mêmes composants que les autres aides de jeu) ===== */
+*{box-sizing:border-box}
+body{
+  margin:0;padding:0 0 4rem;
+  background:var(--parchemin);color:var(--encre);
+  font-family:'Karla',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:18px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,summary{touch-action:manipulation}
+button:focus-visible,input:focus-visible,summary:focus-visible,.coche:focus-within{outline:3px solid var(--j2);outline-offset:2px}
+.wrap{max-width:760px;margin:0 auto;padding:0 1.1rem}
+
+header{padding:2rem 0 .8rem;text-align:center}
+.eyebrow{font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--accent)}
+h1{
+  font-family:'IM Fell English SC',Georgia,'Times New Roman',serif;font-weight:400;
+  font-size:clamp(1.7rem,6.5vw,2.4rem);line-height:1.15;margin:.5rem 0 .3rem;
+}
+.sous{font-size:.9rem;color:var(--encre-pale)}
+.filet{height:1px;background:var(--encre);opacity:.35;margin:1.1rem 0 0}
+
+nav{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin:1.3rem 0}
+.tab{
+  min-height:3.6rem;background:transparent;border:1px solid var(--parchemin-creux);border-radius:4px;
+  padding:.5rem .2rem;cursor:pointer;color:var(--encre-pale);font-family:inherit;text-align:center;
+  transition:background .18s,color .18s,border-color .18s;
+}
+.tab .num{display:block;font-family:'IM Fell English SC',Georgia,serif;font-size:1.15rem}
+.tab .lib{display:block;font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;margin-top:.1rem}
+.tab[aria-selected="true"]{background:var(--encre);border-color:var(--encre);color:var(--parchemin)}
+section[hidden]{display:none}
+@media (min-width:700px){nav{grid-template-columns:repeat(6,1fr)}}
+
+h2{
+  font-family:'IM Fell English SC',Georgia,serif;font-weight:400;font-size:1.3rem;
+  margin:1.9rem 0 .6rem;padding-bottom:.25rem;border-bottom:1px solid var(--parchemin-creux);
+}
+h2:first-child{margin-top:.2rem}
+h3{font-family:'IM Fell English SC',Georgia,serif;font-weight:400;font-size:1.15rem;margin:0 0 .15rem}
+h4{font-family:'IM Fell English SC',Georgia,serif;font-weight:400;font-size:1.05rem;margin:.9rem 0 .2rem}
+p{margin:.45rem 0}
+.note{color:var(--encre-pale);font-size:.9rem}
+b,strong{font-weight:700}
+.ref{font:500 .7rem 'Karla',system-ui,sans-serif;letter-spacing:.08em;color:var(--encre-pale);margin-left:.6rem;vertical-align:middle}
+
+.bloc{background:var(--parchemin-fonce);border-radius:4px;padding:.9rem 1rem}
+.bloc + .bloc{margin-top:.6rem}
+
+ul.check{list-style:none;padding:0;margin:.3rem 0 0}
+ul.check li{padding:.4rem 0 .4rem 1.4rem;position:relative;border-bottom:1px solid var(--parchemin-creux)}
+ul.check li:last-child{border-bottom:0}
+ul.check li::before{content:"›";position:absolute;left:.2rem;color:var(--accent);font-weight:700;top:.35rem}
+ul.check.sans-puce li{padding-left:0}
+ul.check.sans-puce li::before{content:none}
+
+.course{background:var(--parchemin-fonce);border-radius:4px;padding:1rem;margin-bottom:.9rem}
+.course .quoi{font-size:.9rem;color:var(--encre-pale);margin-bottom:.8rem}
+
+.rangee{display:flex;align-items:center;justify-content:center;gap:.5rem}
+.pas{
+  width:44px;height:44px;flex:none;border-radius:50%;border:1px solid var(--encre-pale);
+  background:transparent;color:var(--encre);font-size:1.5rem;line-height:1;cursor:pointer;font-family:inherit;padding:0;
+}
+.pas:disabled{opacity:.25;cursor:default}
+.val{font-size:1.6rem;font-weight:700;min-width:1.7ch;text-align:center}
+.saisie{
+  width:3.7rem;height:44px;font:700 1.4rem 'Karla',system-ui,sans-serif;text-align:center;color:var(--encre);
+  background:var(--parchemin);border:1px solid var(--encre-pale);border-radius:4px;-moz-appearance:textfield;appearance:textfield;
+}
+.saisie::-webkit-outer-spin-button,.saisie::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+.alerte{margin-top:.7rem;padding:.6rem .8rem;border-radius:4px;background:var(--parchemin-creux)}
+.alerte.chaud{background:var(--danger);color:var(--parchemin)}
+.alerte.gagne{background:var(--encre);color:var(--parchemin);font-weight:700}
+.alerte:empty{display:none}
+
+.btn{
+  min-height:44px;background:transparent;border:1px solid var(--encre-pale);border-radius:4px;color:var(--encre);
+  padding:.5rem 1.2rem;font-family:inherit;font-size:.95rem;cursor:pointer;
+}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.confirme{background:var(--danger);border-color:var(--danger);color:var(--parchemin);font-weight:700}
+.remise{margin-top:1.6rem;text-align:center}
+
+.badge{display:inline-block;margin-left:.4rem;padding:0 .45rem;border:1px solid var(--accent);border-radius:3px;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);vertical-align:middle;font-weight:500}
+footer{text-align:center;color:var(--encre-pale);font-size:.72rem;letter-spacing:.09em;margin-top:2.5rem;text-transform:uppercase}
+
+/* ----- spécifique à cette page ----- */
+.j1{color:var(--j1)} .j2{color:var(--j2)}
+.puce-joueur{display:inline-block;padding:0 .5rem;border-radius:3px;color:var(--parchemin);font-weight:700;font-size:.9em}
+.puce-joueur.j1{background:var(--j1)} .puce-joueur.j2{background:var(--j2)}
+
+.picto{width:1.3em;height:1.3em;vertical-align:-.28em;margin-right:.25em;flex:none}
+
+.coche{display:flex;align-items:center;gap:.8rem;min-height:48px;cursor:pointer;padding:.15rem 0}
+.coche input{width:28px;height:28px;flex:none;accent-color:var(--accent);margin:0}
+.coche input:checked + span{opacity:.55}
+
+/* textes de règle : étapes numérotées, tableaux, exemples */
+ol.etapes-regle{margin:.4rem 0 0;padding-left:1.7rem}
+ol.etapes-regle > li{padding:.3rem 0 .3rem .2rem}
+ol.etapes-regle > li::marker{font-weight:700;color:var(--accent)}
+ol.etapes-regle ul{margin:.25rem 0 .1rem;padding-left:1.1rem}
+ol.etapes-regle ul li{padding:.1rem 0}
+.exemple{border-left:3px solid var(--accent);padding-left:.8rem;margin:.7rem 0 .2rem}
+table.donnees{width:100%;border-collapse:collapse;font-size:.95rem;margin:.5rem 0}
+.donnees th,.donnees td{padding:.5rem .6rem;border-bottom:1px solid var(--parchemin-creux);text-align:left;vertical-align:top}
+.donnees th{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--encre-pale);font-weight:700}
+.donnees td.num{font-weight:700;white-space:nowrap}
+.donnees td.centre,.donnees th.centre{text-align:center}
+.donnees tr:last-child td{border-bottom:0}
+.donnees .actuel{background:var(--accent);color:var(--parchemin);font-weight:700}
+
+/* points non réglés par le livret : toujours visibles, jamais comblés */
+.trou{border:2px dashed var(--encre-pale);border-radius:4px;padding:.55rem .8rem;margin:.6rem 0;background:var(--parchemin)}
+.trou .etiquette{display:block;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--danger)}
+.trou .sujet{font-weight:700}
+.trou p{margin:.25rem 0;font-size:.92rem}
+.precision{border-left:4px solid var(--parchemin-creux);padding:.15rem 0 .15rem .8rem;margin:.7rem 0 .2rem;font-size:.92rem}
+
+.sauts{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin:.2rem 0 .6rem}
+.sauts .btn{padding:.4rem .3rem;font-size:.9rem}
+
+.commandes{display:grid;grid-template-columns:1fr 2fr;gap:.5rem;margin-top:.7rem}
+.commandes .btn{min-height:56px;font-size:1.05rem}
+.commandes .btn.primaire{background:var(--accent);border-color:var(--accent);color:var(--parchemin);font-weight:700}
+
+/* outil A : suivi de la partie */
+.suivi-grille{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+.suivi-case{background:var(--parchemin);border-radius:4px;padding:.5rem .4rem;text-align:center}
+.suivi-case .rang{display:block;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--encre-pale)}
+.suivi-case .gros-chiffre{display:block;font:400 2.6rem/1.1 'IM Fell English SC',Georgia,serif}
+.suivi-case .petit{font-size:.85rem;color:var(--encre-pale)}
+.frise{display:grid;grid-template-columns:repeat(5,1fr);gap:.3rem;margin:.6rem 0 0}
+.frise span{text-align:center;padding:.25rem 0;border:1px solid var(--parchemin-creux);border-radius:4px;font-size:.85rem;color:var(--encre-pale)}
+.frise span[aria-current="step"]{background:var(--encre);border-color:var(--encre);color:var(--parchemin);font-weight:700}
+.etape-fin{background:var(--parchemin);border:2px solid var(--accent);border-radius:4px;padding:.7rem 1rem;margin-top:.7rem}
+.etape-fin h4{margin:.1rem 0 .3rem;color:var(--accent)}
+.etape-fin ul{list-style:none;margin:0;padding:0}
+.etape-fin li{padding:.25rem 0}
+.etape-fin .btn{margin-top:.5rem;width:100%}
+
+/* outil B : zone complète */
+.phases-zone{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;margin:.4rem 0 .7rem}
+.bascule{
+  min-height:48px;background:transparent;border:1px solid var(--encre-pale);border-radius:4px;color:var(--encre);
+  font-family:inherit;font-size:.95rem;cursor:pointer;padding:.4rem .6rem;width:100%;
+}
+.bascule[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--parchemin);font-weight:700}
+.zone-ligne{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.resultat{margin-top:.8rem;padding:.7rem 1rem;border-radius:4px;background:var(--accent);color:var(--parchemin)}
+.resultat .grand{font-size:2rem;font-weight:700;line-height:1.2}
+.resultat .detail{font-size:.95rem}
+.etiquette-champ{font-weight:700;margin:.2rem 0}
+
+/* recherche de Monastère */
+.mon-resultat{margin-top:.8rem;padding:.8rem 1rem;border-radius:4px;background:var(--parchemin);border:2px solid var(--accent)}
+.mon-resultat:empty{display:none}
+.mon-resultat .numero{font:400 2rem/1.1 'IM Fell English SC',Georgia,serif;color:var(--accent)}
+.mon-resultat .groupe{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--encre-pale);margin-left:.6rem}
+.mon-resultat .texte{font-size:1.1rem;margin:.3rem 0}
+.liste-bat{display:grid;grid-template-columns:1fr 1fr;gap:.2rem .8rem;list-style:none;padding:0;margin:.4rem 0 0;font-size:.92rem}
+
+/* outil C : décompte final */
+.grille-civil{display:grid;gap:.4rem .6rem;align-items:center;grid-template-columns:minmax(7rem,1fr) auto auto}
+.grille-civil .entete{font-weight:700;text-align:center;font-size:.95rem}
+.grille-civil .lib-cat{display:flex;align-items:center;gap:.5rem;font-weight:500}
+.grille-civil .lib-cat .barre{width:5px;align-self:stretch;min-height:1.6rem;border-radius:2px;background:var(--parchemin-creux)}
+.grille-civil .petit{display:block;font-size:.75rem;color:var(--encre-pale);font-weight:400}
+.cellule{text-align:center}
+.cellule .auto{font-size:1.6rem;font-weight:700;display:block;min-height:44px;line-height:44px}
+.cellule .conv{font-size:.8rem;color:var(--encre-pale);display:block}
+.ligne-total{display:contents}
+.ligne-total > *{border-top:2px solid var(--encre);padding-top:.5rem;margin-top:.3rem}
+.ligne-total .gros-total{font-size:2rem;font-weight:700;text-align:center;line-height:1.1}
+details.sous-decompte{grid-column:1/-1;background:var(--parchemin);border-radius:4px;padding:0 .8rem}
+details.sous-decompte summary{min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;cursor:pointer;font-weight:700}
+details.sous-decompte .grille-civil{margin:.2rem 0 .8rem}
+.choix-joueur{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.4rem}
+
+details.repere{margin:.8rem 0 .9rem;background:var(--parchemin-fonce);border-radius:4px;padding:0 1rem}
+details.repere summary{min-height:48px;display:flex;align-items:center;cursor:pointer;font-weight:700}
+details.repere > div{padding-bottom:.8rem}
+
+@media (max-width:560px){
+  body{font-size:17px}
+  .grille-civil{grid-template-columns:auto auto}
+  .grille-civil .lib-cat{grid-column:1/-1;margin-top:.5rem}
+  .ligne-total .lib-cat{grid-column:1/-1}
+  .suivi-case .gros-chiffre{font-size:2.2rem}
+  .liste-bat{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){.tab{transition:none}}
+
+/* lien vers la grille d'observation : discret, mais avec une cible de 44 px */
+.lien-grille{text-align:center;margin:.3rem 0 0}
+.lien-grille a{display:inline-block;min-height:44px;line-height:44px;padding:0 .8rem;font-size:.8rem;color:var(--encre-pale)}
+
+/* mode ?test */
+#tests{margin-top:2rem;padding:1rem;border:2px dashed var(--encre-pale);border-radius:4px;font-size:.85rem}
+#tests li.ok::marker{content:"✔ "} #tests li.echec{color:var(--danger);font-weight:700}
+#tests li.echec::marker{content:"✘ "} #tests li.info{color:var(--encre-pale)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow" id="eyebrow"></div>
+  <h1 id="titreJeu"></h1>
+  <div class="sous" id="sousTitre"></div>
+  <div class="filet"></div>
+</header>
+
+<noscript><p class="trou">Cette aide de jeu a besoin de JavaScript.</p></noscript>
+
+<nav role="tablist" aria-label="Rubriques">
+  <button class="tab" role="tab" id="t1" aria-controls="p1" aria-selected="true"><span class="num">I</span><span class="lib">Mise en place</span></button>
+  <button class="tab" role="tab" id="t2" aria-controls="p2" aria-selected="false" tabindex="-1"><span class="num">II</span><span class="lib">Tour de jeu</span></button>
+  <button class="tab" role="tab" id="t3" aria-controls="p3" aria-selected="false" tabindex="-1"><span class="num">III</span><span class="lib">Actions</span></button>
+  <button class="tab" role="tab" id="t4" aria-controls="p4" aria-selected="false" tabindex="-1"><span class="num">IV</span><span class="lib">Tuiles</span></button>
+  <button class="tab" role="tab" id="t5" aria-controls="p5" aria-selected="false" tabindex="-1"><span class="num">V</span><span class="lib">Monastères</span></button>
+  <button class="tab" role="tab" id="t6" aria-controls="p6" aria-selected="false" tabindex="-1"><span class="num">VI</span><span class="lib">Points</span></button>
+</nav>
+
+<section id="p1" role="tabpanel" aria-labelledby="t1" tabindex="0"></section>
+<section id="p2" role="tabpanel" aria-labelledby="t2" tabindex="0" hidden></section>
+<section id="p3" role="tabpanel" aria-labelledby="t3" tabindex="0" hidden></section>
+<section id="p4" role="tabpanel" aria-labelledby="t4" tabindex="0" hidden></section>
+<section id="p5" role="tabpanel" aria-labelledby="t5" tabindex="0" hidden></section>
+<section id="p6" role="tabpanel" aria-labelledby="t6" tabindex="0" hidden></section>
+
+<div class="remise"><button class="btn" id="nouvelle" type="button">Nouvelle partie</button></div>
+<footer id="pied"></footer>
+<p class="lien-grille"><a href="chateaux_grille-observation_v1.html">Grille d'observation (partie test)</a></p>
+<div id="tests" hidden></div>
+</div>
+
+<!-- ===== DONNÉES : JSON strict, prêt à migrer en content collection Zod =====
+     Les textes de règle sont ceux de chateaux_regles_v1.md (sections validées), découpés mais non réécrits.
+     **gras** et {{hex:bleu}} {{de:4}} {{piece}} {{ouvrier}} sont interprétés par l'affichage.
+     Périmètre : jeu de base, 2 joueurs. Les valeurs à 3 et 4 joueurs ne sont volontairement pas reprises. -->
+<script type="application/json" id="donnees">
+{
+  "jeu": {
+    "titre": "Châteaux de Bourgogne",
+    "eyebrow": "Aide de jeu · règles paraphrasées",
+    "sousTitre": "Jeu de base · 2 joueurs · 5 phases de 5 tours",
+    "pied": "Aide de jeu non officielle",
+    "source": "chateaux_regles_v1.md",
+    "camps": [
+      { "id": "j1", "nom": "Joueur 1", "court": "J1" },
+      { "id": "j2", "nom": "Joueur 2", "court": "J2" }
+    ],
+    "etiquetteTrou": "Non précisé par le livret"
+  },
+
+  "miseEnPlace": {
+    "checklists": [
+      {
+        "id": "plateau", "titre": "Plateau central", "ref": "§1.4 · p. 2",
+        "points": [
+          "Plateau de jeu au centre, sur la face qui correspond au nombre de joueurs (voir 1.7).",
+          "Pièces, ouvriers et dé blanc à côté du plateau.",
+          "Tuiles hexagonales triées selon la couleur de leur dos, en piles face cachée.",
+          "Marchandises mélangées face cachée, puis 5 piles de 5 tuiles, une sur chaque case Phase A à E. Les 17 restantes sont mises de côté face cachée.",
+          "Tuiles bonus sur leurs cases, chaque petite tuile sous la grande de même couleur."
+        ]
+      },
+      {
+        "id": "deux", "titre": "À 2 joueurs", "ref": "§1.7 · p. 11",
+        "points": [
+          "Verso du plateau de jeu.",
+          "Seules les 12 cases hexagonales intérieures des dépôts et les 4 cases sans marque du dépôt noir sont utilisées."
+        ]
+      },
+      {
+        "id": "joueur", "titre": "Matériel de chaque joueur", "ref": "§1.5 · p. 2",
+        "points": [
+          "Un plateau individuel n° 1 ou n° 2. Tous les joueurs utilisent le même numéro.",
+          "Un château posé face visible sur la case vert foncé centrale (valeur 6) de son domaine.",
+          "3 marchandises tirées au hasard parmi les 17 de côté, rangées sur ses cases de stockage (même couleur empilée, couleurs différentes séparées). Les marchandises restantes retournent dans la boîte.",
+          "Sa tuile PV, posée à côté de son plateau.",
+          "Les 2 dés de sa couleur.",
+          "Un pion sur la case 0/100 de la piste de points.",
+          "1 pièce."
+        ]
+      },
+      {
+        "id": "ordre", "titre": "Ordre du tour", "ref": "§1.6 · p. 3",
+        "points": [
+          "Un lancer de dés désigne le premier joueur.",
+          "Ouvriers selon l'ordre du tour : 1 pour le premier joueur, 2 pour le deuxième.",
+          "Le second pion de chaque joueur va sur la première case à droite du pont. Les pions sont empilés : celui du premier joueur en haut, celui du dernier en bas.",
+          "Le premier joueur reçoit le dé blanc."
+        ]
+      }
+    ],
+    "reperes": {
+      "titre": "Matériel et plateaux (repères)",
+      "materiel": {
+        "titre": "Matériel du jeu de base", "ref": "§1.1 · p. 1",
+        "tableau": {
+          "entetes": ["Élément", "Quantité", "Détail"],
+          "lignes": [
+            ["Tuiles hexagonales", "164", "dont 40 à dos noir (détail ci-dessous)"],
+            ["Bâtiments (beige)", "56", "7 × 8 types ; 16 à dos noir"],
+            ["Animaux (vert clair)", "28", "7 × 4 ; 8 à dos noir"],
+            ["Monastères (jaune)", "26", "tous différents ; 6 à dos noir"],
+            ["Châteaux (vert foncé)", "16", "2 à dos noir"],
+            ["Mines (gris)", "12", "2 à dos noir"],
+            ["Navires (bleu)", "26", "6 à dos noir"],
+            ["Marchandises (carrées)", "42", "6 couleurs × 7"],
+            ["Pièces", "24", ""],
+            ["Ouvriers", "26", ""],
+            ["Tuiles bonus", "12", "1 grande + 1 petite par couleur, 6 couleurs"],
+            ["Tuiles PV 100/200", "4", "une par couleur de joueur"],
+            ["Pions", "8", "2 par couleur de joueur"],
+            ["Dés", "9", "2 par couleur de joueur + 1 blanc"],
+            ["Plateau de jeu", "1", "recto 4 joueurs, verso 2-3 joueurs"],
+            ["Plateaux individuels", "16", "n° 1 et 2 en 4 exemplaires, n° 3 à 10 en 1 exemplaire"],
+            ["Aides de jeu", "4", ""]
+          ]
+        }
+      },
+      "plateauJeu": {
+        "titre": "Le plateau de jeu", "ref": "§1.2 · p. 2",
+        "paragraphes": [
+          "Il comporte : la piste de points de victoire (0 à 100) et un tableau des PV, 5 cases Phase (A à E), 5 cases Tour, 6 dépôts numérotés de 1 à 6 (des cases hexagonales colorées + une case Marchandises chacun), le dépôt noir au centre, le pont (piste d'ordre du tour) et 6 cases pour les tuiles bonus.",
+          "Le verso (2-3 joueurs) ne diffère que par le nombre de cases hexagonales des dépôts et du dépôt noir."
+        ]
+      },
+      "plateauIndividuel": {
+        "titre": "Le plateau individuel", "ref": "§1.3 · p. 3",
+        "liste": [
+          "Un domaine de 37 cases, découpé en zones de couleur (pâturages vert clair, cours d'eau bleus, villes beiges…). Chaque case porte une valeur de dé.",
+          "3 cases de stockage pour les tuiles hexagonales (en bas à gauche).",
+          "3 cases de stockage pour les marchandises et 1 case pour les marchandises vendues (en bas à droite).",
+          "Un emplacement pour les pièces et un pour les ouvriers (en haut à droite).",
+          "Un emplacement pour les dés utilisés (le portrait du prince, en haut à gauche).",
+          "Le numéro du domaine."
+        ]
+      }
+    }
+  },
+
+  "tour": {
+    "structure": {
+      "paragraphes": [
+        "La partie compte 5 phases (A à E). Chaque phase compte 5 tours. Après la phase E, la partie s'arrête."
+      ],
+      "note": "Repère pour la table : chaque tour consomme une des 5 marchandises posées sur les cases Tour. Le nombre de marchandises restantes indique donc où l'on en est dans la phase."
+    },
+    "suivi": {
+      "titre": "Suivi de la partie",
+      "intro": "Un repère pour savoir où l'on en est : il ne remplace pas les cases Phase et Tour du plateau.",
+      "phases": ["A", "B", "C", "D", "E"],
+      "tours": 5,
+      "libelles": {
+        "phase": "Phase", "tour": "Tour", "tourSur": "sur 5", "bonus": "Bonus de zone", "bonusUnite": "PV par zone complète",
+        "suivant": "Tour suivant", "suivantPhase": "Phase suivante", "suivantFin": "Terminer la partie",
+        "retour": "Retour", "finTitre": "Fin de la phase {phase}",
+        "termineeTitre": "Partie terminée", "aller": "Aller au décompte final"
+      },
+      "finPhase": [
+        "Après le 5e tour, chaque joueur reçoit 1 pièce par mine de son domaine."
+      ],
+      "finPhaseMon2": "Monastère n° 2",
+      "finPhaseDeduction": "Déduction à valider : parmi les Monastères décrits p. 9 à 11, seul le n° 2 agit en fin de phase."
+    },
+    "debutPhase": {
+      "titre": "Début de chaque phase", "ref": "§2.2 · p. 3 et p. 11",
+      "etapes": [
+        "**Vider les dépôts** (pas en phase A) : toutes les tuiles hexagonales encore sur le plateau retournent dans la boîte. Les navires, mines et châteaux peuvent rester en place, car ils sont tous identiques. Les marchandises déjà posées sur les dépôts restent.",
+        "**Remplir les dépôts numérotés** : une tuile de la couleur de chaque case utilisée.",
+        "**Remplir le dépôt noir** : des tuiles à dos noir tirées au hasard, une par case utilisée.",
+        "**Poser les marchandises de la phase** : les 5 tuiles de la case Phase en cours, face visible, sur les 5 cases Tour."
+      ],
+      "paragraphesApres": ["Cases utilisées selon le nombre de joueurs :"],
+      "tableau": {
+        "entetes": ["Joueurs", "Face du plateau", "Dépôts numérotés", "Dépôt noir"],
+        "lignes": [["2", "verso", "les 12 cases intérieures", "les 4 cases sans marque"]]
+      }
+    },
+    "deroulement": {
+      "titre": "Déroulement d'un tour", "ref": "§2.3 · p. 4",
+      "etapes": [
+        "**Lancer** : tous les joueurs lancent leurs 2 dés en même temps, et le premier joueur lance aussi le dé blanc. Les dés restent visibles de tous.",
+        "**Marchandise du tour** : le premier joueur prend la marchandise du haut des cases Tour et la pose sur la case Marchandises du dépôt dont le numéro est celui du dé blanc. Le dé blanc ne sert plus à rien pour ce tour ; il ne peut jamais être modifié par des ouvriers.",
+        "**Tours des joueurs** : le premier joueur joue son tour complet, puis le suivant dans l'ordre du pont (de gauche à droite, et de haut en bas pour des pions empilés), et ainsi de suite.",
+        "Quand tous les joueurs ont joué, le tour suivant commence."
+      ],
+      "trous": [
+        {
+          "sujet": "Premier joueur d'un tour",
+          "texte": [
+            "La p. 4 implique que l'ordre est relu sur le pont au début de chaque tour, et la p. 5 donne le dé blanc à qui devient premier « pour le prochain tour ». C'est cohérent, mais le livret ne le dit pas en une phrase : à confirmer."
+          ]
+        }
+      ]
+    },
+    "tourJoueur": {
+      "titre": "Le tour d'un joueur", "ref": "§2.4 · p. 4",
+      "liste": [
+        "Exactement **2 actions, une par dé**, dans l'ordre et la combinaison de son choix (la même action deux fois est permise). Le détail des actions fait l'objet du §3.",
+        "Un dé utilisé est posé sur l'emplacement du prince, sur le plateau individuel.",
+        "**Ouvriers** : à tout moment, un ouvrier rendu à la réserve change la valeur d'un dé de 1, vers le haut ou vers le bas. Passer de 6 à 1, ou de 1 à 6, coûte aussi un ouvrier. On peut en dépenser plusieurs sur le même dé."
+      ]
+    },
+    "finPhase": {
+      "titre": "Fin de phase", "ref": "§2.5 · p. 9",
+      "etapes": [
+        "Après le 5e tour, chaque joueur reçoit 1 pièce par mine de son domaine.",
+        "Certains Monastères agissent à ce moment-là.",
+        "La phase suivante commence (retour en 2.2)."
+      ],
+      "precisions": [
+        {
+          "badge": "déduction",
+          "texte": "Parmi les Monastères décrits p. 9 à 11, seul le n° 2 agit en fin de phase (+1 ouvrier par mine). Le « ? » de l'encadré p. 9 ne cache donc pas d'autre effet pour le jeu de base."
+        }
+      ]
+    }
+  },
+
+  "actions": {
+    "principe": {
+      "titre": "Principe", "ref": "§3.1 · p. 4",
+      "paragraphes": [
+        "Chaque action consomme un dé. Les 2 actions d'un tour se combinent librement : deux actions différentes ou deux fois la même. Les ouvriers peuvent modifier le dé avant n'importe quelle action (§2.4)."
+      ],
+      "tableau": {
+        "entetes": ["Action", "Rôle du dé"],
+        "lignes": [
+          ["Prendre une tuile du plateau", "{{de:3}} numéro du dépôt où se servir"],
+          ["Ajouter une tuile à son domaine", "{{de:5}} valeur de la case où la poser"],
+          ["{{piece}} Vendre des marchandises", "{{de:2}} type de marchandises vendu"],
+          ["{{ouvrier}} Prendre 2 ouvriers", "{{de:6}} aucun, n'importe quelle valeur convient"]
+        ]
+      },
+      "note": "S'y ajoute l'achat au dépôt noir, qui ne consomme pas de dé (3.6)."
+    },
+    "detail": [
+      {
+        "titre": "Prendre une tuile du plateau", "ref": "§3.2 · p. 4 et p. 7",
+        "etapes": [
+          "Choisir une tuile hexagonale dans le dépôt numéroté qui porte la valeur du dé.",
+          "La poser sur une case vide de sa réserve (les 3 cases en bas à gauche du plateau individuel). Elle ne va jamais directement dans le domaine.",
+          "Si les 3 cases sont occupées, défausser d'abord une tuile de sa réserve : elle quitte la partie."
+        ],
+        "trous": [
+          {
+            "sujet": "Dépôt vide",
+            "texte": ["Le livret ne dit pas ce qui se passe si le dépôt désigné par le dé n'a plus de tuile."]
+          }
+        ]
+      },
+      {
+        "titre": "Ajouter une tuile à son domaine", "ref": "§3.3 · p. 5 et p. 7",
+        "etapes": [
+          "Choisir une tuile de sa réserve.",
+          { "texte": "La poser sur une case vide du domaine qui remplit trois conditions :", "sous": [
+            "la case porte la valeur du dé ;",
+            "la case a la couleur de la tuile ;",
+            "la case touche au moins une tuile déjà posée."
+          ] },
+          "L'effet de la tuile s'applique aussitôt (§4)."
+        ],
+        "titreListe": "Conséquences :",
+        "liste": [
+          "La première tuile se pose forcément sur une des 6 cases qui entourent le château de départ.",
+          "Une tuile prise au plateau passe toujours par la réserve, même si la seconde action du tour la pose aussitôt dans le domaine.",
+          "Une tuile posée dans le domaine n'en bouge plus jusqu'à la fin de la partie."
+        ]
+      },
+      {
+        "titre": "Vendre des marchandises", "ref": "§3.4 · p. 8",
+        "etapes": [
+          "Le dé désigne un type de marchandises de son stock.",
+          "On vend **toutes** les tuiles de ce type, sans pouvoir en garder. Elles sont retournées face cachée sur la case des marchandises vendues.",
+          { "texte": "Gains :", "sous": [
+            "{{piece}} **1 pièce** par vente, quel que soit le nombre de tuiles vendues ;",
+            "des **PV par tuile vendue** : 2 à 2 joueurs."
+          ] }
+        ]
+      },
+      {
+        "titre": "Prendre 2 ouvriers", "ref": "§3.5 · p. 8",
+        "paragraphes": ["{{ouvrier}} Avec n'importe quelle valeur de dé, prendre 2 ouvriers dans la réserve."]
+      },
+      {
+        "titre": "Acheter au dépôt noir", "ref": "§3.6 · p. 8",
+        "liste": [
+          "En plus de ses 2 actions, une fois par tour, à n'importe quel moment de son tour (avant, entre ou après les dés).",
+          "Payer 2 pièces à la réserve, choisir une tuile du dépôt noir et la poser sur une case vide de sa réserve."
+        ]
+      }
+    ],
+    "precisions": [
+      {
+        "badge": "déduction confirmée",
+        "texte": "**Lien dé et marchandise** (3.4) : le livret dit que le dé indique la couleur, sans donner la correspondance. La figure p. 4 montre une face de dé sur chaque tuile Marchandises : c'est ce chiffre qui compte."
+      },
+      {
+        "badge": "déduction confirmée",
+        "texte": "**Réserve pleine au dépôt noir** (3.6) : la p. 8 dit que la tuile achetée se range « comme » une tuile du plateau. La défausse de 3.2 s'applique donc aussi."
+      }
+    ]
+  },
+
+  "tuiles": {
+    "principe": {
+      "titre": "Principe", "ref": "§4.1 · p. 5 et p. 7",
+      "liste": [
+        "Une tuile agit **dès qu'elle est posée** dans le domaine. Seules les mines (et quelques Monastères) n'ont pas d'effet immédiat.",
+        "Un effet de tuile ne demande jamais de dé.",
+        "Si l'effet ne peut pas s'appliquer (par exemple, aucun navire ni animal dans les dépôts au moment de poser un Marché), la tuile se pose quand même et l'effet est perdu.",
+        "Les réserves de pièces et d'ouvriers sont illimitées. S'il en manque, on utilise un substitut."
+      ],
+      "tableau": {
+        "entetes": ["Tuile", "Couleur", "Effet à la pose"],
+        "lignes": [
+          ["Navire", "{{hex:bleu}} bleu", "marchandises d'un dépôt + une case sur le pont (4.2)"],
+          ["Château", "{{hex:vert-fonce}} vert foncé", "une action en plus, de la valeur voulue (4.3)"],
+          ["Mine", "{{hex:gris}} gris", "rien ; 1 pièce par mine à chaque fin de phase (4.4)"],
+          ["Animaux", "{{hex:vert-clair}} vert clair", "des PV selon les animaux du pâturage (4.5)"],
+          ["Bâtiment", "{{hex:beige}} beige", "l'avantage du bâtiment (4.6)"],
+          ["Monastère", "{{hex:jaune}} jaune", "effet propre à chaque tuile (§6)"]
+        ]
+      }
+    },
+    "navire": {
+      "titre": "Navire", "ref": "§4.2 · p. 5",
+      "etapes": [
+        { "texte": "**Marchandises** : prendre toutes les marchandises de la case Marchandises d'un dépôt au choix. Ce choix ne dépend pas du dé qui a servi à poser le navire.", "sous": [
+          "Le stock d'un joueur contient au plus 3 types de marchandises. Les tuiles de même type s'empilent, les types différents restent séparés.",
+          "Ce qui ne rentre pas dans le stock reste sur le dépôt."
+        ] },
+        "**Pont** : avancer son pion d'une case sur le pont, vers la ville (vers la gauche, plateau vu dans le sens de lecture). Si la case est déjà occupée, poser son pion au-dessus des autres. Le joueur qui devient ainsi premier pour le tour suivant reçoit le dé blanc."
+      ],
+      "precisions": [
+        { "badge": "à confirmer", "texte": "Sens du pont : déduit de la photo du plateau." }
+      ]
+    },
+    "chateau": {
+      "titre": "Château", "ref": "§4.3 · p. 5",
+      "paragraphes": ["Le joueur fait aussitôt une action de plus, au choix, comme s'il disposait d'un dé supplémentaire réglé sur la valeur qu'il veut."]
+    },
+    "mine": {
+      "titre": "Mine", "ref": "§4.4 · p. 5",
+      "paragraphes": ["Aucun effet à la pose. À chaque fin de phase, le joueur reçoit 1 pièce par mine de son domaine (§2.5)."]
+    },
+    "animaux": {
+      "titre": "Animaux", "ref": "§4.5 · p. 6",
+      "liste": [
+        "Poser une tuile Animaux rapporte 1 PV par animal dessiné sur la tuile (de 2 à 4).",
+        "Un **pâturage** est une zone de cases vert clair qui se touchent.",
+        "Si ce pâturage contient déjà des tuiles de la **même espèce**, chacune de ces tuiles rapporte à nouveau ses PV. Elles n'ont pas besoin de toucher la nouvelle tuile ; il suffit qu'elles soient dans le même pâturage.",
+        "Les animaux de la même espèce dans un autre pâturage ne rapportent rien."
+      ],
+      "exemples": [
+        "Exemple : un pâturage contient une tuile de 3 vaches. Y poser une tuile de 4 vaches rapporte 4 + 3 = 7 PV. Une seconde tuile de 4 vaches dans ce même pâturage rapportera ensuite 4 + 4 + 3 = 11 PV."
+      ]
+    },
+    "batiments": {
+      "titre": "Bâtiments", "ref": "§4.6 · p. 6 et p. 7",
+      "liste": [
+        "Chaque bâtiment donne son avantage une seule fois, à la pose.",
+        "Une **ville** est une zone de cases beiges qui se touchent. Elle ne peut contenir qu'un bâtiment de chaque type (exception : Monastère n° 1, §6).",
+        "Il y a 8 types de bâtiments :"
+      ],
+      "tableau": {
+        "entetes": ["Bâtiment", "Avantage à la pose"],
+        "lignes": [
+          ["{{hex:beige}} Marché", "prendre un navire ou une tuile Animaux au choix dans un dépôt numéroté (pas le dépôt noir), vers sa réserve"],
+          ["{{hex:beige}} Atelier de menuiserie", "prendre un bâtiment au choix dans un dépôt numéroté (pas le dépôt noir), vers sa réserve"],
+          ["{{hex:beige}} Église", "prendre une mine, un Monastère ou un château au choix dans un dépôt numéroté (pas le dépôt noir), vers sa réserve"],
+          ["{{hex:beige}} Entrepôt", "vendre un type de marchandises au choix, exactement comme l'action Vendre (§3.4)"],
+          ["{{hex:beige}} Pension de famille", "{{ouvrier}} prendre 4 ouvriers"],
+          ["{{hex:beige}} Banque", "{{piece}} prendre 2 pièces"],
+          ["{{hex:beige}} Hôtel de ville", "poser aussitôt une autre tuile de sa réserve dans son domaine, avec son effet"],
+          ["{{hex:beige}} Tour de guet", "gagner 4 PV"]
+        ]
+      },
+      "note": "Pour Marché, Atelier et Église, le dépôt se choisit librement, sans lien avec un dé."
+    },
+    "precisions": [
+      {
+        "badge": "déduction confirmée",
+        "texte": "**Hôtel de ville** : la p. 7 dit que la seconde tuile peut être de n'importe quelle couleur. Elle ne dit pas quelle case du domaine est permise. Lecture retenue : n'importe quelle case vide de la bonne couleur, touchant une tuile déjà posée, sans contrainte de valeur de dé. Les règles de couleur et de contact s'appliquent toujours (p. 5)."
+      },
+      {
+        "badge": "déduction retenue",
+        "texte": "**Réserve pleine après Marché, Atelier ou Église** : la p. 6 dit de poser la tuile sur une case vide de sa réserve, sans parler du cas où elle est pleine. La défausse de §3.2 s'applique, comme pour le dépôt noir. Retenu faute de texte explicite."
+      }
+    ]
+  },
+
+  "monasteres": {
+    "total": 26,
+    "intro": "Les 26 tuiles du jeu de base sont toutes différentes. Chacune porte un numéro, que le livret utilise pour les désigner (repérage d'après les figures). Une fois posé dans le domaine, un Monastère agit pour son propriétaire jusqu'à la fin de la partie.",
+    "recherche": {
+      "titre": "Chercher un Monastère par son numéro",
+      "libelle": "Numéro du Monastère (1 à 26)",
+      "vide": "Saisissez un numéro de 1 à 26."
+    },
+    "regles": {
+      "titre": "Monastères n° 1 à 14 : règles modifiées", "ref": "§6a · p. 9 à 11",
+      "liste": [
+        { "n": 1, "texte": "Plusieurs bâtiments du même type sont permis dans une ville." },
+        { "n": 2, "texte": "En fin de phase, +1 ouvrier par mine en plus de la pièce." },
+        { "n": 3, "texte": "Chaque vente de marchandises (action ou Entrepôt) rapporte 2 pièces au lieu d'1." },
+        { "n": 4, "texte": "Chaque vente de marchandises (action ou Entrepôt) rapporte aussi 1 ouvrier." },
+        { "n": 5, "texte": "En posant un navire, on peut vider deux cases Marchandises voisines au lieu d'une.",
+          "trou": { "sujet": "Monastère n° 5, « cases voisines »", "texte": [
+            "Le livret ne dit pas quand deux cases Marchandises sont voisines. Il peut s'agir de dépôts de numéros consécutifs, ou de dépôts proches sur le plateau."
+          ] } },
+        { "n": 6, "texte": "Une fois par tour, payer 2 ouvriers au lieu de 2 pièces pour acheter une tuile au dépôt noir, ou pour prendre une tuile dans l'un des 6 dépôts numérotés.",
+          "trou": { "sujet": "Monastère n° 6, cumul et dé", "texte": [
+            "Le livret ne dit pas si cet achat remplace l'achat normal au dépôt noir (2 pièces) ou s'y ajoute. Pour les dépôts numérotés, il ne dit pas non plus s'il faut un dé."
+          ] } },
+        { "n": 7, "texte": "À chaque pose d'une tuile Animaux, chaque tuile Animaux qui rapporte des PV donne 1 PV de plus." },
+        { "n": 8, "texte": "Chaque ouvrier dépensé change un dé de 1 ou de 2, au choix." },
+        { "n": 9, "texte": "Un dé qui sert à poser un **bâtiment** peut être changé de 1, gratuitement, comme avec un ouvrier." },
+        { "n": 10, "texte": "Même chose pour un dé qui sert à poser un **navire** ou une tuile **Animaux**." },
+        { "n": 11, "texte": "Même chose pour un dé qui sert à poser un **château**, une **mine** ou un **Monastère**." },
+        { "n": 12, "texte": "Même chose pour un dé qui sert à **prendre une tuile** dans un dépôt du plateau." },
+        { "n": 13, "texte": "{{ouvrier}} L'action « Prendre 2 ouvriers » rapporte aussi 1 pièce. Sans effet sur la Pension de famille." },
+        { "n": 14, "texte": "{{ouvrier}} L'action « Prendre des ouvriers » donne 4 ouvriers au lieu de 2. Sans effet sur la Pension de famille." }
+      ],
+      "exemples": [
+        "**N° 7** : un pâturage contient une tuile de 4 moutons. Y poser une tuile de 3 moutons rapporte (3 + 1) + (4 + 1) = 9 PV. Y poser ensuite une tuile de 2 cochons rapporte 2 + 1 = 3 PV.",
+        "**N° 8** : passer d'un 6 à un 3 coûte 2 ouvriers (−2 puis −1)."
+      ],
+      "precisions": [
+        { "badge": "déduction", "texte": "**N° 9 à 12, « comme un ouvrier »** : j'en déduis que le passage de 6 à 1 (et de 1 à 6) est permis, et qu'on peut payer des ouvriers en plus. Le livret ne dit pas si deux de ces tuiles se cumulent sur un même dé : c'est un trou, mais rare." },
+        { "badge": "déduction", "texte": "**N° 13 et 14 ensemble** : le cumul (4 ouvriers + 1 pièce) n'est pas écrit, mais rien ne l'interdit. C'est une déduction." },
+        { "badge": "déduction", "texte": "**Pension de famille** : le livret précise que les n° 13 et 14 ne s'y appliquent pas. Il ne dit rien pour le n° 4 avec l'Entrepôt, mais le texte du n° 4 cite justement l'Entrepôt : il s'applique donc." }
+      ]
+    },
+    "fin": {
+      "titre": "Monastères n° 15 à 26 : PV de fin de partie", "ref": "§6b · p. 10 et p. 11",
+      "intro": "Ces tuiles ne font rien en cours de partie. Elles rapportent des PV au décompte final (§5.4).",
+      "liste": [
+        { "numeros": [15], "etiquette": "15", "texte": "2 PV par **type** de marchandises vendu au moins une fois. Les marchandises invendues ne comptent pas.",
+          "aConfirmer": "2 PV retenus : à confirmer sur la tuile réelle. L'exemple de la p. 10 du livret calcule avec une autre valeur, ce qui contredit son propre texte." },
+        { "numeros": [16, 17, 18, 19, 20, 21, 22, 23], "etiquette": "16 à 23", "texte": "Une tuile par type de bâtiment : 4 PV par bâtiment de ce type dans le domaine, toutes villes confondues.",
+          "trou": { "sujet": "Monastères n° 16 à 23, quel bâtiment pour quel numéro", "texte": [
+            "Le livret n'identifie que le n° 17 (Tour de guet) et le n° 22 (Banque). Les 6 autres correspondances se lisent sur les tuiles."
+          ] } },
+        { "numeros": [24], "etiquette": "24", "texte": "4 PV par **espèce** d'animal présente dans le domaine." },
+        { "numeros": [25], "etiquette": "25", "texte": "1 PV par **tuile** de marchandises vendue. Les invendues ne comptent pas." },
+        { "numeros": [26], "etiquette": "26", "texte": "3 PV par tuile bonus obtenue, grande ou petite." }
+      ],
+      "note": "Les marchandises vendues restent consultables à tout moment (p. 10), ce qui aide à suivre les n° 15 et 25.",
+      "exemples": [
+        "**N° 16 à 23** : un joueur possède les tuiles n° 17 (Tour de guet) et n° 22 (Banque), avec 2 tours de guet et 4 banques dans son domaine. Il marque 2 × 4 + 4 × 4 = 24 PV.",
+        "**N° 24** : un domaine avec 1 tuile de vaches, 1 de cochons et 3 de moutons compte 3 espèces, soit 12 PV.",
+        "**N° 25** : un joueur a vendu 4 + 3 + 3 + 1 = 11 tuiles, soit 11 PV."
+      ]
+    },
+    "batiments": { "17": "Tour de guet", "22": "Banque" },
+    "batimentAIdentifier": "bâtiment à identifier",
+    "groupes": { "regles": "Règle modifiée", "fin": "PV de fin de partie" }
+  },
+
+  "points": {
+    "zone": {
+      "titre": "Compléter une zone", "ref": "§5.1 · p. 8 et plateau",
+      "paragraphes": [
+        "Une **zone** est un groupe de cases de même couleur qui se touchent : une ville, un pâturage, un cours d'eau, etc. Elle compte de 1 à 8 cases.",
+        "Dès que la dernière case vide d'une zone reçoit une tuile, la zone est complète. Elle rapporte aussitôt **deux** gains qui s'additionnent :"
+      ],
+      "etapes": [
+        "des PV selon sa **taille** ;",
+        "un bonus selon la **phase en cours**, quelle que soit la taille de la zone."
+      ],
+      "bareme": [1, 3, 6, 10, 15, 21, 28, 36],
+      "bonusPhase": [
+        { "phase": "A", "bonus": 10 }, { "phase": "B", "bonus": 8 }, { "phase": "C", "bonus": 6 },
+        { "phase": "D", "bonus": 4 }, { "phase": "E", "bonus": 2 }
+      ],
+      "exemples": ["Exemple : compléter une ville de 3 cases en phase B rapporte 6 + 8 = 14 PV."]
+    },
+    "calculateur": {
+      "titre": "Calculateur de zone complète",
+      "intro": "La phase suit le suivi de la partie (onglet Tour de jeu) ; touchez une autre phase pour la corriger.",
+      "taille": "Taille de la zone (cases)",
+      "phase": "Phase",
+      "phaseSuivi": "Phase du suivi : {phase}",
+      "phaseModifiee": "Phase modifiée à la main (le suivi indique {phase}).",
+      "detail": "Taille {taille} : {pvTaille} PV · bonus de la phase {phase} : {pvPhase} PV",
+      "trou": {
+        "sujet": "Zone du château de départ",
+        "texte": [
+          "Sur le domaine n° 1, le château de départ occupe une zone vert foncé d'une seule case. Cette zone est donc complète dès la mise en place. Le livret ne dit pas si elle rapporte des points.",
+          "À vérifier sur d'autres sources ou à trancher en règle de table. Ce calculateur ne la compte pas automatiquement."
+        ]
+      }
+    },
+    "couleur": {
+      "titre": "Bonus de couleur", "ref": "§5.2 · p. 8",
+      "liste": [
+        "Un joueur qui couvre **toutes** les cases d'une couleur de son domaine (par exemple sa 3e mine ou sa 6e tuile Animaux) prend aussitôt une tuile bonus de cette couleur.",
+        "Le premier à y parvenir prend la grande tuile, le second la petite. Les suivants n'ont rien."
+      ],
+      "tableau": {
+        "entetes": ["Joueurs", "Grande tuile (1er)", "Petite tuile (2e)"],
+        "lignes": [["2", "5 PV", "2 PV"]]
+      }
+    },
+    "piste": {
+      "titre": "Piste de score", "ref": "§5.3 · p. 8",
+      "paragraphes": ["En atteignant ou en dépassant la case 0/100, un joueur pose sa tuile PV côté « 100 » devant lui. Il la retourne côté « 200 » en atteignant 200 PV."]
+    },
+    "finPartie": {
+      "titre": "Fin de partie", "ref": "§5.4 · p. 9",
+      "paragraphes": ["La partie s'arrête après la phase E, une fois la fin de phase jouée (revenu des mines compris). On ajoute alors :"],
+      "tableau": {
+        "entetes": ["Ce qui reste", "PV"],
+        "lignes": [
+          ["{{de:4}} chaque marchandise invendue", "1"],
+          ["{{piece}} chaque pièce", "1"],
+          ["{{ouvrier}} chaque paire d'ouvriers", "1"],
+          ["les Monastères qui rapportent en fin de partie", "selon la tuile (§6)"]
+        ]
+      },
+      "note": "Les tuiles restées dans la réserve du plateau individuel ne rapportent rien."
+    },
+    "egalites": {
+      "titre": "Vainqueur et égalités", "ref": "§5.5 · p. 9",
+      "etapes": [
+        "Le joueur le plus avancé sur la piste de score gagne.",
+        "En cas d'égalité, le joueur qui a le moins de cases vides dans son domaine l'emporte.",
+        "Si l'égalité persiste, le joueur le plus à gauche sur le pont (le plus près de la ville) l'emporte."
+      ]
+    }
+  },
+
+  "decompte": {
+    "titre": "Décompte final",
+    "intro": "Saisissez les nombres : la page fait les calculs. Pour un Monastère que vous n'avez pas, laissez 0.",
+    "valeurs": { "piece": 1, "invendue": 1, "ouvriersParPoint": 2, "m15": 2, "m16a23": 4, "m24": 4, "m25": 1, "m26": 3 },
+    "maxBatiments": 20,
+    "lignes": [
+      { "id": "piste", "nom": "Score de la piste", "note": "saisi à la main", "max": 999 },
+      { "id": "pieces", "nom": "{{piece}} Pièces", "note": "1 PV chacune", "max": 99, "pv": true },
+      { "id": "invendues", "nom": "{{de:4}} Marchandises invendues", "note": "1 PV chacune", "max": 42, "pv": true },
+      { "id": "ouvriers", "nom": "{{ouvrier}} Ouvriers", "note": "2 ouvriers = 1 PV, arrondi à l'entier inférieur", "max": 99, "pv": true },
+      { "id": "m15", "nom": "Monastère n° 15 · types vendus", "note": "2 PV par type vendu au moins une fois", "max": 6, "pv": true, "badge": "à confirmer" },
+      { "id": "m16a23", "special": "batiments" },
+      { "id": "m24", "nom": "Monastère n° 24 · espèces d'animaux", "note": "4 PV par espèce", "max": 4, "pv": true },
+      { "id": "m25", "nom": "Monastère n° 25 · tuiles vendues", "note": "1 PV par tuile de marchandises vendue", "max": 42, "pv": true },
+      { "id": "m26", "nom": "Monastère n° 26 · tuiles bonus", "note": "3 PV par tuile bonus, grande ou petite", "max": 6, "pv": true }
+    ],
+    "batimentsTitre": "Monastères n° 16 à 23",
+    "batimentsNote": "4 PV par bâtiment du type de la tuile. Pour chaque tuile que vous avez, comptez les bâtiments de ce type dans votre domaine ; laissez 0 pour une tuile que vous n'avez pas.",
+    "fin": "Points de fin de partie",
+    "total": "Total (piste + fin de partie)",
+    "departage": {
+      "titre": "Départage",
+      "casesVides": "Cases vides dans le domaine",
+      "casesVidesNote": "le moins de cases vides l'emporte",
+      "pont": "Qui est devant sur le pont ?",
+      "pontNote": "le plus à gauche, le plus près de la ville",
+      "maxCases": 37
+    },
+    "messages": {
+      "vide": "Saisissez le score de la piste de chaque joueur.",
+      "points": "{joueur} l'emporte : {a} points contre {b}.",
+      "casesVides": "Égalité à {a} points. {joueur} l'emporte avec moins de cases vides ({x} contre {y}).",
+      "pont": "Égalité à {a} points et à {x} cases vides. {joueur} l'emporte : il est devant sur le pont.",
+      "pontASaisir": "Égalité à {a} points et à {x} cases vides. Indiquez qui est devant sur le pont."
+    }
+  }
+}
+</script>
+
+<script>
+(function(){
+"use strict";
+
+/* ================================================================== */
+/* Données et constantes                                               */
+/* ================================================================== */
+
+const D = JSON.parse(document.getElementById('donnees').textContent);
+const CLE = 'guilde:chateaux:partie';
+const JOUEURS = D.jeu.camps.map(c => c.id);
+const nom = id => D.jeu.camps.find(c => c.id === id).nom;
+const autre = id => (id === 'j1' ? 'j2' : 'j1');
+const MEP = D.miseEnPlace, TOUR = D.tour, SUIVI = D.tour.suivi, MON = D.monasteres, PTS = D.points, DEC = D.decompte;
+const PHASES = SUIVI.phases;
+const BAREME = PTS.zone.bareme;
+const ONGLETS = ['t1', 't2', 't3', 't4', 't5', 't6'];
+// Une phase = 5 tours + la fin de phase ; au-delà du dernier pas, la partie est terminée.
+const PAS_PAR_PHASE = SUIVI.tours + 1;
+const PAS_MAX = PHASES.length * PAS_PAR_PHASE;
+const COULEURS_HEX = ['vert-clair', 'vert-fonce', 'jaune', 'beige', 'bleu', 'gris'];
+
+const gab = (t, v) => t.replace(/\{(\w+)\}/g, (m, k) => (v[k] !== undefined ? v[k] : m));
+const borner = (v, min, max) => Math.max(min, Math.min(max, v));
+const somme = tab => tab.reduce((a, n) => a + n, 0);
+
+/* ================================================================== */
+/* Logique pure (testée en mode ?test)                                 */
+/* ================================================================== */
+
+// --- Outil A : suivi. Le pas 0 est le tour 1 de la phase A ; le pas 30 est la partie terminée.
+function positionSuivi(pas) {
+  const n = borner(Math.trunc(Number.isFinite(pas) ? pas : 0), 0, PAS_MAX);
+  if (n === PAS_MAX) return { etape: 'terminee', phase: PHASES[PHASES.length - 1], tour: null };
+  const phase = PHASES[Math.floor(n / PAS_PAR_PHASE)], reste = n % PAS_PAR_PHASE;
+  return reste < SUIVI.tours ? { etape: 'tour', phase, tour: reste + 1 } : { etape: 'fin', phase, tour: null };
+}
+const suivantSuivi = pas => Math.min(PAS_MAX, pas + 1);
+const precedentSuivi = pas => Math.max(0, pas - 1);
+function bonusDePhase(phase) {
+  const b = PTS.zone.bonusPhase.find(x => x.phase === phase);
+  return b ? b.bonus : null;
+}
+
+// --- Outil B : PV d'une zone complète = barème de taille + bonus de la phase.
+function pointsZone(taille, phase) {
+  if (!Number.isInteger(taille) || taille < 1 || taille > BAREME.length) return null;
+  const bonus = bonusDePhase(phase);
+  if (bonus === null) return null;
+  return { taille: BAREME[taille - 1], phase: bonus, total: BAREME[taille - 1] + bonus };
+}
+// La phase du suivi sert de valeur par défaut ; une phase saisie à la main la remplace.
+const phaseEffective = (phaseSuivi, surcharge) => (PHASES.includes(surcharge) ? surcharge : phaseSuivi);
+
+// --- Outil C : décompte final à 2 joueurs.
+function decompteJoueur(s) {
+  const V = DEC.valeurs;
+  const lignes = {
+    pieces: s.pieces * V.piece,
+    invendues: s.invendues * V.invendue,
+    ouvriers: Math.floor(s.ouvriers / V.ouvriersParPoint),
+    m15: s.m15 * V.m15,
+    m16a23: somme(s.m16a23) * V.m16a23,
+    m24: s.m24 * V.m24,
+    m25: s.m25 * V.m25,
+    m26: s.m26 * V.m26
+  };
+  const fin = somme(Object.values(lignes));
+  return { lignes, fin, total: s.piste + fin };
+}
+// Égalité de points → moins de cases vides → joueur devant sur le pont.
+function departager(a, b, pont) {
+  if (a.total !== b.total) return { gagnant: a.total > b.total ? 'j1' : 'j2', raison: 'points' };
+  if (a.casesVides !== b.casesVides) return { gagnant: a.casesVides < b.casesVides ? 'j1' : 'j2', raison: 'casesVides' };
+  if (pont === 'j1' || pont === 'j2') return { gagnant: pont, raison: 'pont' };
+  return { gagnant: null, raison: 'pontASaisir' };
+}
+
+// --- Recherche de Monastère par numéro. Aucun nom de bâtiment hors de ceux que le livret identifie.
+function chercherMonastere(n) {
+  if (!Number.isInteger(n) || n < 1 || n > MON.total) return null;
+  const regle = MON.regles.liste.find(m => m.n === n);
+  if (regle) return { numero: n, groupe: 'regles', texte: regle.texte, trou: regle.trou || null, aConfirmer: null, batiment: null, batimentAIdentifier: false };
+  const fin = MON.fin.liste.find(m => m.numeros.includes(n));
+  if (!fin) return null;
+  const batiment = fin.numeros.length > 1 ? (MON.batiments[n] || null) : null;
+  const dansGroupeBatiments = fin.numeros.length > 1;
+  return {
+    numero: n, groupe: 'fin', texte: fin.texte,
+    // Le trou des n° 16 à 23 ne concerne que les numéros dont le livret ne donne pas le bâtiment.
+    trou: dansGroupeBatiments && batiment ? null : (fin.trou || null),
+    aConfirmer: fin.aConfirmer || null,
+    batiment, batimentAIdentifier: dansGroupeBatiments && !batiment
+  };
+}
+
+// --- Domaine (données de test) : découpage en zones de même couleur qui se touchent.
+// Pour une case d'indice c sur une ligne de n cases, la position horizontale est p = 2c + (nMax − n).
+function decouperDomaine(texte) {
+  const rangees = texte.trim().split('\n').map(l => l.trim().replace(/^L\d+:\s*/, '').split(/\s+/));
+  const nMax = Math.max(...rangees.map(r => r.length));
+  const cases = [];
+  rangees.forEach((r, y) => r.forEach((code, c) => cases.push({
+    id: cases.length, y, c, p: 2 * c + (nMax - r.length), couleur: code[0], de: Number(code.slice(1))
+  })));
+  const voisines = (a, b) => (a.y === b.y && Math.abs(a.p - b.p) === 2) || (Math.abs(a.y - b.y) === 1 && Math.abs(a.p - b.p) === 1);
+  const vues = new Set(), zones = [];
+  cases.forEach(depart => {
+    if (vues.has(depart.id)) return;
+    const membres = [depart];
+    vues.add(depart.id);
+    for (let i = 0; i < membres.length; i++) {
+      cases.forEach(o => {
+        if (!vues.has(o.id) && o.couleur === membres[i].couleur && voisines(membres[i], o)) { vues.add(o.id); membres.push(o); }
+      });
+    }
+    zones.push({ couleur: depart.couleur, cases: membres.map(m => m.id) });
+  });
+  return { rangees: rangees.map(r => r.length), cases, zones, voisines };
+}
+
+// --- État : tout ce qui n'a pas la forme attendue retombe sur la valeur par défaut.
+function normaliser(def, brut) {
+  if (Array.isArray(def)) {
+    if (!Array.isArray(brut)) return def;
+    return def.map((d, i) => normaliser(d, brut[i]));
+  }
+  if (def && typeof def === 'object') {
+    const src = brut && typeof brut === 'object' ? brut : {};
+    const sortie = {};
+    Object.keys(def).forEach(k => { sortie[k] = normaliser(def[k], src[k]); });
+    return sortie;
+  }
+  if (typeof def === 'number') return Number.isFinite(brut) ? brut : def;
+  if (typeof def === 'boolean') return typeof brut === 'boolean' ? brut : def;
+  if (typeof def === 'string') return typeof brut === 'string' ? brut : def;
+  return def;
+}
+
+/* ================================================================== */
+/* État de partie                                                      */
+/* ================================================================== */
+
+// Une tuile Monastère par type de bâtiment (n° 16 à 23) : un compteur de bâtiments par tuile.
+const NB_TUILES_BATIMENT = MON.fin.liste.find(m => m.numeros.length > 1).numeros.length;
+const MAX_LIGNE = Object.fromEntries(DEC.lignes.filter(l => l.max).map(l => [l.id, l.max]));
+
+function etatDefaut() {
+  const joueur = () => ({
+    piste: 0, pieces: 0, invendues: 0, ouvriers: 0, m15: 0,
+    m16a23: new Array(NB_TUILES_BATIMENT).fill(0),
+    m24: 0, m25: 0, m26: 0, casesVides: 0
+  });
+  return {
+    v: 1,
+    onglet: 't1',
+    checklist: Object.fromEntries(MEP.checklists.flatMap(g => g.points.map((p, i) => [g.id + '-' + i, false]))),
+    suivi: 0,
+    zone: { taille: 1, phase: '' },
+    monastere: 0,
+    decompte: { j1: joueur(), j2: joueur(), pont: '' },
+    // Jamais enregistré : valeurs propres à un instant de la partie.
+    transitoire: { confirmation: false }
+  };
+}
+
+function assainir(e) {
+  e.suivi = borner(Math.round(e.suivi), 0, PAS_MAX);
+  e.zone.taille = borner(Math.round(e.zone.taille), 1, BAREME.length);
+  // La phase propre à l'outil B n'est pas reprise d'une session à l'autre : elle repart de celle du suivi.
+  e.zone.phase = '';
+  e.monastere = borner(Math.round(e.monastere), 0, MON.total);
+  JOUEURS.forEach(j => {
+    const d = e.decompte[j];
+    Object.keys(MAX_LIGNE).forEach(k => { if (k in d) d[k] = borner(Math.round(d[k]), 0, MAX_LIGNE[k]); });
+    d.m16a23 = d.m16a23.map(n => borner(Math.round(n), 0, DEC.maxBatiments));
+    d.casesVides = borner(Math.round(d.casesVides), 0, DEC.departage.maxCases);
+  });
+  if (!['', 'j1', 'j2'].includes(e.decompte.pont)) e.decompte.pont = '';
+  if (!ONGLETS.includes(e.onglet)) e.onglet = 't1';
+  return e;
+}
+
+function charger() {
+  try {
+    const brut = localStorage.getItem(CLE);
+    if (brut) {
+      const o = JSON.parse(brut);
+      if (o && o.v === 1) return assainir(normaliser(etatDefaut(), o));
+    }
+  } catch (e) { /* stockage vide, illisible ou indisponible : on repart d'une partie neuve */ }
+  return etatDefaut();
+}
+
+function sauver() {
+  try {
+    const copie = Object.assign({}, etat);
+    delete copie.transitoire;
+    localStorage.setItem(CLE, JSON.stringify(copie));
+  } catch (e) { /* stockage indisponible : la partie reste jouable en mémoire */ }
+}
+
+let etat = charger();
+
+const lire = chemin => chemin.split('.').reduce((o, k) => o[k], etat);
+function ecrire(chemin, valeur) {
+  const cles = chemin.split('.');
+  const dernier = cles.pop();
+  cles.reduce((o, k) => o[k], etat)[dernier] = valeur;
+}
+
+/* ================================================================== */
+/* Outils DOM                                                          */
+/* ================================================================== */
+
+function h(tag, attrs, ...enfants) {
+  const e = document.createElement(tag);
+  Object.entries(attrs || {}).forEach(([k, v]) => {
+    if (v === null || v === undefined || v === false) return;
+    e.setAttribute(k, v === true ? '' : v);
+  });
+  enfants.flat(Infinity).forEach(c => {
+    if (c === null || c === undefined || c === false) return;
+    e.append(typeof c === 'object' ? c : document.createTextNode(c));
+  });
+  return e;
+}
+const NS = 'http://www.w3.org/2000/svg';
+function sv(tag, attrs, ...enfants) {
+  const e = document.createElementNS(NS, tag);
+  Object.entries(attrs || {}).forEach(([k, v]) => e.setAttribute(k, v));
+  enfants.flat(Infinity).forEach(c => { if (c) e.append(c); });
+  return e;
+}
+// Element.append convertirait un tableau en texte : on aplatit d'abord.
+function ajouter(parent, ...enfants) {
+  enfants.flat(Infinity).forEach(c => {
+    if (c === null || c === undefined || c === false) return;
+    parent.append(typeof c === 'object' ? c : document.createTextNode(c));
+  });
+  return parent;
+}
+
+/* --- pictogrammes originaux : hexagone de la couleur du type, face de dé, pièce, ouvrier --- */
+const PIPS = {
+  1: [[12, 12]],
+  2: [[7, 7], [17, 17]],
+  3: [[7, 7], [12, 12], [17, 17]],
+  4: [[7, 7], [17, 7], [7, 17], [17, 17]],
+  5: [[7, 7], [17, 7], [12, 12], [7, 17], [17, 17]],
+  6: [[7, 6.5], [17, 6.5], [7, 12], [17, 12], [7, 17.5], [17, 17.5]]
+};
+function picto(spec) {
+  const [type, arg] = spec.split(':');
+  const svg = sv('svg', { class: 'picto', viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' });
+  if (type === 'hex' && COULEURS_HEX.includes(arg)) {
+    svg.append(sv('polygon', { points: '12,1.5 21.5,7 21.5,17 12,22.5 2.5,17 2.5,7', fill: 'var(--t-' + arg + ')', stroke: 'var(--encre)', 'stroke-width': 1.5, 'stroke-linejoin': 'round' }));
+  } else if (type === 'de') {
+    const n = PIPS[arg] ? arg : 5;
+    svg.append(sv('rect', { x: 2, y: 2, width: 20, height: 20, rx: 4, fill: 'var(--face-de)', stroke: 'var(--encre)', 'stroke-width': 1.5 }),
+      ...PIPS[n].map(([x, y]) => sv('circle', { cx: x, cy: y, r: 1.9, fill: 'var(--encre)' })));
+  } else if (type === 'piece') {
+    svg.append(sv('circle', { cx: 12, cy: 12, r: 9.5, fill: 'var(--piece)', stroke: 'var(--encre)', 'stroke-width': 1.5 }),
+      sv('circle', { cx: 12, cy: 12, r: 5.6, fill: 'none', stroke: 'var(--encre)', 'stroke-width': 1.2 }));
+  } else if (type === 'ouvrier') {
+    svg.append(sv('circle', { cx: 12, cy: 6.8, r: 4.2, fill: 'var(--ouvrier)', stroke: 'var(--encre)', 'stroke-width': 1.4 }),
+      sv('path', { d: 'M4.5 22 C4.5 15.5 8 12.6 12 12.6 C16 12.6 19.5 15.5 19.5 22 Z', fill: 'var(--ouvrier)', stroke: 'var(--encre)', 'stroke-width': 1.4, 'stroke-linejoin': 'round' }));
+  } else return document.createTextNode('');
+  return svg;
+}
+// **gras** et {{pictogramme}} dans les textes des données
+function riche(t) {
+  return String(t).split(/(\*\*.+?\*\*|\{\{.+?\}\})/).map(p => {
+    if (/^\*\*.+\*\*$/.test(p)) return h('strong', {}, p.slice(2, -2));
+    if (/^\{\{.+\}\}$/.test(p)) return picto(p.slice(2, -2));
+    return p;
+  });
+}
+const badge = texte => h('span', { class: 'badge' }, texte);
+const puce = j => h('span', { class: 'puce-joueur ' + j }, nom(j));
+
+function stepper(chemin, libelle, min = 0, max = 99) {
+  const data = d => ({ 'data-pas': chemin, 'data-d': d, 'data-min': min, 'data-max': max });
+  return h('div', { class: 'rangee', role: 'group', 'aria-label': libelle },
+    h('button', Object.assign({ class: 'pas', type: 'button', 'aria-label': 'Diminuer : ' + libelle }, data(-1)), '−'),
+    h('span', { class: 'val', 'data-lit': chemin }),
+    h('button', Object.assign({ class: 'pas', type: 'button', 'aria-label': 'Augmenter : ' + libelle }, data(1)), '+'));
+}
+function saisie(chemin, libelle, max, videSiZero) {
+  const data = d => ({ 'data-pas': chemin, 'data-d': d, 'data-min': 0, 'data-max': max });
+  return h('div', { class: 'rangee', role: 'group', 'aria-label': libelle },
+    h('button', Object.assign({ class: 'pas', type: 'button', 'aria-label': 'Diminuer : ' + libelle }, data(-1)), '−'),
+    h('input', { class: 'saisie', type: 'number', inputmode: 'numeric', min: 0, max, 'data-saisie': chemin, 'data-vide-zero': videSiZero ? '1' : null, 'aria-label': libelle }),
+    h('button', Object.assign({ class: 'pas', type: 'button', 'aria-label': 'Augmenter : ' + libelle }, data(1)), '+'));
+}
+
+/* --- éléments génériques pilotés par les données --- */
+function tableau(t) {
+  return h('table', { class: 'donnees' },
+    h('thead', {}, h('tr', {}, t.entetes.map(e => h('th', { scope: 'col' }, e)))),
+    h('tbody', {}, t.lignes.map(l => h('tr', {}, l.map((c, i) => (i === 0 && t.premiereColonne !== false && /^\d/.test(c)
+      ? h('td', { class: 'num' }, riche(c)) : h('td', {}, riche(c))))))));
+}
+function trou(t) {
+  return h('div', { class: 'trou', role: 'note' },
+    h('span', { class: 'etiquette' }, D.jeu.etiquetteTrou),
+    h('p', {}, h('span', { class: 'sujet' }, t.sujet), ' — ', riche(t.texte[0])),
+    t.texte.slice(1).map(p => h('p', {}, riche(p))));
+}
+const precision = p => h('div', { class: 'precision' }, riche(p.texte), p.badge ? badge(p.badge) : null);
+function bloc(b) {
+  return h('div', { class: 'bloc' },
+    b.titre ? h('h3', {}, b.titre, b.ref ? h('span', { class: 'ref' }, b.ref) : null) : null,
+    (b.paragraphes || []).map(p => h('p', {}, riche(p))),
+    b.etapes ? h('ol', { class: 'etapes-regle' }, b.etapes.map(e => (typeof e === 'string'
+      ? h('li', {}, riche(e))
+      : h('li', {}, riche(e.texte), h('ul', {}, e.sous.map(s => h('li', {}, riche(s)))))))) : null,
+    (b.paragraphesApres || []).map(p => h('p', {}, riche(p))),
+    b.titreListe ? h('p', {}, h('strong', {}, b.titreListe)) : null,
+    b.liste ? h('ul', { class: 'check' }, b.liste.map(l => h('li', {}, riche(l)))) : null,
+    b.tableau ? tableau(b.tableau) : null,
+    (b.exemples || []).map(x => h('p', { class: 'exemple' }, riche(x))),
+    (b.trous || []).map(trou),
+    (b.precisions || []).map(precision),
+    b.note ? h('p', { class: 'note' }, riche(b.note)) : null);
+}
+const section = (titre, ...contenu) => [h('h2', {}, titre), contenu];
+
+/* ================================================================== */
+/* Construction des onglets                                            */
+/* ================================================================== */
+
+function construireMiseEnPlace(el) {
+  MEP.checklists.forEach(g => {
+    ajouter(el, h('h2', {}, g.titre, h('span', { class: 'ref' }, g.ref)),
+      h('div', { class: 'bloc' },
+        h('ul', { class: 'check sans-puce' }, g.points.map((p, i) =>
+          h('li', {}, h('label', { class: 'coche' },
+            h('input', { type: 'checkbox', 'data-coche': g.id + '-' + i }), h('span', {}, riche(p))))))));
+  });
+  const R = MEP.reperes;
+  ajouter(el, h('details', { class: 'repere' },
+    h('summary', {}, R.titre),
+    h('div', {}, bloc(R.materiel), bloc(R.plateauJeu), bloc(R.plateauIndividuel))));
+}
+
+/* --- outil A : suivi de la partie --- */
+function construireSuivi() {
+  const L = SUIVI.libelles;
+  return h('div', { class: 'course', id: 'suivi' },
+    h('h3', {}, SUIVI.titre),
+    h('div', { class: 'quoi' }, SUIVI.intro),
+    h('div', { class: 'suivi-grille' },
+      h('div', { class: 'suivi-case' }, h('span', { class: 'rang' }, L.phase), h('span', { class: 'gros-chiffre', 'data-suivi': 'phase' })),
+      h('div', { class: 'suivi-case' }, h('span', { class: 'rang' }, L.tour),
+        h('span', { class: 'gros-chiffre', 'data-suivi': 'tour' }), h('span', { class: 'petit' }, L.tourSur)),
+      h('div', { class: 'suivi-case' }, h('span', { class: 'rang' }, L.bonus),
+        h('span', { class: 'gros-chiffre', 'data-suivi': 'bonus' }), h('span', { class: 'petit' }, L.bonusUnite))),
+    h('div', { class: 'frise', 'data-frise': '1' }, PHASES.map(p =>
+      h('span', { 'data-frise-phase': p }, p + ' · ' + bonusDePhase(p)))),
+    h('div', { id: 'suiviFin', role: 'status', 'aria-live': 'polite' }),
+    h('div', { class: 'commandes' },
+      h('button', { class: 'btn', type: 'button', 'data-action': 'suivi-prec', id: 'suiviPrec' }, L.retour),
+      h('button', { class: 'btn primaire', type: 'button', 'data-action': 'suivi-suiv', id: 'suiviSuiv' }, L.suivant)));
+}
+
+function construireTour(el) {
+  ajouter(el, h('h2', {}, 'Où en est-on ?'), construireSuivi(), bloc(TOUR.structure));
+  ajouter(el, h('h2', {}, TOUR.debutPhase.titre, h('span', { class: 'ref' }, TOUR.debutPhase.ref)), bloc({
+    etapes: TOUR.debutPhase.etapes, paragraphesApres: TOUR.debutPhase.paragraphesApres, tableau: TOUR.debutPhase.tableau }));
+  ajouter(el, h('h2', {}, TOUR.deroulement.titre, h('span', { class: 'ref' }, TOUR.deroulement.ref)), bloc({
+    etapes: TOUR.deroulement.etapes, trous: TOUR.deroulement.trous }));
+  ajouter(el, h('h2', {}, TOUR.tourJoueur.titre, h('span', { class: 'ref' }, TOUR.tourJoueur.ref)), bloc({ liste: TOUR.tourJoueur.liste }));
+  ajouter(el, h('h2', {}, TOUR.finPhase.titre, h('span', { class: 'ref' }, TOUR.finPhase.ref)), bloc({
+    etapes: TOUR.finPhase.etapes, precisions: TOUR.finPhase.precisions }));
+}
+
+function construireActions(el) {
+  const A = D.actions;
+  ajouter(el, h('h2', {}, 'Rôle du dé', h('span', { class: 'ref' }, A.principe.ref)), bloc({
+    paragraphes: A.principe.paragraphes, tableau: A.principe.tableau, note: A.principe.note }));
+  ajouter(el, h('h2', {}, 'Le détail des actions'), A.detail.map(bloc));
+  ajouter(el, h('h2', {}, 'Précisions'), h('div', { class: 'bloc' }, A.precisions.map(precision)));
+}
+
+function construireTuiles(el) {
+  const T = D.tuiles;
+  ajouter(el, h('h2', {}, 'Les 6 types de tuiles', h('span', { class: 'ref' }, T.principe.ref)),
+    bloc({ tableau: T.principe.tableau }), bloc({ titre: 'Principe', liste: T.principe.liste }));
+  ajouter(el, h('h2', {}, 'Les 8 bâtiments'), bloc(T.batiments));
+  ajouter(el, h('h2', {}, 'Effets des autres tuiles'), bloc(T.navire), bloc(T.chateau), bloc(T.mine), bloc(T.animaux));
+  ajouter(el, h('h2', {}, 'Précisions'), h('div', { class: 'bloc' }, T.precisions.map(precision)));
+}
+
+function ligneMonasteresTable(entetes, lignes) {
+  return h('table', { class: 'donnees' },
+    h('thead', {}, h('tr', {}, entetes.map(e => h('th', { scope: 'col' }, e)))),
+    h('tbody', {}, lignes));
+}
+function listeBatiments() {
+  const fin = MON.fin.liste.find(m => m.numeros.length > 1);
+  return h('ul', { class: 'liste-bat' }, fin.numeros.map(n => h('li', {},
+    picto('hex:beige'), h('strong', {}, 'n° ' + n), ' — ', MON.batiments[n] || MON.batimentAIdentifier)));
+}
+function construireMonasteres(el) {
+  const R = MON.recherche;
+  ajouter(el,
+    h('div', { class: 'course' },
+      h('h3', {}, R.titre),
+      h('div', { class: 'etiquette-champ' }, R.libelle),
+      saisie('monastere', R.libelle, MON.total, true),
+      h('div', { class: 'mon-resultat', id: 'monResultat', role: 'status', 'aria-live': 'polite' })),
+    h('p', { class: 'note' }, MON.intro));
+
+  ajouter(el, h('h2', {}, MON.regles.titre, h('span', { class: 'ref' }, MON.regles.ref)),
+    h('div', { class: 'bloc' }, ligneMonasteresTable(['N°', 'Effet permanent'], MON.regles.liste.map(m =>
+      h('tr', {}, h('td', { class: 'num' }, m.n), h('td', {}, riche(m.texte), m.trou ? trou(m.trou) : null)))),
+      (MON.regles.exemples || []).map(x => h('p', { class: 'exemple' }, riche(x))),
+      MON.regles.precisions.map(precision)));
+
+  ajouter(el, h('h2', {}, MON.fin.titre, h('span', { class: 'ref' }, MON.fin.ref)),
+    h('div', { class: 'bloc' }, h('p', {}, MON.fin.intro),
+      ligneMonasteresTable(['N°', 'PV en fin de partie'], MON.fin.liste.map(m => h('tr', {},
+        h('td', { class: 'num' }, m.etiquette),
+        h('td', {}, riche(m.texte),
+          m.aConfirmer ? [badge('à confirmer'), h('p', { class: 'note' }, m.aConfirmer)] : null,
+          m.numeros.length > 1 ? listeBatiments() : null,
+          m.trou ? trou(m.trou) : null)))),
+      h('p', { class: 'note' }, MON.fin.note),
+      MON.fin.exemples.map(x => h('p', { class: 'exemple' }, riche(x)))));
+}
+
+/* --- outil B : zone complète --- */
+function construireCalculateurZone() {
+  const C = PTS.calculateur;
+  return h('div', { class: 'course', id: 'zone' },
+    h('h3', {}, C.titre),
+    h('div', { class: 'quoi' }, C.intro),
+    h('div', { class: 'zone-ligne' }, h('strong', {}, C.taille), stepper('zone.taille', C.taille, 1, BAREME.length)),
+    h('div', { class: 'etiquette-champ', style: 'margin-top:.8rem' }, C.phase),
+    h('div', { class: 'phases-zone', role: 'group', 'aria-label': C.phase }, PHASES.map(p =>
+      h('button', { class: 'bascule', type: 'button', 'data-action': 'phase-zone', 'data-phase': p, 'aria-pressed': 'false' }, p))),
+    h('p', { class: 'note', id: 'zoneNotePhase' }),
+    h('div', { class: 'resultat', id: 'zoneResultat', role: 'status', 'aria-live': 'polite' }),
+    trou(C.trou));
+}
+
+// Deux tableaux horizontaux (taille → PV, phase → bonus), construits depuis les mêmes données que le calculateur.
+function tableauHorizontal(libelleEntete, entetes, libelleLigne, valeurs) {
+  return h('table', { class: 'donnees' },
+    h('thead', {}, h('tr', {}, h('th', { scope: 'col' }, libelleEntete), entetes.map(e => h('th', { scope: 'col', class: 'centre' }, e)))),
+    h('tbody', {}, h('tr', {}, h('td', { class: 'num' }, libelleLigne), valeurs.map(v => h('td', { class: 'centre' }, v)))));
+}
+function tableauBaremes() {
+  const bonus = PTS.zone.bonusPhase;
+  return [
+    tableauHorizontal('Taille (cases)', BAREME.map((v, i) => i + 1), 'PV', BAREME),
+    tableauHorizontal('Phase', bonus.map(b => b.phase), 'Bonus', bonus.map(b => b.bonus))
+  ];
+}
+
+/* --- outil C : décompte final --- */
+function ligneDecompte(l) {
+  if (l.special === 'batiments') return null;
+  return [
+    h('span', { class: 'lib-cat' }, h('span', { class: 'barre', 'aria-hidden': 'true' }),
+      h('span', {}, riche(l.nom), l.badge ? badge(l.badge) : null, l.note ? h('span', { class: 'petit' }, l.note) : null)),
+    JOUEURS.map(j => h('span', { class: 'cellule' },
+      saisie('decompte.' + j + '.' + l.id, nom(j) + ', ' + l.nom.replace(/\{\{.+?\}\}\s*/g, ''), l.max),
+      l.pv ? h('span', { class: 'conv', 'data-pv': j + '.' + l.id }) : null))
+  ];
+}
+function detailsBatiments() {
+  const fin = MON.fin.liste.find(m => m.numeros.length > 1);
+  const grille = h('div', { class: 'grille-civil' },
+    h('span', {}), JOUEURS.map(j => h('span', { class: 'entete ' + j }, nom(j))));
+  fin.numeros.forEach((n, i) => {
+    const nomBat = MON.batiments[n] || MON.batimentAIdentifier;
+    ajouter(grille,
+      h('span', { class: 'lib-cat' }, h('span', { class: 'barre', 'aria-hidden': 'true' }), h('span', {}, picto('hex:beige'), 'n° ' + n, h('span', { class: 'petit' }, nomBat))),
+      JOUEURS.map(j => h('span', { class: 'cellule' },
+        saisie('decompte.' + j + '.m16a23.' + i, nom(j) + ', Monastère n° ' + n + ' (' + nomBat + '), nombre de bâtiments', DEC.maxBatiments))));
+  });
+  return h('details', { class: 'sous-decompte' },
+    h('summary', {}, h('span', {}, DEC.batimentsTitre, h('span', { class: 'ref' }, '4 PV par bâtiment')),
+      h('span', { class: 'note' }, JOUEURS.map(j => h('span', { class: j, style: 'margin-left:.6rem' }, nom(j) + ' : ', h('span', { 'data-pv16': j }), ' PV')))),
+    h('p', { class: 'note' }, DEC.batimentsNote), grille);
+}
+function construireDecompte() {
+  const grille = h('div', { class: 'grille-civil' }, h('span', {}), JOUEURS.map(j => h('span', { class: 'entete ' + j }, nom(j))));
+  DEC.lignes.forEach(l => ajouter(grille, l.special === 'batiments' ? detailsBatiments() : ligneDecompte(l)));
+  ajouter(grille,
+    h('span', { class: 'lib-cat' }, h('strong', {}, DEC.fin)),
+    JOUEURS.map(j => h('span', { class: 'cellule' }, h('span', { class: 'auto', 'data-fin': j }))),
+    h('div', { class: 'ligne-total' }, h('span', { class: 'lib-cat' }, h('strong', {}, DEC.total)),
+      JOUEURS.map(j => h('span', { class: 'gros-total ' + j, 'data-total': j }))));
+
+  const dp = DEC.departage;
+  const gDep = h('div', { class: 'grille-civil' }, h('span', {}), JOUEURS.map(j => h('span', { class: 'entete ' + j }, nom(j))),
+    h('span', { class: 'lib-cat' }, h('span', { class: 'barre', 'aria-hidden': 'true' }), h('span', {}, dp.casesVides, h('span', { class: 'petit' }, dp.casesVidesNote))),
+    JOUEURS.map(j => h('span', { class: 'cellule' }, saisie('decompte.' + j + '.casesVides', nom(j) + ', ' + dp.casesVides, dp.maxCases))));
+
+  return h('div', { class: 'course', id: 'decompte' },
+    h('h3', {}, DEC.titre),
+    h('div', { class: 'quoi' }, DEC.intro),
+    grille,
+    h('h4', {}, dp.titre),
+    gDep,
+    h('div', { class: 'etiquette-champ', style: 'margin-top:.8rem' }, dp.pont, h('span', { class: 'ref' }, dp.pontNote)),
+    h('div', { class: 'choix-joueur', role: 'group', 'aria-label': dp.pont }, JOUEURS.map(j =>
+      h('button', { class: 'bascule', type: 'button', 'data-action': 'pont', 'data-joueur': j, 'aria-pressed': 'false' }, nom(j)))),
+    h('div', { class: 'alerte', id: 'verdict', role: 'status', 'aria-live': 'polite' }));
+}
+
+function construirePoints(el) {
+  const Z = PTS.zone;
+  ajouter(el, h('div', { class: 'sauts', role: 'group', 'aria-label': 'Aller à' },
+    h('button', { class: 'btn', type: 'button', 'data-saut': 'zone' }, 'Zone complète'),
+    h('button', { class: 'btn', type: 'button', 'data-saut': 'couleur' }, 'Bonus de couleur'),
+    h('button', { class: 'btn', type: 'button', 'data-saut': 'decompte' }, 'Décompte final')));
+
+  ajouter(el, construireCalculateurZone());
+  ajouter(el, h('h2', {}, Z.titre, h('span', { class: 'ref' }, Z.ref)), h('div', { class: 'bloc' },
+    Z.paragraphes.map(p => h('p', {}, riche(p))),
+    h('ol', { class: 'etapes-regle' }, Z.etapes.map(e => h('li', {}, riche(e)))),
+    tableauBaremes(),
+    Z.exemples.map(x => h('p', { class: 'exemple' }, riche(x)))));
+
+  ajouter(el, h('div', { id: 'couleur' }), h('h2', {}, PTS.couleur.titre, h('span', { class: 'ref' }, PTS.couleur.ref)),
+    bloc({ liste: PTS.couleur.liste, tableau: PTS.couleur.tableau }));
+  ajouter(el, h('h2', {}, PTS.piste.titre, h('span', { class: 'ref' }, PTS.piste.ref)), bloc({ paragraphes: PTS.piste.paragraphes }));
+  ajouter(el, h('h2', {}, PTS.finPartie.titre, h('span', { class: 'ref' }, PTS.finPartie.ref)), bloc({
+    paragraphes: PTS.finPartie.paragraphes, tableau: PTS.finPartie.tableau, note: PTS.finPartie.note }));
+  ajouter(el, h('h2', {}, PTS.egalites.titre, h('span', { class: 'ref' }, PTS.egalites.ref)), bloc({ etapes: PTS.egalites.etapes }));
+  ajouter(el, construireDecompte());
+}
+
+/* ================================================================== */
+/* Mise à jour de l'affichage                                          */
+/* ================================================================== */
+
+const qs = sel => document.querySelector(sel);
+function messageNiveau(el, niveau, texte) { el.className = 'alerte' + (niveau ? ' ' + niveau : ''); el.textContent = texte || ''; }
+
+function majGenerique() {
+  document.querySelectorAll('[data-lit]').forEach(e => { e.textContent = lire(e.dataset.lit); });
+  document.querySelectorAll('[data-pas]').forEach(b => {
+    const v = lire(b.dataset.pas), d = Number(b.dataset.d);
+    b.disabled = d < 0 ? v <= Number(b.dataset.min) : v >= Number(b.dataset.max);
+  });
+  document.querySelectorAll('[data-saisie]').forEach(i => {
+    const v = lire(i.dataset.saisie);
+    if (document.activeElement !== i) i.value = (i.dataset.videZero && v === 0) ? '' : v;
+  });
+  document.querySelectorAll('[data-coche]').forEach(i => { i.checked = !!etat.checklist[i.dataset.coche]; });
+}
+
+function majOnglets() {
+  ONGLETS.forEach((id, i) => {
+    const actif = etat.onglet === id, t = document.getElementById(id);
+    t.setAttribute('aria-selected', actif ? 'true' : 'false');
+    t.tabIndex = actif ? 0 : -1;
+    document.getElementById('p' + (i + 1)).hidden = !actif;
+  });
+}
+
+function majSuivi() {
+  const L = SUIVI.libelles, pos = positionSuivi(etat.suivi);
+  qs('[data-suivi="phase"]').textContent = pos.phase;
+  qs('[data-suivi="tour"]').textContent = pos.etape === 'tour' ? pos.tour : '–';
+  qs('[data-suivi="bonus"]').textContent = bonusDePhase(pos.phase);
+  document.querySelectorAll('[data-frise-phase]').forEach(s => {
+    if (s.dataset.frisePhase === pos.phase && pos.etape !== 'terminee') s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current');
+  });
+  const suivant = qs('#suiviSuiv');
+  suivant.disabled = pos.etape === 'terminee';
+  suivant.textContent = pos.etape === 'fin' ? (pos.phase === PHASES[PHASES.length - 1] ? L.suivantFin : L.suivantPhase) : L.suivant;
+  qs('#suiviPrec').disabled = etat.suivi <= 0;
+
+  const zone = qs('#suiviFin');
+  zone.replaceChildren();
+  if (pos.etape === 'fin') {
+    const mon2 = MON.regles.liste.find(m => m.n === 2);
+    ajouter(zone, h('div', { class: 'etape-fin' },
+      h('h4', {}, gab(L.finTitre, { phase: pos.phase })),
+      h('ul', {},
+        SUIVI.finPhase.map(t => h('li', {}, picto('piece'), t)),
+        h('li', {}, picto('ouvrier'), h('strong', {}, SUIVI.finPhaseMon2), ' : ', mon2.texte, badge('déduction'))),
+      h('p', { class: 'note' }, SUIVI.finPhaseDeduction)));
+  } else if (pos.etape === 'terminee') {
+    ajouter(zone, h('div', { class: 'etape-fin' },
+      h('h4', {}, L.termineeTitre),
+      h('p', {}, PTS.finPartie.paragraphes[0]),
+      h('button', { class: 'btn primaire', type: 'button', 'data-action': 'aller-decompte' }, L.aller)));
+  }
+}
+
+function majZone() {
+  const C = PTS.calculateur, suivi = positionSuivi(etat.suivi).phase;
+  const phase = phaseEffective(suivi, etat.zone.phase);
+  document.querySelectorAll('[data-action="phase-zone"]').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.phase === phase)));
+  qs('#zoneNotePhase').textContent = phase === suivi ? gab(C.phaseSuivi, { phase: suivi }) : gab(C.phaseModifiee, { phase: suivi });
+  const r = pointsZone(etat.zone.taille, phase);
+  qs('#zoneResultat').replaceChildren(
+    h('div', { class: 'grand' }, r.total + ' PV'),
+    h('div', { class: 'detail' }, gab(C.detail, { taille: etat.zone.taille, pvTaille: r.taille, phase, pvPhase: r.phase })));
+}
+
+function majMonastere() {
+  const el = qs('#monResultat'), r = chercherMonastere(etat.monastere);
+  el.replaceChildren();
+  if (!r) { el.append(h('p', { class: 'note' }, MON.recherche.vide)); el.style.display = 'block'; return; }
+  el.style.display = '';
+  ajouter(el,
+    h('div', {}, h('span', { class: 'numero' }, 'n° ' + r.numero), h('span', { class: 'groupe' }, MON.groupes[r.groupe])),
+    h('p', { class: 'texte' }, riche(r.texte)),
+    r.batiment ? h('p', {}, picto('hex:beige'), h('strong', {}, 'Bâtiment : '), r.batiment) : null,
+    r.batimentAIdentifier ? h('p', {}, picto('hex:beige'), h('strong', {}, 'Bâtiment : '), MON.batimentAIdentifier) : null,
+    r.aConfirmer ? h('p', {}, badge('à confirmer'), ' ', r.aConfirmer) : null,
+    r.trou ? trou(r.trou) : null);
+}
+
+function majDecompte() {
+  const res = {};
+  JOUEURS.forEach(j => {
+    const s = etat.decompte[j], r = decompteJoueur(s);
+    res[j] = { total: r.total, casesVides: s.casesVides };
+    qs('[data-total="' + j + '"]').textContent = r.total;
+    qs('[data-fin="' + j + '"]').textContent = r.fin;
+    qs('[data-pv16="' + j + '"]').textContent = r.lignes.m16a23;
+    DEC.lignes.filter(l => l.pv).forEach(l => { qs('[data-pv="' + j + '.' + l.id + '"]').textContent = '= ' + r.lignes[l.id] + ' PV'; });
+  });
+  document.querySelectorAll('[data-action="pont"]').forEach(b =>
+    b.setAttribute('aria-pressed', String(etat.decompte.pont === b.dataset.joueur)));
+  const el = qs('#verdict'), M = DEC.messages;
+  if (JOUEURS.every(j => etat.decompte[j].piste === 0 && res[j].total === 0)) { messageNiveau(el, '', M.vide); return; }
+  const v = departager(res.j1, res.j2, etat.decompte.pont);
+  const joueur = v.gagnant ? nom(v.gagnant) : '';
+  const tot = res[v.gagnant || 'j1'].total;
+  if (v.raison === 'points') messageNiveau(el, 'gagne', gab(M.points, { joueur, a: tot, b: res[autre(v.gagnant)].total }));
+  else if (v.raison === 'casesVides') messageNiveau(el, 'gagne', gab(M.casesVides, { joueur, a: tot, x: res[v.gagnant].casesVides, y: res[autre(v.gagnant)].casesVides }));
+  else if (v.raison === 'pont') messageNiveau(el, 'gagne', gab(M.pont, { joueur, a: tot, x: res.j1.casesVides }));
+  else messageNiveau(el, 'chaud', gab(M.pontASaisir, { a: tot, x: res.j1.casesVides }));
+}
+
+function majNouvelle() {
+  const b = document.getElementById('nouvelle');
+  b.classList.toggle('confirme', etat.transitoire.confirmation);
+  b.textContent = etat.transitoire.confirmation ? 'Confirmer : tout effacer ?' : 'Nouvelle partie';
+}
+
+function actualiser() {
+  majOnglets(); majGenerique(); majSuivi(); majZone(); majMonastere(); majDecompte(); majNouvelle();
+}
+function valider() { sauver(); actualiser(); }
+
+/* ================================================================== */
+/* Interactions                                                        */
+/* ================================================================== */
+
+let minuteurConfirmation = null;
+
+function allerAOnglet(id) {
+  // L'outil B repart de la phase du suivi à chaque ouverture de l'onglet Points ; il n'écrit jamais dans le suivi.
+  if (id === 't6') etat.zone.phase = '';
+  etat.onglet = id; sauver(); majOnglets(); majZone();
+}
+
+function nouvellePartie() {
+  clearTimeout(minuteurConfirmation);
+  try { localStorage.removeItem(CLE); } catch (e) { /* sans effet : l'état mémoire est remis à zéro */ }
+  etat = etatDefaut();
+  actualiser();
+  window.scrollTo({ top: 0 });
+}
+
+document.addEventListener('click', ev => {
+  const pas = ev.target.closest('[data-pas]');
+  if (pas) {
+    const chemin = pas.dataset.pas, avant = lire(chemin);
+    const apres = borner(avant + Number(pas.dataset.d), Number(pas.dataset.min), Number(pas.dataset.max));
+    if (apres === avant) return;
+    ecrire(chemin, apres); valider();
+    return;
+  }
+  const saut = ev.target.closest('[data-saut]');
+  if (saut) { document.getElementById(saut.dataset.saut).scrollIntoView({ block: 'start' }); return; }
+
+  const act = ev.target.closest('[data-action]');
+  if (act) {
+    switch (act.dataset.action) {
+      case 'suivi-suiv':
+        etat.suivi = suivantSuivi(etat.suivi); etat.zone.phase = ''; valider(); break;
+      case 'suivi-prec':
+        etat.suivi = precedentSuivi(etat.suivi); etat.zone.phase = ''; valider(); break;
+      case 'aller-decompte':
+        allerAOnglet('t6'); actualiser(); document.getElementById('decompte').scrollIntoView({ block: 'start' }); break;
+      case 'phase-zone':
+        // Choisir la phase du suivi revient à le suivre de nouveau.
+        etat.zone.phase = act.dataset.phase === positionSuivi(etat.suivi).phase ? '' : act.dataset.phase; valider(); break;
+      case 'pont':
+        etat.decompte.pont = etat.decompte.pont === act.dataset.joueur ? '' : act.dataset.joueur; valider(); break;
+    }
+  }
+});
+
+document.addEventListener('change', ev => {
+  const c = ev.target.closest('[data-coche]');
+  if (c) { etat.checklist[c.dataset.coche] = c.checked; valider(); }
+  if (ev.target.matches('[data-saisie]')) actualiser();
+});
+
+document.addEventListener('input', ev => {
+  const i = ev.target.closest('[data-saisie]');
+  if (!i) return;
+  const n = parseInt(i.value, 10);
+  ecrire(i.dataset.saisie, borner(Number.isFinite(n) ? n : 0, 0, Number(i.max)));
+  sauver(); actualiser();
+});
+
+// Deux appuis pour effacer la partie : un appui isolé sur une tablette ne doit rien détruire.
+document.getElementById('nouvelle').addEventListener('click', () => {
+  if (etat.transitoire.confirmation) { nouvellePartie(); return; }
+  etat.transitoire.confirmation = true; majNouvelle();
+  clearTimeout(minuteurConfirmation);
+  minuteurConfirmation = setTimeout(() => { etat.transitoire.confirmation = false; majNouvelle(); }, 4000);
+});
+
+// Onglets : clic et clavier (flèches, Début, Fin).
+ONGLETS.forEach((id, i) => {
+  const t = document.getElementById(id), n = ONGLETS.length;
+  t.addEventListener('click', () => { allerAOnglet(id); window.scrollTo({ top: 0 }); });
+  t.addEventListener('keydown', ev => {
+    const cible = { ArrowRight: (i + 1) % n, ArrowLeft: (i + n - 1) % n, Home: 0, End: n - 1 }[ev.key];
+    if (cible === undefined) return;
+    ev.preventDefault();
+    allerAOnglet(ONGLETS[cible]);
+    document.getElementById(ONGLETS[cible]).focus();
+  });
+});
+
+/* ================================================================== */
+/* Démarrage                                                           */
+/* ================================================================== */
+
+document.getElementById('eyebrow').textContent = D.jeu.eyebrow;
+document.getElementById('titreJeu').textContent = D.jeu.titre;
+document.getElementById('sousTitre').textContent = D.jeu.sousTitre;
+document.getElementById('pied').textContent = D.jeu.pied;
+construireMiseEnPlace(document.getElementById('p1'));
+construireTour(document.getElementById('p2'));
+construireActions(document.getElementById('p3'));
+construireTuiles(document.getElementById('p4'));
+construireMonasteres(document.getElementById('p5'));
+construirePoints(document.getElementById('p6'));
+actualiser();
+
+/* ================================================================== */
+/* Tests : ouvrir la page avec ?test                                   */
+/* ================================================================== */
+
+if (/[?&]test\b/.test(location.search)) {
+  const liste = h('ul', {});
+  let echecs = 0, total = 0;
+  const verif = (nomTest, ok, detail) => {
+    total++;
+    if (!ok) echecs++;
+    liste.append(h('li', { class: ok ? 'ok' : 'echec' }, nomTest + (ok ? '' : ' — ' + detail)));
+  };
+  const egal = (nomTest, obtenu, attendu) => verif(nomTest, obtenu === attendu, 'obtenu ' + obtenu + ', attendu ' + attendu);
+  const suite = (nomTest, obtenu, attendu) => egal(nomTest, JSON.stringify(obtenu), JSON.stringify(attendu));
+
+  // --- Outil A : suivi
+  const pos = n => { const p = positionSuivi(n); return p.phase + ':' + p.etape + ':' + p.tour; };
+  egal('Suivi : pas 0 = phase A, tour 1', pos(0), 'A:tour:1');
+  egal('Suivi : pas 4 = phase A, tour 5', pos(4), 'A:tour:5');
+  egal('Suivi : pas 5 = fin de la phase A', pos(5), 'A:fin:null');
+  egal('Suivi : pas 6 = phase B, tour 1', pos(6), 'B:tour:1');
+  egal('Suivi : pas 29 = fin de la phase E', pos(29), 'E:fin:null');
+  egal('Suivi : pas 30 = partie terminée', pos(30), 'E:terminee:null');
+  egal('Suivi : pas négatif ramené au début', pos(-4), 'A:tour:1');
+  egal('Suivi : pas trop grand ramené à la fin', pos(99), 'E:terminee:null');
+  egal('Suivi : valeur illisible ramenée au début', pos(NaN), 'A:tour:1');
+  egal('Suivi : « tour suivant » s\'arrête à la fin', suivantSuivi(30), 30);
+  egal('Suivi : « retour » s\'arrête au début', precedentSuivi(0), 0);
+  egal('Suivi : « retour » depuis la partie terminée = fin de phase E', pos(precedentSuivi(30)), 'E:fin:null');
+  let parcours = [], p = 0;
+  while (p < PAS_MAX) { parcours.push(positionSuivi(p)); p = suivantSuivi(p); }
+  egal('Suivi : 25 tours et 5 fins de phase', parcours.filter(x => x.etape === 'tour').length + ' tours, ' + parcours.filter(x => x.etape === 'fin').length + ' fins', '25 tours, 5 fins');
+  egal('Suivi : phases dans l\'ordre A à E', [...new Set(parcours.map(x => x.phase))].join(''), 'ABCDE');
+  egal('Suivi : bonus A 10, B 8, C 6, D 4, E 2', PHASES.map(bonusDePhase).join(','), '10,8,6,4,2');
+  egal('Suivi : phase inconnue sans bonus', bonusDePhase('F'), null);
+
+  // --- Outil B : zone complète
+  egal('Zone : 3 cases en phase B = 14 PV (exemple du livret)', pointsZone(3, 'B').total, 14);
+  egal('Zone : barème de taille 1 à 8', BAREME.join(','), '1,3,6,10,15,21,28,36');
+  egal('Zone : 3 cases en phase B = 6 + 8', pointsZone(3, 'B').taille + '+' + pointsZone(3, 'B').phase, '6+8');
+  egal('Zone : 1 case en phase A = 11', pointsZone(1, 'A').total, 11);
+  egal('Zone : 8 cases en phase E = 38', pointsZone(8, 'E').total, 38);
+  egal('Zone : 5 cases en phase D = 19', pointsZone(5, 'D').total, 19);
+  egal('Zone : taille 0 refusée', pointsZone(0, 'A'), null);
+  egal('Zone : taille 9 refusée', pointsZone(9, 'A'), null);
+  egal('Zone : taille décimale refusée', pointsZone(2.5, 'A'), null);
+  egal('Zone : taille illisible refusée', pointsZone(NaN, 'A'), null);
+  egal('Zone : phase inconnue refusée', pointsZone(3, 'Z'), null);
+  egal('Zone : la phase suit le suivi par défaut', phaseEffective('C', ''), 'C');
+  egal('Zone : la phase saisie remplace celle du suivi', phaseEffective('C', 'E'), 'E');
+  egal('Zone : phase saisie invalide ignorée', phaseEffective('C', 'Z'), 'C');
+
+  // --- Outil B ne modifie jamais le suivi (outil A) : essai par les vrais boutons, état et stockage restaurés ensuite
+  {
+    const lireStockage = () => { try { return localStorage.getItem(CLE); } catch (e) { return null; } };
+    const brutAvant = lireStockage(), etatAvant = JSON.parse(JSON.stringify(etat));
+    const cliquer = sel => document.querySelector(sel).click();
+    etat.suivi = 7; etat.zone.phase = ''; etat.onglet = 't6'; valider();
+    egal('Indépendance : le suivi est en phase B', positionSuivi(etat.suivi).phase, 'B');
+    egal('Indépendance : B suit la phase du suivi à l\'ouverture', qs('#zoneNotePhase').textContent, 'Phase du suivi : B');
+    cliquer('[data-action="phase-zone"][data-phase="D"]');
+    egal('Indépendance : B réglé sur la phase D', etat.zone.phase, 'D');
+    verif('Indépendance : B affiche le bonus de la phase D', /phase D : 4 PV/.test(qs('#zoneResultat').textContent), qs('#zoneResultat').textContent);
+    egal('Indépendance : le suivi reste en phase B (mémoire)', positionSuivi(etat.suivi).phase + ':' + etat.suivi, 'B:7');
+    const enregistre = JSON.parse(lireStockage() || '{}');
+    egal('Indépendance : le suivi reste en phase B (clé guilde:chateaux:partie)', positionSuivi(enregistre.suivi).phase + ':' + enregistre.suivi, 'B:7');
+    egal('Indépendance : le suivi affiché reste en phase B', qs('[data-suivi="phase"]').textContent, 'B');
+    cliquer('[data-action="phase-zone"][data-phase="B"]');
+    egal('Indépendance : revenir à la phase du suivi réinitialise B', etat.zone.phase, '');
+    cliquer('[data-action="phase-zone"][data-phase="E"]');
+    cliquer('#t2'); cliquer('#t6');
+    egal('Indépendance : B repart de la phase du suivi à la réouverture de l\'onglet', etat.zone.phase + ':' + positionSuivi(etat.suivi).phase, ':B');
+    cliquer('[data-action="phase-zone"][data-phase="E"]');
+    cliquer('#suiviSuiv');
+    egal('Indépendance : B repart de la phase du suivi quand le suivi change', etat.zone.phase + ':' + etat.suivi, ':8');
+    etat = etatAvant;
+    try { if (brutAvant === null) localStorage.removeItem(CLE); else localStorage.setItem(CLE, brutAvant); } catch (e) { /* stockage indisponible : rien à restaurer */ }
+    actualiser();
+  }
+
+  // --- Outil C : décompte final
+  const joueurVide = () => ({ piste: 0, pieces: 0, invendues: 0, ouvriers: 0, m15: 0, m16a23: [0, 0, 0, 0, 0, 0, 0, 0], m24: 0, m25: 0, m26: 0, casesVides: 0 });
+  const avec = (champs) => Object.assign(joueurVide(), champs);
+  const ligneIdx = n => MON.fin.liste.find(m => m.numeros.length > 1).numeros.indexOf(n);
+  const m1623 = (d17, d22) => { const t = [0, 0, 0, 0, 0, 0, 0, 0]; t[ligneIdx(17)] = d17; t[ligneIdx(22)] = d22; return t; };
+  egal('Décompte n° 16 à 23 : tuiles 17 et 22, 2 tours de guet et 4 banques = 24 PV (livret)', decompteJoueur(avec({ m16a23: m1623(2, 4) })).lignes.m16a23, 24);
+  egal('Décompte n° 24 : 3 espèces = 12 PV (livret)', decompteJoueur(avec({ m24: 3 })).lignes.m24, 12);
+  egal('Décompte n° 25 : 11 tuiles vendues = 11 PV (livret)', decompteJoueur(avec({ m25: 11 })).lignes.m25, 11);
+  egal('Décompte n° 15 : 4 types = 8 PV (2 PV par type retenu)', decompteJoueur(avec({ m15: 4 })).lignes.m15, 8);
+  egal('Décompte n° 26 : 2 tuiles bonus = 6 PV', decompteJoueur(avec({ m26: 2 })).lignes.m26, 6);
+  egal('Décompte : 7 pièces = 7 PV', decompteJoueur(avec({ pieces: 7 })).lignes.pieces, 7);
+  egal('Décompte : 3 marchandises invendues = 3 PV', decompteJoueur(avec({ invendues: 3 })).lignes.invendues, 3);
+  egal('Décompte : 7 ouvriers = 3 PV (arrondi inférieur)', decompteJoueur(avec({ ouvriers: 7 })).lignes.ouvriers, 3);
+  egal('Décompte : 1 ouvrier = 0 PV', decompteJoueur(avec({ ouvriers: 1 })).lignes.ouvriers, 0);
+  egal('Décompte : 8 ouvriers = 4 PV', decompteJoueur(avec({ ouvriers: 8 })).lignes.ouvriers, 4);
+  egal('Décompte : rien saisi = 0', decompteJoueur(joueurVide()).total, 0);
+  const complet = decompteJoueur(avec({ piste: 80, pieces: 5, invendues: 2, ouvriers: 7, m15: 4, m16a23: m1623(2, 4), m24: 3, m25: 11, m26: 2 }));
+  egal('Décompte : fin de partie = 5 + 2 + 3 + 8 + 24 + 12 + 11 + 6', complet.fin, 71);
+  egal('Décompte : total = piste 80 + fin de partie', complet.total, 151);
+  egal('Décompte : la piste seule ne change pas la fin de partie', decompteJoueur(avec({ piste: 120 })).fin, 0);
+  egal('Départage : plus de points gagne', departager({ total: 90, casesVides: 5 }, { total: 88, casesVides: 0 }, '').gagnant, 'j1');
+  egal('Départage : raison = points', departager({ total: 88, casesVides: 5 }, { total: 90, casesVides: 0 }, '').raison, 'points');
+  suite('Départage : égalité, moins de cases vides gagne', departager({ total: 90, casesVides: 4 }, { total: 90, casesVides: 2 }, 'j1'), { gagnant: 'j2', raison: 'casesVides' });
+  suite('Départage : égalité totale, le pont décide (J2 devant)', departager({ total: 90, casesVides: 2 }, { total: 90, casesVides: 2 }, 'j2'), { gagnant: 'j2', raison: 'pont' });
+  suite('Départage : égalité totale, le pont décide (J1 devant)', departager({ total: 90, casesVides: 2 }, { total: 90, casesVides: 2 }, 'j1'), { gagnant: 'j1', raison: 'pont' });
+  suite('Départage : égalité totale sans pont saisi = à saisir', departager({ total: 90, casesVides: 2 }, { total: 90, casesVides: 2 }, ''), { gagnant: null, raison: 'pontASaisir' });
+  egal('Départage : les cases vides ne comptent pas avant les points', departager({ total: 91, casesVides: 20 }, { total: 90, casesVides: 0 }, 'j2').gagnant, 'j1');
+  egal('Décompte : coefficients 1, 1, ÷2, 2, 4, 4, 1, 3', [DEC.valeurs.piece, DEC.valeurs.invendue, DEC.valeurs.ouvriersParPoint, DEC.valeurs.m15, DEC.valeurs.m16a23, DEC.valeurs.m24, DEC.valeurs.m25, DEC.valeurs.m26].join(','), '1,1,2,2,4,4,1,3');
+
+  // --- Monastères : recherche par numéro
+  const tous = Array.from({ length: 26 }, (_, i) => chercherMonastere(i + 1));
+  verif('Monastères : les 26 numéros sont trouvés', tous.every(x => x !== null), 'un numéro manque');
+  egal('Monastères : 0 refusé', chercherMonastere(0), null);
+  egal('Monastères : 27 refusé', chercherMonastere(27), null);
+  egal('Monastères : décimal refusé', chercherMonastere(3.5), null);
+  egal('Monastères : valeur illisible refusée', chercherMonastere(NaN), null);
+  egal('Monastères : n° 1 à 14 = règles modifiées', tous.slice(0, 14).every(x => x.groupe === 'regles'), true);
+  egal('Monastères : n° 15 à 26 = PV de fin de partie', tous.slice(14).every(x => x.groupe === 'fin'), true);
+  egal('Monastères : n° 17 = Tour de guet', chercherMonastere(17).batiment, 'Tour de guet');
+  egal('Monastères : n° 22 = Banque', chercherMonastere(22).batiment, 'Banque');
+  egal('Monastères : seuls 2 numéros portent un nom de bâtiment', tous.filter(x => x.batiment).length, 2);
+  egal('Monastères : n° 16 = bâtiment à identifier', chercherMonastere(16).batimentAIdentifier, true);
+  egal('Monastères : n° 20 = bâtiment à identifier', chercherMonastere(20).batimentAIdentifier, true);
+  egal('Monastères : n° 17 n\'est pas à identifier', chercherMonastere(17).batimentAIdentifier, false);
+  egal('Monastères : n° 16 garde son trou', chercherMonastere(16).trou !== null, true);
+  egal('Monastères : n° 22 n\'a plus de trou', chercherMonastere(22).trou, null);
+  egal('Monastères : n° 5 signalé comme non précisé', chercherMonastere(5).trou !== null, true);
+  egal('Monastères : n° 6 signalé comme non précisé', chercherMonastere(6).trou !== null, true);
+  egal('Monastères : n° 15 à confirmer', chercherMonastere(15).aConfirmer !== null, true);
+  egal('Monastères : n° 2 sans trou', chercherMonastere(2).trou, null);
+  verif('Monastères : n° 26 = 3 PV par tuile bonus', /3 PV par tuile bonus/.test(chercherMonastere(26).texte), chercherMonastere(26).texte);
+  verif('Monastères : n° 24 = 4 PV par espèce', /4 PV par \*\*espèce\*\*/.test(chercherMonastere(24).texte), chercherMonastere(24).texte);
+  verif('Monastères : n° 15 = 2 PV par type', /^2 PV par \*\*type\*\*/.test(chercherMonastere(15).texte), chercherMonastere(15).texte);
+  egal('Monastères : numéros du fichier sans doublon ni trou',
+    [...MON.regles.liste.map(m => m.n), ...MON.fin.liste.flatMap(m => m.numeros)].sort((a, b) => a - b).join(','),
+    Array.from({ length: 26 }, (_, i) => i + 1).join(','));
+  egal('Monastères : jamais plus de 2 noms de bâtiment dans les données', Object.keys(MON.batiments).join(','), '17,22');
+
+  // --- Données : effectifs des tableaux du fichier de règles
+  egal('Données : 17 lignes de matériel', MEP.reperes.materiel.tableau.lignes.length, 17);
+  egal('Données : 6 types de tuiles', D.tuiles.principe.tableau.lignes.length, 6);
+  egal('Données : 8 bâtiments', D.tuiles.batiments.tableau.lignes.length, 8);
+  egal('Données : 4 actions dans le tableau « rôle du dé »', D.actions.principe.tableau.lignes.length, 4);
+  egal('Données : 5 phases', PHASES.length, 5);
+  egal('Données : bonus de couleur à 2 joueurs = 5 PV et 2 PV', PTS.couleur.tableau.lignes[0].join('|'), '2|5 PV|2 PV');
+  egal('Données : une seule ligne « joueurs » dans les tableaux à 2 joueurs',
+    [D.tour.debutPhase.tableau.lignes.length, PTS.couleur.tableau.lignes.length].join(','), '1,1');
+  egal('Données : 4 groupes dans la liste de mise en place', MEP.checklists.length, 4);
+  egal('Données : 7 éléments par joueur dans la mise en place', MEP.checklists.find(g => g.id === 'joueur').points.length, 7);
+  verif('Données : aucun texte ne parle de 3 ou 4 joueurs hors mention du fichier',
+    !/3 joueurs|4 joueurs|à 3 |à 4 /.test(JSON.stringify([MEP.checklists, D.tour, D.actions.detail, PTS.couleur, PTS.finPartie])), 'valeur 3/4 joueurs repérée');
+
+  // --- Trous du livret : montrés, jamais comblés
+  const trousDonnees = [
+    ...TOUR.deroulement.trous, ...D.actions.detail.flatMap(b => b.trous || []), PTS.calculateur.trou,
+    ...MON.regles.liste.filter(m => m.trou).map(m => m.trou), ...MON.fin.liste.filter(m => m.trou).map(m => m.trou)
+  ];
+  egal('Trous : 6 trous dans les données (dépôt vide, premier joueur, château de départ, n° 5, n° 6, n° 16 à 23)', trousDonnees.length, 6);
+  egal('Trous : le texte visible porte la mention « Non précisé par le livret »', D.jeu.etiquetteTrou, 'Non précisé par le livret');
+  // Le résultat de la recherche de Monastère répète un trou selon l'état enregistré : on ne le compte pas.
+  const trousAffiches = [...document.querySelectorAll('.trou[role="note"]')].filter(t => !t.closest('#monResultat'));
+  egal('Trous : 6 encadrés affichés (un par trou, le château de départ dans l\'outil B)', trousAffiches.length, 6);
+  verif('Trous : chaque encadré affiché porte la mention', [...trousAffiches].every(t => t.textContent.includes('Non précisé par le livret')), 'mention absente');
+  const sujets = [...trousAffiches].map(t => t.querySelector('.sujet').textContent).join(' | ');
+  ['Dépôt vide', 'Premier joueur d\'un tour', 'Zone du château de départ', 'n° 5', 'n° 6', 'n° 16 à 23'].forEach(s =>
+    verif('Trous : « ' + s + ' » affiché', sujets.includes(s), sujets));
+  verif('Trous : l\'exemple contradictoire du n° 15 (4 types × 3) n\'est pas repris', !/4 types\s*×\s*3|12 PV par type/.test(JSON.stringify(D)), 'trouvé');
+  const liBat = [...document.querySelectorAll('.liste-bat li')].map(li => li.textContent);
+  egal('Trous : liste n° 16 à 23 = 6 « bâtiment à identifier »', liBat.filter(t => t.includes('bâtiment à identifier')).length, 6);
+  verif('Trous : n° 17 et n° 22 nommés dans la liste', liBat.some(t => t.includes('n° 17') && t.includes('Tour de guet')) && liBat.some(t => t.includes('n° 22') && t.includes('Banque')), liBat.join(' / '));
+
+  // --- Domaine n° 1 (données de test du plateau individuel, jamais affichées)
+  const DOMAINE = `L1: V6 F5 F4 J3
+L2: V2 V1 F6 J5 B4
+L3: V5 V4 B3 J1 B2 B3
+L4: E6 E1 E2 F6 E5 E4 E1
+L5: B2 B5 G4 B3 B1 V2
+L6: B6 G1 J2 B5 B6
+L7: G3 J4 J1 B3`;
+  const dom = decouperDomaine(DOMAINE);
+  const tailles = c => dom.zones.filter(z => z.couleur === c).map(z => z.cases.length).sort((a, b) => a - b).join(',');
+  egal('Domaine 1 : lignes de 4, 5, 6, 7, 6, 5 et 4 cases', dom.rangees.join(','), '4,5,6,7,6,5,4');
+  egal('Domaine 1 : 37 cases', dom.cases.length, 37);
+  egal('Domaine 1 : 13 zones', dom.zones.length, 13);
+  egal('Domaine 1 : toutes les cases sont dans une zone, une seule fois', dom.zones.flatMap(z => z.cases).sort((a, b) => a - b).join(','), dom.cases.map(c => c.id).join(','));
+  egal('Domaine 1 : beige 1, 3, 3, 5', tailles('B'), '1,3,3,5');
+  egal('Domaine 1 : bleu 3, 3', tailles('E'), '3,3');
+  egal('Domaine 1 : vert foncé 1 et 3', tailles('F'), '1,3');
+  egal('Domaine 1 : vert clair 1 et 5', tailles('V'), '1,5');
+  egal('Domaine 1 : jaune 3, 3', tailles('J'), '3,3');
+  egal('Domaine 1 : gris 3', tailles('G'), '3');
+  egal('Domaine 1 : les 4 villes (1, 5, 3, 3) concordent avec la p. 6', dom.zones.filter(z => z.couleur === 'B').map(z => z.cases.length).sort((a, b) => b - a).join(','), '5,3,3,1');
+  const chateau = dom.cases.find(c => c.couleur === 'F' && c.y === 3 && c.c === 3);
+  egal('Domaine 1 : le château de départ (L4, centre) est la case F6', chateau.couleur + chateau.de, 'F6');
+  egal('Domaine 1 : la zone du château de départ a 1 case', dom.zones.find(z => z.cases.includes(chateau.id)).cases.length, 1);
+  egal('Domaine 1 : le château de départ a 6 voisines (livret : 6 cases autour)', dom.cases.filter(o => dom.voisines(chateau, o)).length, 6);
+  verif('Domaine 1 : voisinage symétrique', dom.cases.every(a => dom.cases.every(b => dom.voisines(a, b) === dom.voisines(b, a))), 'asymétrie');
+  verif('Domaine 1 : aucune case voisine d\'elle-même', dom.cases.every(a => !dom.voisines(a, a)), 'auto-voisinage');
+  egal('Domaine 1 : valeurs de dé de 1 à 6', dom.cases.every(c => c.de >= 1 && c.de <= 6), true);
+  egal('Domaine 1 : 12 + 6 + 4 + 6 + 6 + 3 cases par couleur', ['B', 'E', 'F', 'V', 'J', 'G'].map(c => dom.cases.filter(x => x.couleur === c).length).join(','), '12,6,4,6,6,3');
+  const mini = decouperDomaine('L1: V1 V2\nL2: V3');
+  egal('Découpage : deux lignes de longueur différente, 1 zone', mini.zones.length + ':' + mini.zones[0].cases.length, '1:3');
+  const separe = decouperDomaine('L1: V1 J2 V3');
+  egal('Découpage : trois cases alignées de deux couleurs, 3 zones', separe.zones.length, 3);
+
+  // --- État
+  const def = { a: 1, b: { c: true, d: [0, 0] }, e: 'x' };
+  verif('État : valeurs invalides → défaut', JSON.stringify(normaliser(def, { a: 'zz', b: { c: 3, d: [5, 'q'] }, e: 4 })) === JSON.stringify({ a: 1, b: { c: true, d: [5, 0] }, e: 'x' }), 'écart');
+  verif('État : corps absent → défaut', JSON.stringify(normaliser(def, null)) === JSON.stringify(def), 'écart');
+  const abime = assainir(normaliser(etatDefaut(), { v: 1, suivi: 99, zone: { taille: 40, phase: 'Z' }, monastere: -5, onglet: 'x', decompte: { pont: 'j3', j1: { pieces: 5000, m16a23: [99, 'a'] } } }));
+  suite('État : valeurs hors limites ramenées', [abime.suivi, abime.zone.taille, abime.zone.phase, abime.monastere, abime.onglet, abime.decompte.pont, abime.decompte.j1.pieces, abime.decompte.j1.m16a23.slice(0, 2)],
+    [30, 8, '', 0, 't1', '', 99, [20, 0]]);
+  egal('État : par défaut, 8 compteurs de bâtiments par joueur', etatDefaut().decompte.j1.m16a23.length, 8);
+  verif('État : le transitoire n\'est pas enregistré', !('transitoire' in JSON.parse((() => { const c = Object.assign({}, etatDefaut()); delete c.transitoire; return JSON.stringify(c); })())), 'enregistré');
+
+  // --- Interface : 6 onglets, rôles ARIA, cibles tactiles d'au moins 44 px
+  egal('Interface : 6 onglets', document.querySelectorAll('[role="tab"]').length, 6);
+  egal('Interface : 6 panneaux reliés aux onglets', [...document.querySelectorAll('[role="tab"]')].every(t => document.getElementById(t.getAttribute('aria-controls'))), true);
+  egal('Interface : un seul onglet sélectionné', document.querySelectorAll('[role="tab"][aria-selected="true"]').length, 1);
+  [1, 2, 3, 4, 5, 6].forEach(n => egal('Pictogramme : dé ' + n + ' = ' + n + ' points', picto('de:' + n).querySelectorAll('circle').length, n));
+  COULEURS_HEX.forEach(c => egal('Pictogramme : hexagone ' + c, picto('hex:' + c).querySelectorAll('polygon').length, 1));
+  egal('Pictogramme : couleur d\'hexagone inconnue = rien', picto('hex:rose').nodeType, 3);
+  egal('Pictogramme : pièce', picto('piece').querySelectorAll('circle').length, 2);
+  egal('Pictogramme : ouvrier', picto('ouvrier').querySelectorAll('circle, path').length, 2);
+  verif('Pictogramme : tous décoratifs (aria-hidden)', [...document.querySelectorAll('svg.picto')].every(s => s.getAttribute('aria-hidden') === 'true'), 'un pictogramme est lu');
+  egal('Interface : aucun lien ni script tiers', document.querySelectorAll('link[href^="http"], script[src], img[src^="http"]').length, 0);
+  const detailsOuverts = [...document.querySelectorAll('details')];
+  const dejaOuverts = detailsOuverts.map(d => d.open);
+  detailsOuverts.forEach(d => { d.open = true; });
+  const trop = [];
+  ONGLETS.forEach((id, i) => {
+    const panneau = document.getElementById('p' + (i + 1)), cachait = panneau.hidden;
+    panneau.hidden = false;
+    panneau.querySelectorAll('button, .saisie, summary, label.coche').forEach(e => {
+      const r = e.getBoundingClientRect();
+      if (r.width > 0 && (r.width < 43.5 || r.height < 43.5)) trop.push(id + ' ' + (e.className || e.tagName) + ' ' + Math.round(r.width) + '×' + Math.round(r.height));
+    });
+    panneau.hidden = cachait;
+  });
+  document.querySelectorAll('.tab, #nouvelle').forEach(e => {
+    const r = e.getBoundingClientRect();
+    if (r.width < 43.5 || r.height < 43.5) trop.push((e.id || e.className) + ' ' + Math.round(r.width) + '×' + Math.round(r.height));
+  });
+  detailsOuverts.forEach((d, i) => { d.open = dejaOuverts[i]; });
+  verif('Tactile : toutes les cibles font au moins 44 px', trop.length === 0, trop.slice(0, 6).join(' ; '));
+
+  liste.append(h('li', { class: 'info' }, total + ' vérifications.'));
+  const zoneTests = document.getElementById('tests');
+  zoneTests.hidden = false;
+  ajouter(zoneTests, h('strong', { id: 'bilanTests' }, echecs ? echecs + ' test(s) en échec sur ' + total : 'Tous les tests passent (' + total + ')'), liste);
+  console.log(echecs ? 'TESTS : ' + echecs + ' échec(s) sur ' + total : 'TESTS : tout passe (' + total + ')');
+}
+
+})();
+</script>
+</body>
+</html>
