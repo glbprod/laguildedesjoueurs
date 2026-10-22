@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Châteaux de Bourgogne — grille d'observation</title>
+<!-- Aucune ressource tierce : mêmes polices de repli que l'aide de jeu. -->
+<style>
+/* ===== THÈME « parchemin et bordeaux » : mêmes tokens que l'aide de jeu ===== */
+:root{
+  --parchemin:#f0e8d6;
+  --parchemin-fonce:#e5dac0;
+  --parchemin-creux:#cdbf9a;
+  --encre:#2a2420;
+  --encre-pale:#54483f;
+  --accent:#5b1a2b;
+  --danger:#8c2f1b;
+  --j2:#a0521d;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;padding:0 0 4rem;
+  background:var(--parchemin);color:var(--encre);
+  font-family:'Karla',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:17px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea,summary,a{touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,.coche:focus-within{outline:3px solid var(--j2);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;padding:0 1rem}
+
+header{padding:1.6rem 0 .6rem;text-align:center}
+.eyebrow{font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--accent)}
+h1{
+  font-family:'IM Fell English SC',Georgia,'Times New Roman',serif;font-weight:400;
+  font-size:clamp(1.7rem,7vw,2.2rem);line-height:1.15;margin:.4rem 0 .2rem;
+}
+.sous{font-size:.9rem;color:var(--encre-pale)}
+.filet{height:1px;background:var(--encre);opacity:.35;margin:1rem 0 0}
+code{font:.88em ui-monospace,Consolas,monospace;background:var(--parchemin-fonce);padding:0 .25em;border-radius:3px;overflow-wrap:anywhere}
+
+/* sauts vers les 7 sections */
+.sauts{
+  position:sticky;top:0;z-index:10;display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;
+  padding:.4rem 0;background:var(--parchemin);border-bottom:1px solid var(--parchemin-creux);margin-bottom:.4rem;
+}
+.sauts a{
+  min-height:44px;display:grid;place-items:center;border:1px solid var(--parchemin-creux);border-radius:4px;
+  color:var(--encre);text-decoration:none;font-weight:700;
+}
+.sauts a:active{background:var(--accent);color:var(--parchemin)}
+
+h2{
+  font-family:'IM Fell English SC',Georgia,serif;font-weight:400;font-size:1.3rem;line-height:1.25;
+  margin:1.8rem 0 .6rem;padding-bottom:.25rem;border-bottom:1px solid var(--parchemin-creux);scroll-margin-top:4rem;
+}
+p{margin:.45rem 0}
+.note{color:var(--encre-pale);font-size:.9rem}
+.intro p{font-size:.95rem}
+
+.bloc{background:var(--parchemin-fonce);border-radius:4px;padding:.8rem .9rem}
+.bloc + .bloc{margin-top:.6rem}
+
+.coche{display:flex;align-items:flex-start;gap:.8rem;min-height:48px;cursor:pointer;padding:.45rem 0}
+.coche input{width:28px;height:28px;flex:none;accent-color:var(--accent);margin:0}
+.coche input:checked + span{opacity:.6}
+.point{border-bottom:1px solid var(--parchemin-creux);padding-bottom:.4rem}
+.point:last-child{border-bottom:0}
+.point .champs-point{margin-left:2.3rem}
+
+/* champs */
+.champ{display:block;margin:.5rem 0}
+.champ .lib{display:block;font-size:.82rem;color:var(--encre-pale);margin-bottom:.15rem}
+.champ input,.champ select,.champ textarea{
+  width:100%;min-height:44px;padding:.5rem .6rem;font:inherit;color:var(--encre);
+  background:var(--parchemin);border:1px solid var(--encre-pale);border-radius:4px;
+}
+.champ textarea{min-height:88px;resize:vertical}
+
+/* choix : oui / non, livret, notes (boutons à bascule) */
+.choix{display:flex;flex-wrap:wrap;gap:.4rem;margin:.2rem 0 .3rem}
+.choix button{
+  flex:1 1 0;min-width:56px;min-height:48px;background:transparent;border:1px solid var(--encre-pale);border-radius:4px;
+  color:var(--encre);font:inherit;cursor:pointer;padding:.3rem .5rem;
+}
+.choix button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--parchemin);font-weight:700}
+.etiquette-choix{font-size:.82rem;color:var(--encre-pale);margin-top:.5rem}
+
+/* cartes du journal, des trous et du bilan */
+.cartes{display:grid;gap:.7rem;margin-top:.6rem}
+.carte{background:var(--parchemin-fonce);border-radius:4px;border-left:4px solid var(--accent);padding:.5rem .9rem .6rem}
+.carte-tete{display:flex;align-items:center;justify-content:space-between;gap:.6rem;min-height:44px}
+.carte-tete .heure{font-variant-numeric:tabular-nums;color:var(--encre-pale);margin-left:.5rem}
+.carte h3{font-size:1.05rem;margin:.3rem 0 .1rem;font-family:'IM Fell English SC',Georgia,serif;font-weight:400}
+
+.btn{
+  min-height:48px;background:transparent;border:1px solid var(--encre-pale);border-radius:4px;color:var(--encre);
+  padding:.5rem 1rem;font:inherit;cursor:pointer;
+}
+.btn.plein{background:var(--accent);border-color:var(--accent);color:var(--parchemin);font-weight:700}
+.btn.large{width:100%;margin-top:.7rem}
+.btn.petit{min-height:44px;padding:.3rem .8rem;font-size:.9rem}
+.btn.confirme{background:var(--danger);border-color:var(--danger);color:var(--parchemin);font-weight:700}
+.btn:disabled{opacity:.35;cursor:default}
+
+/* export */
+.export{margin-top:.8rem;background:var(--parchemin-fonce);border-radius:4px;padding:.8rem .9rem}
+.export textarea{
+  width:100%;min-height:12rem;font:.8rem/1.4 ui-monospace,Consolas,monospace;color:var(--encre);
+  background:var(--parchemin);border:1px solid var(--encre-pale);border-radius:4px;padding:.5rem;
+}
+.export .rangee{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem}
+.statut{font-weight:700;margin:0 0 .5rem}
+.remise{margin-top:1.4rem}
+footer{text-align:center;color:var(--encre-pale);font-size:.72rem;letter-spacing:.09em;margin-top:2.5rem;text-transform:uppercase}
+
+/* mode ?test */
+#tests{margin-top:2rem;padding:1rem;border:2px dashed var(--encre-pale);border-radius:4px;font-size:.85rem}
+#tests li.ok::marker{content:"✔ "} #tests li.echec{color:var(--danger);font-weight:700}
+#tests li.echec::marker{content:"✘ "} #tests li.info{color:var(--encre-pale)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow" id="eyebrow"></div>
+  <h1 id="titreJeu"></h1>
+  <div class="sous" id="sousTitre"></div>
+  <div class="filet"></div>
+</header>
+
+<noscript><p class="bloc">Cette grille a besoin de JavaScript.</p></noscript>
+
+<nav class="sauts" id="sauts" aria-label="Aller à la section"></nav>
+
+<main id="grille"></main>
+
+<div class="remise">
+  <button class="btn plein large" id="exporter" type="button">Exporter</button>
+  <div class="export" id="zoneExport" hidden>
+    <p class="statut" id="statutExport" role="status" aria-live="polite"></p>
+    <textarea id="texteExport" readonly aria-label="Grille exportée au format Markdown" rows="12"></textarea>
+    <div class="rangee">
+      <button class="btn" id="copier" type="button">Copier</button>
+      <button class="btn" id="telecharger" type="button">Télécharger (.md)</button>
+    </div>
+  </div>
+  <button class="btn large" id="nouvelle" type="button">Nouvelle grille</button>
+</div>
+<footer id="pied"></footer>
+<div id="tests" hidden></div>
+</div>
+
+<!-- ===== DONNÉES : textes de chateaux_grille-observation_v1.md, sections 1 à 7, repris tels quels ===== -->
+<script type="application/json" id="donnees">
+{
+  "titre": "Châteaux de Bourgogne — grille d'observation, partie test v1",
+  "eyebrow": "Châteaux de Bourgogne",
+  "h1": "Grille d'observation",
+  "sousTitre": "partie test v1",
+  "pied": "Aide de jeu non officielle",
+  "intro": [
+    "Étape 3 du pipeline. Une partie à 2 joueurs, page `reference/chateaux_aide-de-jeu_v1.html` sur la tablette posée sur la table.",
+    "Objectif : noter ce qui coince **pendant** la partie, sans corriger sur le moment. Une ligne par incident suffit."
+  ],
+  "entete": [
+    { "id": "date", "libelle": "Date" },
+    { "id": "joueurs", "libelle": "Joueurs" },
+    { "id": "tablette", "libelle": "Tablette" },
+    { "id": "duree", "libelle": "Durée de la partie" }
+  ],
+  "avant": {
+    "titre": "1. Avant de jouer (2 min)",
+    "points": [
+      { "texte": "La page s'ouvre sans réseau (mode avion), avec les pictogrammes et les polices de repli" },
+      { "texte": "« Nouvelle partie » remet bien le suivi à phase A, tour 1" },
+      { "texte": "La mise en place se fait uniquement avec l'onglet 1, sans le livret" }
+    ]
+  },
+  "journal": {
+    "titre": "2. Pendant la partie : le journal",
+    "intro": "Une ligne à chaque fois qu'on consulte la tablette pour une raison qui mérite d'être notée.",
+    "colonnes": {
+      "heure": "Heure",
+      "phase": "Phase / tour",
+      "question": "Question qu'on se posait",
+      "onglet": "Onglet ouvert",
+      "trouve": "Trouvé ? (oui / non / livret)",
+      "temps": "Temps approx.",
+      "remarque": "Remarque"
+    },
+    "trouve": ["oui", "non", "livret"],
+    "onglets": ["Mise en place", "Tour de jeu", "Actions", "Tuiles", "Monastères", "Points"],
+    "note": "« Livret » = il a fallu ouvrir le livret : c'est un manque de la page, à noter en priorité.",
+    "ajouter": "+ Ajouter une ligne"
+  },
+  "trous": {
+    "titre": "3. Les trous du livret : sont-ils survenus ?",
+    "intro": "Cocher seulement si la situation s'est **vraiment** présentée, et noter ce qu'on a décidé à table.",
+    "colonnes": { "point": "Point ouvert", "survenu": "Survenu ?", "decision": "Décision prise à table" },
+    "reponses": ["oui", "non"],
+    "points": [
+      "Dépôt vide pour le dé choisi",
+      "Zone du château de départ (points ou non)",
+      "Premier joueur d'un tour (lecture du pont)",
+      "Sens du pont lors d'un navire",
+      "Monastère n° 5 (cases voisines)",
+      "Monastère n° 6 (cumul, dé)",
+      "Monastère n° 15 (2 ou 3 PV : lire la tuile)",
+      "Monastères n° 16 à 23 (bâtiment par numéro : lire les tuiles)"
+    ]
+  },
+  "outils": {
+    "titre": "4. Les outils",
+    "points": [
+      { "texte": "**Suivi (A)** : il est resté synchronisé avec la partie réelle jusqu'à la fin.",
+        "champs": [{ "libelle": "Sinon, à quel moment a-t-il décroché ?" }] },
+      { "texte": "**Suivi (A)** : utiliser le calculateur de zone n'a jamais modifié la phase du suivi (le bug corrigé)" },
+      { "texte": "**Zone (B)** : chaque zone complétée a été comptée avec l'outil.",
+        "champs": [{ "libelle": "Nombre de fois :" }, { "libelle": "erreurs :" }] },
+      { "texte": "**Décompte (C)** : le total de l'outil est identique à un recalcul à la main, pour les deux joueurs" },
+      { "texte": "**Départage** :", "sansCase": true,
+        "champs": [{ "choix": ["il a servi", "il n'a pas servi"], "aide": "(rayer la mention inutile)" }] }
+    ]
+  },
+  "lisibilite": {
+    "titre": "5. Lisibilité à table",
+    "points": [
+      { "texte": "Texte lisible depuis sa chaise, sans prendre la tablette en main" },
+      { "texte": "Aucun appui raté sur un bouton (cibles ≥ 44 px).", "champs": [{ "libelle": "Sinon, lequel :" }] },
+      { "texte": "L'essentiel de chaque onglet visible sans défiler.", "champs": [{ "libelle": "Onglets où il a fallu défiler :" }] },
+      { "texte": "Veille de l'écran :", "champs": [{ "libelle": "gênante ?" }] },
+      { "texte": "Lumière, reflets, orientation de la tablette :", "champs": [{ "libelle": "" }] }
+    ]
+  },
+  "apres": {
+    "titre": "6. Après la partie (5 min, avec l'autre joueur)",
+    "questions": [
+      { "texte": "Quel est le moment où l'aide de jeu vous a le plus servi ?" },
+      { "texte": "Le moment où elle vous a gêné ou ralenti ?" },
+      { "texte": "Une information qu'on a cherchée et qui n'y était pas ?" },
+      { "texte": "Sur 5, quelle note pour l'aide de jeu ? (1 = plus lente que le livret, 5 = on n'a jamais ouvert le livret)", "note": [1, 2, 3, 4, 5] }
+    ]
+  },
+  "bilan": {
+    "titre": "7. Bilan pour la suite (à remplir ensuite avec Claude)",
+    "colonnes": {
+      "constat": "Constat",
+      "type": "Type (règle / interface / outil)",
+      "gravite": "Gravité (bloquant / gênant / détail)",
+      "suite": "Suite"
+    },
+    "types": ["règle", "interface", "outil"],
+    "gravites": ["bloquant", "gênant", "détail"],
+    "ajouter": "+ Ajouter une ligne"
+  },
+  "messages": {
+    "copie": "Copié dans le presse-papiers.",
+    "copieImpossible": "Copie automatique impossible : sélectionnez le texte ci-dessous.",
+    "pret": "Grille exportée. Le fichier .md se télécharge avec le bouton ci-dessous.",
+    "telecharge": "Fichier téléchargé.",
+    "confirmerLigne": "Confirmer la suppression ?",
+    "supprimer": "Supprimer la ligne",
+    "nouvelle": "Nouvelle grille",
+    "confirmerNouvelle": "Confirmer : tout effacer ?"
+  }
+}
+</script>
+
+<script>
+(function(){
+"use strict";
+
+/* ================================================================== */
+/* Données et constantes                                               */
+/* ================================================================== */
+
+const D = JSON.parse(document.getElementById('donnees').textContent);
+const CLE = 'guilde:chateaux:observation';
+const MAX_TEXTE = 2000, MAX_LIGNES = 200;
+const J = D.journal, B = D.bilan, T = D.trous, APRES = D.apres;
+// Premier champ renvoyant vrai si une chaîne vaut l'une des options, sinon vide.
+const choisi = (v, options) => (options.includes(v) ? v : '');
+const chaine = v => (typeof v === 'string' ? v.slice(0, MAX_TEXTE) : '');
+const tableau = v => (Array.isArray(v) ? v : []);
+const objet = v => (v && typeof v === 'object' ? v : {});
+
+/* ================================================================== */
+/* Logique pure (testée en mode ?test)                                 */
+/* ================================================================== */
+
+const pad = n => String(n).padStart(2, '0');
+const heureDe = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+const dateDe = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const nomFichier = d => 'chateaux_grille-observation_' + dateDe(d) + '.md';
+
+const ligneJournal = heure => ({ heure: heure || '', phase: '', question: '', onglet: '', trouve: '', temps: '', remarque: '' });
+const ligneBilan = () => ({ constat: '', type: '', gravite: '', suite: '' });
+const pointVide = p => ({ coche: false, v: (p.champs || []).map(() => '') });
+
+function etatDefaut() {
+  return {
+    v: 1,
+    entete: Object.fromEntries(D.entete.map(e => [e.id, ''])),
+    avant: D.avant.points.map(() => ({ coche: false })),
+    journal: [],
+    trous: T.points.map(() => ({ survenu: '', decision: '' })),
+    outils: D.outils.points.map(pointVide),
+    lisibilite: D.lisibilite.points.map(pointVide),
+    apres: { reponses: APRES.questions.filter(q => !q.note).map(() => ''), note: 0 },
+    bilan: []
+  };
+}
+
+// Tout ce qui n'a pas la forme attendue retombe sur la valeur par défaut.
+function normaliserEtat(brut) {
+  const e = etatDefaut(), b = objet(brut);
+  Object.keys(e.entete).forEach(k => { e.entete[k] = chaine(objet(b.entete)[k]); });
+  e.avant.forEach((p, i) => { p.coche = objet(tableau(b.avant)[i]).coche === true; });
+  e.journal = tableau(b.journal).slice(0, MAX_LIGNES).map(l => {
+    const o = objet(l);
+    return {
+      heure: chaine(o.heure), phase: chaine(o.phase), question: chaine(o.question),
+      onglet: choisi(o.onglet, J.onglets), trouve: choisi(o.trouve, J.trouve), temps: chaine(o.temps), remarque: chaine(o.remarque)
+    };
+  });
+  e.trous.forEach((t, i) => {
+    const o = objet(tableau(b.trous)[i]);
+    t.survenu = choisi(o.survenu, T.reponses); t.decision = chaine(o.decision);
+  });
+  ['outils', 'lisibilite'].forEach(cle => {
+    D[cle].points.forEach((p, i) => {
+      const o = objet(tableau(b[cle])[i]), cible = e[cle][i];
+      cible.coche = o.coche === true;
+      (p.champs || []).forEach((c, j) => { cible.v[j] = c.choix ? choisi(tableau(o.v)[j], c.choix) : chaine(tableau(o.v)[j]); });
+    });
+  });
+  const ap = objet(b.apres);
+  e.apres.reponses = e.apres.reponses.map((_, i) => chaine(tableau(ap.reponses)[i]));
+  e.apres.note = Number.isInteger(ap.note) && ap.note >= 1 && ap.note <= 5 ? ap.note : 0;
+  e.bilan = tableau(b.bilan).slice(0, MAX_LIGNES).map(l => {
+    const o = objet(l);
+    return { constat: chaine(o.constat), type: choisi(o.type, B.types), gravite: choisi(o.gravite, B.gravites), suite: chaine(o.suite) };
+  });
+  return e;
+}
+
+// --- Export Markdown : mêmes sections, même ordre, mêmes libellés que le .md d'origine.
+const VIDE = '**\\_\\_\\_\\_**';
+const gras = v => (String(v).trim() ? '**' + String(v).trim() + '**' : VIDE);
+const cellule = v => String(v).replace(/\r?\n/g, ' ').replace(/\|/g, '\\|').trim();
+const ligneTableau = cellules => '| ' + cellules.map(cellule).join(' | ') + ' |';
+function tableMd(entetes, lignes) {
+  const corps = lignes.length ? lignes : [entetes.map(() => '')];
+  return [ligneTableau(entetes), ligneTableau(entetes.map(() => '---'))].concat(corps.map(ligneTableau));
+}
+function pointMd(p, valeurs, coche) {
+  const champs = p.champs || [];
+  let ligne = p.texte;
+  champs.forEach((c, j) => {
+    const v = valeurs[j];
+    if (c.choix) {
+      const rendu = c.choix.map(o => (v && o !== v ? '~~' + o + '~~' : o)).join(' / ');
+      ligne += ' ' + rendu + (c.aide ? ' ' + c.aide : '');
+    } else {
+      ligne += (j ? ' ;' : '') + ' ' + (c.libelle ? c.libelle + ' ' : '') + gras(v);
+    }
+  });
+  const fait = coche === undefined ? champs.some(c => c.choix) && valeurs.some(v => v) : coche;
+  return '- [' + (fait ? 'x' : ' ') + '] ' + ligne;
+}
+
+function genererExport(e) {
+  const L = [];
+  L.push('# ' + D.titre, '');
+  D.intro.forEach(p => L.push(p));
+  L.push('', D.entete.map(c => c.libelle + ' : ' + gras(e.entete[c.id])).join(' '), '', '---', '');
+
+  L.push('## ' + D.avant.titre, '');
+  D.avant.points.forEach((p, i) => L.push('- [' + (e.avant[i].coche ? 'x' : ' ') + '] ' + p.texte));
+
+  const C = J.colonnes;
+  L.push('', '## ' + J.titre, '', J.intro, '');
+  L.push(...tableMd([C.heure, C.phase, C.question, C.onglet, C.trouve, C.temps, C.remarque],
+    e.journal.map(l => [l.heure, l.phase, l.question, l.onglet, l.trouve, l.temps, l.remarque])));
+  L.push('', J.note);
+
+  L.push('', '## ' + T.titre, '', T.intro, '');
+  L.push(...tableMd([T.colonnes.point, T.colonnes.survenu, T.colonnes.decision],
+    T.points.map((p, i) => [p, e.trous[i].survenu, e.trous[i].decision])));
+
+  L.push('', '## ' + D.outils.titre, '');
+  D.outils.points.forEach((p, i) => L.push(pointMd(p, e.outils[i].v, p.sansCase ? undefined : e.outils[i].coche)));
+
+  L.push('', '## ' + D.lisibilite.titre, '');
+  D.lisibilite.points.forEach((p, i) => L.push(pointMd(p, e.lisibilite[i].v, e.lisibilite[i].coche)));
+
+  L.push('', '## ' + APRES.titre, '');
+  let r = 0;
+  APRES.questions.forEach((q, i) => {
+    L.push((i + 1) + '. ' + q.texte);
+    L.push('   ' + (q.note ? '**Réponse :** ' + (e.apres.note ? e.apres.note + ' / 5' : VIDE) : '**Réponse :** ' + (e.apres.reponses[r++].replace(/\r?\n/g, ' ').trim() || VIDE)));
+  });
+
+  const K = B.colonnes;
+  L.push('', '## ' + B.titre, '');
+  L.push(...tableMd([K.constat, K.type, K.gravite, K.suite], e.bilan.map(l => [l.constat, l.type, l.gravite, l.suite])));
+  return L.join('\n') + '\n';
+}
+
+/* ================================================================== */
+/* État                                                                */
+/* ================================================================== */
+
+function charger() {
+  try {
+    const brut = localStorage.getItem(CLE);
+    if (brut) {
+      const o = JSON.parse(brut);
+      if (o && o.v === 1) return normaliserEtat(o);
+    }
+  } catch (e) { /* stockage vide, illisible ou indisponible : on repart d'une grille neuve */ }
+  return etatDefaut();
+}
+function sauver() {
+  try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch (e) { /* stockage indisponible : la grille reste utilisable en mémoire */ }
+}
+let etat = charger();
+
+const lire = chemin => chemin.split('.').reduce((o, k) => o[k], etat);
+function ecrire(chemin, valeur) {
+  const cles = chemin.split('.');
+  const dernier = cles.pop();
+  cles.reduce((o, k) => o[k], etat)[dernier] = valeur;
+}
+
+/* ================================================================== */
+/* Outils DOM                                                          */
+/* ================================================================== */
+
+function h(tag, attrs, ...enfants) {
+  const e = document.createElement(tag);
+  Object.entries(attrs || {}).forEach(([k, v]) => {
+    if (v === null || v === undefined || v === false) return;
+    e.setAttribute(k, v === true ? '' : v);
+  });
+  enfants.flat(Infinity).forEach(c => {
+    if (c === null || c === undefined || c === false) return;
+    e.append(typeof c === 'object' ? c : document.createTextNode(c));
+  });
+  return e;
+}
+// **gras** et `code` dans les textes des données
+function riche(t) {
+  return String(t).split(/(\*\*.+?\*\*|`.+?`)/).map(p => {
+    if (/^\*\*.+\*\*$/.test(p)) return h('strong', {}, p.slice(2, -2));
+    if (/^`.+`$/.test(p)) return h('code', {}, p.slice(1, -1));
+    return p;
+  });
+}
+
+const champTexte = (chemin, libelle, type) => h('label', { class: 'champ' },
+  h('span', { class: 'lib' }, libelle), h('input', { type: type || 'text', 'data-champ': chemin, autocomplete: 'off', maxlength: MAX_TEXTE }));
+const champZone = (chemin, libelle) => h('label', { class: 'champ' },
+  h('span', { class: 'lib' }, libelle), h('textarea', { 'data-champ': chemin, rows: 3, maxlength: MAX_TEXTE }));
+const champListe = (chemin, libelle, options) => h('label', { class: 'champ' },
+  h('span', { class: 'lib' }, libelle),
+  h('select', { 'data-champ': chemin }, h('option', { value: '' }, '—'), options.map(o => h('option', { value: o }, o))));
+// Boutons à bascule : un second appui sur le bouton choisi retire le choix.
+const choix = (chemin, libelle, options) => h('div', { role: 'group', 'aria-label': libelle },
+  h('div', { class: 'etiquette-choix' }, libelle),
+  h('div', { class: 'choix' }, options.map(o => h('button', { type: 'button', 'data-choix': chemin, 'data-valeur': o, 'aria-pressed': 'false' }, o))));
+
+/* ================================================================== */
+/* Construction                                                        */
+/* ================================================================== */
+
+function pointAvecCase(p, cheminCoche, cheminBase) {
+  return h('div', { class: 'point' },
+    p.sansCase ? null : h('label', { class: 'coche' },
+      h('input', { type: 'checkbox', 'data-coche': cheminCoche }), h('span', {}, riche(p.texte))),
+    p.sansCase ? h('div', { class: 'etiquette-choix' }, riche(p.texte)) : null,
+    (p.champs || []).length ? h('div', { class: 'champs-point' }, p.champs.map((c, j) => (c.choix
+      ? [choix(cheminBase + '.v.' + j, p.texte.replace(/\*\*/g, '') + ' ' + c.choix.join(' / '), c.choix), c.aide ? h('p', { class: 'note' }, c.aide) : null]
+      : champTexte(cheminBase + '.v.' + j, c.libelle || p.texte.replace(/\*\*/g, ''))))) : null);
+}
+
+function carteJournal(l, i) {
+  const C = J.colonnes, c = 'journal.' + i + '.';
+  return h('article', { class: 'carte', role: 'group', 'aria-label': 'Ligne ' + (i + 1) + ' du journal' },
+    h('div', { class: 'carte-tete' },
+      h('span', {}, h('strong', {}, 'Ligne ' + (i + 1)), h('span', { class: 'heure' }, l.heure)),
+      h('button', { class: 'btn petit', type: 'button', 'data-action': 'supprimer', 'data-liste': 'journal', 'data-i': i }, D.messages.supprimer)),
+    champTexte(c + 'phase', C.phase), champTexte(c + 'question', C.question),
+    champListe(c + 'onglet', C.onglet, J.onglets),
+    choix(c + 'trouve', C.trouve, J.trouve),
+    champTexte(c + 'temps', C.temps), champZone(c + 'remarque', C.remarque));
+}
+function carteBilan(l, i) {
+  const C = B.colonnes, c = 'bilan.' + i + '.';
+  return h('article', { class: 'carte', role: 'group', 'aria-label': 'Ligne ' + (i + 1) + ' du bilan' },
+    h('div', { class: 'carte-tete' }, h('strong', {}, 'Ligne ' + (i + 1)),
+      h('button', { class: 'btn petit', type: 'button', 'data-action': 'supprimer', 'data-liste': 'bilan', 'data-i': i }, D.messages.supprimer)),
+    champZone(c + 'constat', C.constat),
+    choix(c + 'type', C.type, B.types), choix(c + 'gravite', C.gravite, B.gravites),
+    champTexte(c + 'suite', C.suite));
+}
+function construireListe(nom) {
+  const conteneur = document.getElementById('liste-' + nom);
+  conteneur.replaceChildren(...etat[nom].map((l, i) => (nom === 'journal' ? carteJournal(l, i) : carteBilan(l, i))));
+  majChamps(conteneur);
+}
+
+function construireGrille() {
+  const main = document.getElementById('grille'), sauts = document.getElementById('sauts');
+  const section = (id, titre, ...contenu) => h('section', { id }, h('h2', {}, titre), contenu);
+  const titres = [D.avant.titre, J.titre, T.titre, D.outils.titre, D.lisibilite.titre, APRES.titre, B.titre];
+  titres.forEach((t, i) => sauts.append(h('a', { href: '#s' + (i + 1), 'aria-label': 'Section ' + t }, String(i + 1))));
+
+  main.append(
+    h('div', { class: 'intro' }, D.intro.map(p => h('p', {}, riche(p)))),
+    h('div', { class: 'bloc', style: 'margin-top:.6rem' }, D.entete.map(c => champTexte('entete.' + c.id, c.libelle))),
+
+    section('s1', D.avant.titre, h('div', { class: 'bloc' }, D.avant.points.map((p, i) => pointAvecCase(p, 'avant.' + i + '.coche', 'avant.' + i)))),
+
+    section('s2', J.titre, h('p', {}, J.intro),
+      h('div', { class: 'cartes', id: 'liste-journal' }),
+      h('button', { class: 'btn plein large', type: 'button', 'data-action': 'ajouter', 'data-liste': 'journal' }, J.ajouter),
+      h('p', { class: 'note' }, J.note)),
+
+    section('s3', T.titre, h('p', {}, riche(T.intro)),
+      h('div', { class: 'cartes' }, T.points.map((p, i) => h('article', { class: 'carte', role: 'group', 'aria-label': p },
+        h('h3', {}, p),
+        choix('trous.' + i + '.survenu', T.colonnes.survenu, T.reponses),
+        champZone('trous.' + i + '.decision', T.colonnes.decision))))),
+
+    section('s4', D.outils.titre, h('div', { class: 'bloc' }, D.outils.points.map((p, i) => pointAvecCase(p, 'outils.' + i + '.coche', 'outils.' + i)))),
+    section('s5', D.lisibilite.titre, h('div', { class: 'bloc' }, D.lisibilite.points.map((p, i) => pointAvecCase(p, 'lisibilite.' + i + '.coche', 'lisibilite.' + i)))),
+
+    section('s6', APRES.titre, h('div', { class: 'cartes' }, (() => {
+      let r = 0;
+      return APRES.questions.map((q, i) => h('article', { class: 'carte', role: 'group', 'aria-label': 'Question ' + (i + 1) },
+        h('p', {}, h('strong', {}, (i + 1) + '. '), q.texte),
+        q.note ? choix('apres.note', 'Note sur 5', q.note.map(String)) : champZone('apres.reponses.' + (r++), 'Réponse')));
+    })())),
+
+    section('s7', B.titre, h('div', { class: 'cartes', id: 'liste-bilan' }),
+      h('button', { class: 'btn plein large', type: 'button', 'data-action': 'ajouter', 'data-liste': 'bilan' }, B.ajouter)));
+}
+
+/* ================================================================== */
+/* Mise à jour de l'affichage                                          */
+/* ================================================================== */
+
+// `racine` limite la mise à jour à un bloc : une liste reconstruite ne doit pas relire les cartes de l'autre liste,
+// dont les indices peuvent ne plus exister dans l'état.
+function majChamps(racine) {
+  const zone = racine || document;
+  zone.querySelectorAll('[data-champ]').forEach(c => {
+    if (document.activeElement !== c) c.value = lire(c.dataset.champ);
+  });
+  zone.querySelectorAll('[data-coche]').forEach(c => { c.checked = lire(c.dataset.coche) === true; });
+  zone.querySelectorAll('[data-choix]').forEach(b => {
+    b.setAttribute('aria-pressed', String(String(lire(b.dataset.choix)) === b.dataset.valeur));
+  });
+}
+function majNouvelle() {
+  const b = document.getElementById('nouvelle');
+  b.classList.toggle('confirme', confirmations.nouvelle);
+  b.textContent = confirmations.nouvelle ? D.messages.confirmerNouvelle : D.messages.nouvelle;
+}
+function majSuppressions() {
+  document.querySelectorAll('[data-action="supprimer"]').forEach(b => {
+    const attente = confirmations.ligne === b.dataset.liste + '.' + b.dataset.i;
+    b.classList.toggle('confirme', attente);
+    b.textContent = attente ? D.messages.confirmerLigne : D.messages.supprimer;
+  });
+}
+function actualiser() { majChamps(); majNouvelle(); majSuppressions(); }
+function valider() { sauver(); majChamps(); }
+
+/* ================================================================== */
+/* Interactions                                                        */
+/* ================================================================== */
+
+// Deux appuis pour effacer : un appui isolé sur un téléphone ne doit rien détruire.
+const confirmations = { nouvelle: false, ligne: '' };
+let minuteurNouvelle = null, minuteurLigne = null;
+
+function ajouterLigne(nom) {
+  if (etat[nom].length >= MAX_LIGNES) return;
+  etat[nom].push(nom === 'journal' ? ligneJournal(heureDe(new Date())) : ligneBilan());
+  sauver();
+  construireListe(nom);
+  const cartes = document.getElementById('liste-' + nom).children, derniere = cartes[cartes.length - 1];
+  const premier = derniere.querySelector('input, textarea');
+  if (premier) premier.focus({ preventScroll: true });
+  derniere.scrollIntoView({ block: 'center' });
+}
+function supprimerLigne(nom, i) {
+  etat[nom].splice(i, 1);
+  sauver();
+  confirmations.ligne = '';
+  construireListe(nom);
+  majSuppressions();
+}
+function nouvelleGrille() {
+  clearTimeout(minuteurNouvelle);
+  confirmations.nouvelle = false; confirmations.ligne = '';
+  try { localStorage.removeItem(CLE); } catch (e) { /* sans effet : l'état mémoire est remis à zéro */ }
+  etat = etatDefaut();
+  document.getElementById('zoneExport').hidden = true;
+  construireListe('journal'); construireListe('bilan');
+  actualiser();
+  window.scrollTo({ top: 0 });
+}
+
+document.addEventListener('click', ev => {
+  const ch = ev.target.closest('[data-choix]');
+  if (ch) {
+    const chemin = ch.dataset.choix, valeur = ch.dataset.valeur;
+    const numerique = chemin === 'apres.note';
+    const actuel = String(lire(chemin));
+    ecrire(chemin, actuel === valeur ? (numerique ? 0 : '') : (numerique ? Number(valeur) : valeur));
+    valider(); return;
+  }
+  const act = ev.target.closest('[data-action]');
+  if (!act) return;
+  const nom = act.dataset.liste, i = Number(act.dataset.i);
+  if (act.dataset.action === 'ajouter') ajouterLigne(nom);
+  if (act.dataset.action === 'supprimer') {
+    const cle = nom + '.' + i;
+    if (confirmations.ligne === cle) { clearTimeout(minuteurLigne); supprimerLigne(nom, i); return; }
+    confirmations.ligne = cle; majSuppressions();
+    clearTimeout(minuteurLigne);
+    minuteurLigne = setTimeout(() => { confirmations.ligne = ''; majSuppressions(); }, 4000);
+  }
+});
+
+document.addEventListener('input', ev => {
+  const c = ev.target.closest('[data-champ]');
+  if (c) { ecrire(c.dataset.champ, c.value); sauver(); }
+});
+document.addEventListener('change', ev => {
+  const c = ev.target.closest('[data-coche]');
+  if (c) { ecrire(c.dataset.coche, c.checked); sauver(); return; }
+  const l = ev.target.closest('select[data-champ]');
+  if (l) { ecrire(l.dataset.champ, l.value); sauver(); }
+});
+
+document.getElementById('nouvelle').addEventListener('click', () => {
+  if (confirmations.nouvelle) { nouvelleGrille(); return; }
+  confirmations.nouvelle = true; majNouvelle();
+  clearTimeout(minuteurNouvelle);
+  minuteurNouvelle = setTimeout(() => { confirmations.nouvelle = false; majNouvelle(); }, 4000);
+});
+
+/* --- export : copie dans le presse-papiers et téléchargement .md --- */
+async function copier(texte) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(texte); return true; }
+  } catch (e) { /* refus ou API absente : repli ci-dessous */ }
+  try {
+    const zone = document.getElementById('texteExport');
+    zone.focus(); zone.select();
+    return document.execCommand('copy');
+  } catch (e) { return false; }
+}
+function telecharger(texte) {
+  const url = URL.createObjectURL(new Blob([texte], { type: 'text/markdown;charset=utf-8' }));
+  const a = h('a', { href: url, download: nomFichier(new Date()) });
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+async function exporter() {
+  const texte = genererExport(etat);
+  const zone = document.getElementById('texteExport');
+  zone.value = texte;
+  document.getElementById('zoneExport').hidden = false;
+  const ok = await copier(texte);
+  document.getElementById('statutExport').textContent = ok ? D.messages.copie + ' ' + D.messages.pret : D.messages.copieImpossible;
+  if (!ok) { zone.focus(); zone.select(); }
+  return ok;
+}
+document.getElementById('exporter').addEventListener('click', exporter);
+document.getElementById('copier').addEventListener('click', async () => {
+  const ok = await copier(document.getElementById('texteExport').value);
+  document.getElementById('statutExport').textContent = ok ? D.messages.copie : D.messages.copieImpossible;
+});
+document.getElementById('telecharger').addEventListener('click', () => {
+  telecharger(document.getElementById('texteExport').value);
+  document.getElementById('statutExport').textContent = D.messages.telecharge;
+});
+
+/* ================================================================== */
+/* Démarrage                                                           */
+/* ================================================================== */
+
+document.title = D.titre;
+document.getElementById('eyebrow').textContent = D.eyebrow;
+document.getElementById('titreJeu').textContent = D.h1;
+document.getElementById('sousTitre').textContent = D.sousTitre;
+document.getElementById('pied').textContent = D.pied;
+construireGrille();
+construireListe('journal'); construireListe('bilan');
+actualiser();
+
+/* ================================================================== */
+/* Tests : ouvrir la page avec ?test                                   */
+/* ================================================================== */
+
+if (/[?&]test\b/.test(location.search)) {
+  const liste = h('ul', {});
+  let echecs = 0, total = 0;
+  const verif = (nomTest, ok, detail) => {
+    total++;
+    if (!ok) echecs++;
+    liste.append(h('li', { class: ok ? 'ok' : 'echec' }, nomTest + (ok ? '' : ' — ' + detail)));
+  };
+  const egal = (nomTest, obtenu, attendu) => verif(nomTest, obtenu === attendu, 'obtenu ' + obtenu + ', attendu ' + attendu);
+  const lireStockage = () => { try { return localStorage.getItem(CLE); } catch (e) { return null; } };
+  const qs = sel => document.querySelector(sel);
+  const cliquer = sel => qs(sel).click();
+  const saisir = (sel, valeur) => { const c = qs(sel); c.value = valeur; c.dispatchEvent(new Event('input', { bubbles: true })); };
+
+  // L'essai agit sur la vraie page : on sauvegarde l'état et le stockage pour les restaurer à la fin.
+  const brutAvant = lireStockage(), etatAvant = JSON.parse(JSON.stringify(etat));
+  etat = etatDefaut(); sauver(); construireListe('journal'); construireListe('bilan'); actualiser();
+
+  // --- Structure
+  egal('Clé de sauvegarde', CLE, 'guilde:chateaux:observation');
+  egal('7 sections', document.querySelectorAll('main > section').length, 7);
+  egal('7 liens de saut', document.querySelectorAll('#sauts a').length, 7);
+  egal('Les titres des 7 sections sont ceux du .md', [...document.querySelectorAll('main h2')].map(x => x.textContent).join('|'),
+    [D.avant.titre, J.titre, T.titre, D.outils.titre, D.lisibilite.titre, APRES.titre, B.titre].join('|'));
+  egal('§1 : 3 cases à cocher', D.avant.points.length, 3);
+  egal('§3 : 8 trous du livret', T.points.length, 8);
+  egal('§3 : 8 cartes avec choix oui / non', document.querySelectorAll('#s3 .carte').length + ':' + document.querySelectorAll('#s3 [data-choix$=".survenu"]').length / 2, '8:8');
+  egal('§4 : 5 points', D.outils.points.length, 5);
+  egal('§5 : 5 points', D.lisibilite.points.length, 5);
+  egal('§6 : 4 questions, note de 1 à 5', APRES.questions.length + ':' + APRES.questions[3].note.join(''), '4:12345');
+  egal('§6 : 5 boutons de note', document.querySelectorAll('[data-choix="apres.note"]').length, 5);
+  egal('Journal vide au départ, bouton « + Ajouter une ligne »', document.querySelectorAll('#liste-journal .carte').length + ':' + qs('[data-action="ajouter"][data-liste="journal"]').textContent, '0:+ Ajouter une ligne');
+
+  // --- Heure et noms de fichier
+  egal('Heure : 09:05', heureDe(new Date(2026, 9, 22, 9, 5)), '09:05');
+  egal('Heure : 23:59', heureDe(new Date(2026, 9, 22, 23, 59)), '23:59');
+  egal('Fichier : nom daté', nomFichier(new Date(2026, 9, 3)), 'chateaux_grille-observation_2026-10-03.md');
+
+  // --- Journal : ajout d'une ligne
+  cliquer('[data-action="ajouter"][data-liste="journal"]');
+  egal('Journal : une carte après « Ajouter »', document.querySelectorAll('#liste-journal .carte').length, 1);
+  egal('Journal : une ligne en mémoire', etat.journal.length, 1);
+  verif('Journal : heure ajoutée automatiquement (HH:MM)', /^\d\d:\d\d$/.test(etat.journal[0].heure), etat.journal[0].heure);
+  egal('Journal : heure affichée sur la carte', qs('#liste-journal .heure').textContent, etat.journal[0].heure);
+  saisir('[data-champ="journal.0.phase"]', 'B / 3');
+  saisir('[data-champ="journal.0.question"]', 'Qui prend le dé blanc ?');
+  qs('[data-champ="journal.0.onglet"]').value = 'Tour de jeu'; qs('[data-champ="journal.0.onglet"]').dispatchEvent(new Event('change', { bubbles: true }));
+  cliquer('[data-choix="journal.0.trouve"][data-valeur="livret"]');
+  saisir('[data-champ="journal.0.temps"]', '40 s');
+  saisir('[data-champ="journal.0.remarque"]', 'à | confirmer');
+  egal('Journal : phase saisie', etat.journal[0].phase, 'B / 3');
+  egal('Journal : question saisie', etat.journal[0].question, 'Qui prend le dé blanc ?');
+  egal('Journal : onglet choisi', etat.journal[0].onglet, 'Tour de jeu');
+  egal('Journal : « Trouvé ? » = livret', etat.journal[0].trouve, 'livret');
+  egal('Journal : bouton « livret » enfoncé', qs('[data-choix="journal.0.trouve"][data-valeur="livret"]').getAttribute('aria-pressed'), 'true');
+  cliquer('[data-choix="journal.0.trouve"][data-valeur="livret"]');
+  egal('Journal : second appui sur « livret » retire le choix', etat.journal[0].trouve, '');
+  cliquer('[data-choix="journal.0.trouve"][data-valeur="oui"]');
+  cliquer('[data-action="ajouter"][data-liste="journal"]');
+  egal('Journal : deux lignes', etat.journal.length + ':' + document.querySelectorAll('#liste-journal .carte').length, '2:2');
+  egal('Journal : la saisie de la ligne 1 survit à l\'ajout', qs('[data-champ="journal.0.question"]').value, 'Qui prend le dé blanc ?');
+
+  // --- Sauvegarde et restauration
+  const enregistre = JSON.parse(lireStockage() || '{}');
+  egal('Sauvegarde : la clé existe et contient 2 lignes de journal', enregistre.journal && enregistre.journal.length, 2);
+  egal('Sauvegarde : valeurs saisies enregistrées', enregistre.journal[0].remarque + ':' + enregistre.journal[0].trouve, 'à | confirmer:oui');
+  cliquer('[data-choix="trous.2.survenu"][data-valeur="oui"]');
+  saisir('[data-champ="trous.2.decision"]', 'Joueur devant sur le pont');
+  cliquer('[data-choix="apres.note"][data-valeur="4"]');
+  saisir('[data-champ="entete.joueurs"]', 'Ana et Léo');
+  const restaure = charger();
+  suite('Restauration : état identique après sauvegarde', restaure, etat);
+  function suite(nomTest, obtenu, attendu) { egal(nomTest, JSON.stringify(obtenu), JSON.stringify(attendu)); }
+  egal('Restauration : trou n° 3 = oui', restaure.trous[2].survenu, 'oui');
+  egal('Restauration : note = 4', restaure.apres.note, 4);
+  egal('Restauration : joueurs', restaure.entete.joueurs, 'Ana et Léo');
+
+  // La page se reconstruit identique depuis le stockage
+  etat = charger(); construireListe('journal'); construireListe('bilan'); actualiser();
+  egal('Restauration : cartes du journal reconstruites', document.querySelectorAll('#liste-journal .carte').length, 2);
+  egal('Restauration : champ rempli à nouveau', qs('[data-champ="journal.0.question"]').value, 'Qui prend le dé blanc ?');
+  egal('Restauration : bouton oui du trou n° 3 enfoncé', qs('[data-choix="trous.2.survenu"][data-valeur="oui"]').getAttribute('aria-pressed'), 'true');
+  egal('Restauration : bouton de note 4 enfoncé', qs('[data-choix="apres.note"][data-valeur="4"]').getAttribute('aria-pressed'), 'true');
+  egal('Restauration : champ de l\'en-tête', qs('[data-champ="entete.joueurs"]').value, 'Ana et Léo');
+
+  // Données abîmées ou stockage absent : la page marche sans
+  const getOrig = Storage.prototype.getItem, setOrig = Storage.prototype.setItem;
+  try {
+    localStorage.setItem(CLE, '{pas du json');
+    suite('Stockage illisible → grille neuve', charger(), etatDefaut());
+    localStorage.setItem(CLE, JSON.stringify({ v: 2, journal: [{ phase: 'x' }] }));
+    suite('Version inconnue → grille neuve', charger(), etatDefaut());
+    localStorage.setItem(CLE, JSON.stringify({ v: 1, entete: { date: 12 }, journal: [{ phase: 5, onglet: 'inconnu', trouve: 'peut-être', heure: 'ok' }, 'x', null], trous: [{ survenu: 'oui!' }], apres: { note: 9, reponses: [3] }, bilan: [{ type: 'x', gravite: 'détail' }] }));
+    const abime = charger();
+    egal('Données abîmées : texte invalide vidé', abime.entete.date + ':' + abime.journal[0].phase, ':');
+    egal('Données abîmées : onglet et « Trouvé ? » invalides vidés', abime.journal[0].onglet + abime.journal[0].trouve, '');
+    egal('Données abîmées : lignes non objets gardées vides', abime.journal.length, 3);
+    egal('Données abîmées : trou et note invalides ramenés à vide', abime.trous[0].survenu + abime.apres.note + abime.apres.reponses[0], '0');
+    egal('Données abîmées : bilan conserve la gravité valide', abime.bilan[0].type + ':' + abime.bilan[0].gravite, ':détail');
+    Storage.prototype.getItem = () => { throw new Error('stockage bloqué'); };
+    Storage.prototype.setItem = () => { throw new Error('stockage bloqué'); };
+    suite('Stockage bloqué (lecture) → grille neuve', charger(), etatDefaut());
+    let plante = false;
+    try { sauver(); } catch (e) { plante = true; }
+    egal('Stockage bloqué (écriture) : sans erreur', plante, false);
+    etat = etatDefaut();
+    cliquer('[data-action="ajouter"][data-liste="journal"]');
+    egal('Stockage bloqué : on peut encore ajouter une ligne', etat.journal.length, 1);
+  } finally { Storage.prototype.getItem = getOrig; Storage.prototype.setItem = setOrig; }
+  etat = etatDefaut(); sauver(); construireListe('journal'); construireListe('bilan'); actualiser();
+
+  // --- Suppression d'une ligne : deux appuis
+  cliquer('[data-action="ajouter"][data-liste="journal"]');
+  cliquer('[data-action="ajouter"][data-liste="journal"]');
+  cliquer('[data-action="supprimer"][data-liste="journal"][data-i="0"]');
+  egal('Suppression : un seul appui ne supprime rien', etat.journal.length, 2);
+  egal('Suppression : le bouton demande confirmation', qs('[data-action="supprimer"][data-i="0"]').textContent, D.messages.confirmerLigne);
+  cliquer('[data-action="supprimer"][data-liste="journal"][data-i="0"]');
+  egal('Suppression : le second appui supprime', etat.journal.length + ':' + document.querySelectorAll('#liste-journal .carte').length, '1:1');
+
+  // --- Bilan
+  cliquer('[data-action="ajouter"][data-liste="bilan"]');
+  saisir('[data-champ="bilan.0.constat"]', 'Bouton trop petit');
+  cliquer('[data-choix="bilan.0.type"][data-valeur="interface"]');
+  cliquer('[data-choix="bilan.0.gravite"][data-valeur="gênant"]');
+  saisir('[data-champ="bilan.0.suite"]', 'agrandir');
+  egal('Bilan : ligne saisie', JSON.stringify(etat.bilan[0]), JSON.stringify({ constat: 'Bouton trop petit', type: 'interface', gravite: 'gênant', suite: 'agrandir' }));
+
+  // --- Export : structure et valeurs
+  const vide = genererExport(etatDefaut());
+  ['# Châteaux de Bourgogne — grille d\'observation, partie test v1', '## 1. Avant de jouer (2 min)', '## 2. Pendant la partie : le journal',
+    '## 3. Les trous du livret : sont-ils survenus ?', '## 4. Les outils', '## 5. Lisibilité à table',
+    '## 6. Après la partie (5 min, avec l\'autre joueur)', '## 7. Bilan pour la suite (à remplir ensuite avec Claude)'].forEach(t =>
+    verif('Export : titre « ' + t.replace(/^#+ /, '').slice(0, 40) + ' »', vide.includes('\n' + t + '\n') || vide.startsWith(t + '\n'), 'absent'));
+  verif('Export vide : les 7 sections dans l\'ordre', (() => { const p = [1, 2, 3, 4, 5, 6, 7].map(n => vide.indexOf('\n## ' + n + '. ')); return p.every((x, i) => x > 0 && (i === 0 || x > p[i - 1])); })(), 'ordre');
+  egal('Export vide : en-tête avec 4 champs à remplir', (vide.match(/\*\*\\_\\_\\_\\_\*\*/g) || []).length >= 4, true);
+  verif('Export vide : les 3 cases du §1 non cochées', (vide.match(/- \[ \] (La page|« Nouvelle|La mise)/g) || []).length === 3, 'cases');
+  verif('Export vide : les 8 trous listés', T.points.every(p => vide.includes('| ' + p + ' |')), 'trou manquant');
+  verif('Export vide : texte d\'intro, note « Livret » et consigne présents', vide.includes(J.note) && vide.includes(D.intro[1]) && vide.includes(T.intro), 'texte manquant');
+  verif('Export vide : tableau du journal avec en-tête et ligne vide', vide.includes('| Heure | Phase / tour | Question qu\'on se posait | Onglet ouvert | Trouvé ? (oui / non / livret) | Temps approx. | Remarque |'), 'en-tête');
+
+  etat = etatDefaut();
+  etat.entete = { date: '2026-10-22', joueurs: 'Ana et Léo', tablette: 'Galaxy Tab', duree: '1 h 40' };
+  etat.avant[0].coche = true; etat.avant[2].coche = true;
+  etat.journal = [{ heure: '14:32', phase: 'B / 3', question: 'Qui prend le dé blanc ?', onglet: 'Tour de jeu', trouve: 'non', temps: '40 s', remarque: 'a | b\nsuite' }];
+  etat.trous[2] = { survenu: 'oui', decision: 'Pont relu à chaque tour' }; etat.trous[0].survenu = 'non';
+  etat.outils[0] = { coche: true, v: ['tour 3'] }; etat.outils[2] = { coche: true, v: ['7', '1'] }; etat.outils[4] = { coche: false, v: ["il n'a pas servi"] };
+  etat.lisibilite[1] = { coche: false, v: ['bouton Retour'] }; etat.lisibilite[4] = { coche: true, v: ['reflets'] };
+  etat.apres = { reponses: ['le suivi', 'le départage', 'les égalités'], note: 4 };
+  etat.bilan = [{ constat: 'Bouton trop petit', type: 'interface', gravite: 'gênant', suite: 'agrandir' }];
+  const plein = genererExport(etat);
+  ['2026-10-22', 'Ana et Léo', 'Galaxy Tab', '1 h 40', '14:32', 'B / 3', 'Qui prend le dé blanc ?', 'Tour de jeu', '40 s', 'Pont relu à chaque tour',
+    'tour 3', 'bouton Retour', 'reflets', 'le suivi', 'le départage', 'les égalités', 'Bouton trop petit', 'interface', 'gênant', 'agrandir'].forEach(v =>
+    verif('Export : valeur « ' + v + ' » reprise', plein.includes(v), 'absente'));
+  verif('Export : « 4 / 5 » pour la note', plein.includes('**Réponse :** 4 / 5'), 'note');
+  verif('Export : la barre verticale saisie est échappée', plein.includes('a \\| b suite'), 'non échappée');
+  verif('Export : la ligne du journal tient sur une seule ligne', plein.split('\n').filter(l => l.startsWith('| 14:32')).length === 1, 'ligne coupée');
+  verif('Export : trou n° 3 = oui, n° 1 = non', plein.includes('| Premier joueur d\'un tour (lecture du pont) | oui | Pont relu à chaque tour |') && plein.includes('| Dépôt vide pour le dé choisi | non |'), 'trous');
+  verif('Export : cases cochées (§1, §4, §5)', plein.includes('- [x] La page s\'ouvre') && plein.includes('- [ ] « Nouvelle partie »') && plein.includes('- [x] La mise en place')
+    && plein.includes('- [x] **Zone (B)** : chaque zone complétée a été comptée avec l\'outil. Nombre de fois : **7** ; erreurs : **1**'), 'cases');
+  verif('Export : champ « Sinon, à quel moment… » repris', plein.includes('- [x] **Suivi (A)** : il est resté synchronisé avec la partie réelle jusqu\'à la fin. Sinon, à quel moment a-t-il décroché ? **tour 3**'), 'champ');
+  verif('Export : départage, mention inutile rayée', plein.includes('- [x] **Départage** : ~~il a servi~~ / il n\'a pas servi (rayer la mention inutile)'), 'départage');
+  verif('Export : départage non renseigné = case vide, rien rayé', vide.includes('- [ ] **Départage** : il a servi / il n\'a pas servi (rayer la mention inutile)'), 'départage vide');
+  verif('Export : champ libre sans libellé (lumière, reflets)', plein.includes('- [x] Lumière, reflets, orientation de la tablette : **reflets**'), 'lumière');
+  verif('Export : en-tête rempli', plein.includes('Date : **2026-10-22** Joueurs : **Ana et Léo** Tablette : **Galaxy Tab** Durée de la partie : **1 h 40**'), 'en-tête');
+  verif('Export : réponse non saisie = champ à remplir', genererExport(etatDefaut()).includes('**Réponse :** ' + VIDE), 'réponse vide');
+
+  // Export par le bouton : le texte affiché est celui de l'état courant
+  const etatPourExport = JSON.parse(JSON.stringify(etat));
+  sauver(); construireListe('journal'); construireListe('bilan'); actualiser();
+  egal('Export : zone masquée avant le bouton', document.getElementById('zoneExport').hidden, true);
+  verif('Export : le bouton remplit la zone avec le Markdown de l\'état', (() => { exporter(); return document.getElementById('texteExport').value === genererExport(etatPourExport) && !document.getElementById('zoneExport').hidden; })(), 'texte différent');
+
+  // --- Réinitialisation : « Nouvelle grille »
+  cliquer('#nouvelle');
+  egal('Nouvelle grille : un seul appui ne change rien', etat.journal.length + ':' + etat.entete.joueurs, '1:Ana et Léo');
+  egal('Nouvelle grille : le bouton demande confirmation', qs('#nouvelle').textContent, D.messages.confirmerNouvelle);
+  cliquer('#nouvelle');
+  suite('Nouvelle grille : état remis à zéro', etat, etatDefaut());
+  egal('Nouvelle grille : cartes supprimées', document.querySelectorAll('.carte').length - T.points.length - APRES.questions.length, 0);
+  egal('Nouvelle grille : champ vidé', qs('[data-champ="entete.joueurs"]').value, '');
+  egal('Nouvelle grille : boutons relâchés', document.querySelectorAll('[aria-pressed="true"]').length, 0);
+  egal('Nouvelle grille : sauvegarde effacée', lireStockage(), null);
+  egal('Nouvelle grille : export masqué', document.getElementById('zoneExport').hidden, true);
+  egal('Nouvelle grille : bouton revenu à son libellé', qs('#nouvelle').textContent, 'Nouvelle grille');
+
+  // --- Interface : téléphone, 44 px, aucune ressource tierce
+  egal('Interface : aucun lien ni script tiers', document.querySelectorAll('link[href^="http"], script[src], img[src^="http"]').length, 0);
+  cliquer('[data-action="ajouter"][data-liste="journal"]'); cliquer('[data-action="ajouter"][data-liste="bilan"]');
+  const trop = [];
+  document.querySelectorAll('button, select, textarea, input:not([type=checkbox]), label.coche, #sauts a').forEach(e => {
+    const r = e.getBoundingClientRect();
+    if (r.width > 0 && (r.height < 43.5 || r.width < 43.5)) trop.push((e.id || e.className || e.tagName) + ' ' + Math.round(r.width) + '×' + Math.round(r.height));
+  });
+  verif('Tactile : toutes les cibles font au moins 44 px', trop.length === 0, trop.slice(0, 6).join(' ; '));
+  verif('Une seule colonne : aucun défilement horizontal', document.documentElement.scrollWidth <= window.innerWidth, document.documentElement.scrollWidth + ' > ' + window.innerWidth);
+  verif('Chaque champ a une étiquette', [...document.querySelectorAll('[data-champ]')].every(c => c.closest('label') || c.getAttribute('aria-label')), 'champ sans étiquette');
+
+  // --- Restauration de l'état d'avant les tests
+  etat = normaliserEtat(etatAvant);
+  try { if (brutAvant === null) localStorage.removeItem(CLE); else localStorage.setItem(CLE, brutAvant); } catch (e) { /* stockage indisponible : rien à restaurer */ }
+  construireListe('journal'); construireListe('bilan'); actualiser();
+  window.scrollTo({ top: 0 });
+
+  liste.append(h('li', { class: 'info' }, total + ' vérifications.'));
+  const zoneTests = document.getElementById('tests');
+  zoneTests.hidden = false;
+  zoneTests.append(h('strong', { id: 'bilanTests' }, echecs ? echecs + ' test(s) en échec sur ' + total : 'Tous les tests passent (' + total + ')'), liste);
+  console.log(echecs ? 'TESTS : ' + echecs + ' échec(s) sur ' + total : 'TESTS : tout passe (' + total + ')');
+}
+
+})();
+</script>
+</body>
+</html>
