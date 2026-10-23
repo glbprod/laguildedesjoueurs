@@ -1,0 +1,23 @@
+---
+// Bouton « Nouvelle partie » d'un jeu à état partagé (jeu.yaml : stockage: partie).
+interface Props {
+  cle: string; // clé de stockage de la partie
+}
+const { cle } = Astro.props;
+---
+
+<div class="remise">
+  <button
+    type="button"
+    class="btn"
+    data-nouvelle-partie-globale
+    data-stockage={cle}
+    data-confirmation="Confirmer : tout effacer ?"
+  >
+    Nouvelle partie
+  </button>
+</div>
+
+<script>
+  import '../scripts/ilots/nouvelle-partie.js';
+</script>

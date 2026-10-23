@@ -1,0 +1,93 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { enrichir } from '../../lib/texte';
+import IlotCartes from '../IlotCartes.astro';
+
+interface Props {
+  data: Extract<CollectionEntry<'modules'>['data'], { type: 'effets' }>;
+}
+const { data } = Astro.props;
+
+// Le mode entraînement (cartes mémoire) relève d'un îlot qui n'existe pas encore :
+// mieux vaut échouer au build que l'omettre en silence.
+if (data.entrainement) {
+  throw new Error(`Le mode entraînement du module « effets » n'a pas encore de rendu (${data.titre})`);
+}
+
+const config = { groupes: data.groupes.map((g) => ({ id: g.id, fiches: g.fiches.map((f) => ({ nom: f.nom })) })) };
+const total = data.groupes.reduce((n, g) => n + g.fiches.length, 0);
+---
+
+{
+  data.recherche && (
+    <div class="recherche-cartes" data-ilot="cartes" data-config={JSON.stringify(config)}>
+      <div class="recherche">
+        <label for="champ-recherche" class="sr">Rechercher une fiche par nom</label>
+        <input id="champ-recherche" type="search" placeholder="Nom d'une fiche…" autocomplete="off" data-recherche />
+        <button type="button" class="btn" data-effacer>Effacer</button>
+      </div>
+      <div class="filtres" role="group" aria-label="Filtrer par type">
+        <button type="button" data-filtre="tout" aria-pressed="true">Tout</button>
+        {data.groupes.map((g) => <button type="button" data-filtre={g.id} aria-pressed="false">{g.titre}</button>)}
+      </div>
+      <div class="resultats" data-resultats role="status" aria-live="polite">{total} fiches</div>
+    </div>
+  )
+}
+
+{
+  data.groupes.map((g) => (
+    <section class="section" data-groupe={g.id}>
+      <h2>
+        {g.titre}
+        {data.recherche && <span class="compte-fiches" data-compte-fiches> ({g.fiches.length})</span>}
+      </h2>
+      {
+        g.regles.length > 0 && (
+          <div class="bloc">
+            <ul class="check">
+              {g.regles.map((r) => <li set:html={enrichir(r)} />)}
+            </ul>
+            {g.note && <p class="note" set:html={enrichir(g.note)} />}
+          </div>
+        )
+      }
+      {g.regles.length === 0 && g.note && <p class="note" set:html={enrichir(g.note)} />}
+
+      {
+        g.fiches.map((f) => (
+          <article class={f.immediat ? 'fiche imm' : 'fiche'} data-fiche={`${g.id}:${f.nom}`}>
+            <h3>
+              {f.nom}
+              {f.immediat && <span class="tagimm">immédiat</span>}
+            </h3>
+            {f.sousTitre && <div class="sous-titre">{f.sousTitre}</div>}
+            {
+              f.effets.length > 1 ? (
+                <ul>{f.effets.map((e) => <li set:html={enrichir(e)} />)}</ul>
+              ) : (
+                <p set:html={enrichir(f.effets[0])} />
+              )
+            }
+            {
+              f.precisions.length > 0 && (
+                <ul class="precisions">
+                  {f.precisions.map((p) => <li set:html={enrichir(p)} />)}
+                </ul>
+              )
+            }
+            {
+              f.etiquettes.length > 0 && (
+                <p class="etiquettes">{f.etiquettes.map((t) => <span class="etiquette">{t}</span>)}</p>
+              )
+            }
+          </article>
+        ))
+      }
+
+      {g.notes.map((n) => <p class="note" set:html={enrichir(n)} />)}
+    </section>
+  ))
+}
+
+{data.recherche && <IlotCartes />}

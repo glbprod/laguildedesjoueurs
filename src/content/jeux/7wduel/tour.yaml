@@ -1,0 +1,71 @@
+# Un tour. Rappel « Rejouer », compteur de Merveilles et fin d'Âge : voir le schéma `tour`.
+type: tour
+titre: Un tour
+validation:
+  statut: valide
+  source: 7wduel_regles_v1.md §3, §4, §9
+blocs:
+  - titre: À votre tour
+    paragraphes:
+      - "Prenez une carte **accessible**, c'est-à-dire qu'aucune autre carte ne recouvre, même partiellement, puis jouez-la de l'une de ces trois façons :"
+    liste:
+      - "**Construire le bâtiment** : Payez son coût et posez la carte dans votre Cité. Ranger ses cartes par couleur est conseillé."
+      - "**Défausser** : Prenez **2 pièces + 1 pièce par carte jaune** de votre Cité. La carte va face cachée à côté du plateau. La défausse est consultable par les deux joueurs à tout moment."
+      - "**Construire une Merveille** : Payez le coût **de la Merveille, pas celui de la carte**, puis glissez la carte d'Âge face cachée sous la Merveille. Cette carte n'a aucun effet : elle sert de marqueur."
+  - titre: Ensuite
+    liste:
+      - Le joueur actif **retourne les cartes cachées** devenues accessibles.
+      - "**Rejouer** : le nouveau tour commence après la révélation des cartes. Un « Rejouer » obtenu alors que la structure est vide, en fin d'Âge, est perdu."
+rappels:
+  - id: rejouer
+    titre: Rejouer
+    modele: "**{n} Merveilles « Rejouer »** : {liste}. Théologie ne leur ajoute rien."
+    groupe: merveilles
+    etiquette: rejouer
+    complement:
+      groupe: progres
+      fiche: theologie
+suivis:
+  - id: merveilles
+    titre: Merveilles construites
+    description: "**7 Merveilles maximum** dans la partie : dès que la 7e est construite, la Merveille restante non construite retourne dans la boîte."
+    suivi:
+      type: jauge
+      max: 7
+      parCamp: false
+      alertes:
+        - comparaison: ">="
+          seuil: 7
+          niveau: chaud
+          texte: "La 7e Merveille est construite : remettez la Merveille restante non construite dans la boîte."
+finDeManche:
+  titre: Fin d'un Âge
+  points:
+    - L'Âge se termine quand les **20 cartes** de la structure ont été jouées. Préparez la structure suivante.
+    - Le joueur **mené militairement** choisit qui commence l'Âge suivant. Est mené le joueur du côté duquel se trouve le pion Conflit.
+    - Si le pion est au centre, c'est le **dernier joueur actif** (celui qui a joué la dernière carte de l'Âge) qui choisit.
+  piste:
+    module: victoire
+    condition: militaire
+  question: Qui a joué la dernière carte de l'Âge ?
+  messages:
+    mene: "Le pion est du côté de {joueur} : {joueur} est mené militairement et choisit qui commence l'Âge suivant."
+    centre: "Le pion est au centre : c'est le dernier joueur actif qui choisit. Indiquez qui a joué la dernière carte."
+    centreChoisi: "Le pion est au centre et {joueur} a joué la dernière carte : {joueur} choisit qui commence l'Âge suivant."
+blocsApres:
+  - titre: Payer une carte
+  - titre: Types de coût
+    liste:
+      - "**Gratuit** : zone de coût vide."
+      - "**Ressources** : produire chaque ressource demandée, ou acheter celles qui manquent (commerce)."
+      - "**Pièces** : payer la somme à la Banque."
+      - "**Pièces et ressources** : payer les pièces, et produire ou acheter les ressources."
+    note: Toutes les Merveilles ont un coût en ressources.
+  - titre: Production
+    paragraphes:
+      - "Les ressources viennent des cartes marron et grises, de certaines cartes jaunes et de certaines Merveilles. Elles **ne se dépensent pas** : elles servent à chaque tour, toute la partie."
+    note: Sauf exception, la production d'une Cité ne diminue jamais.
+  - titre: Chaînage
+    paragraphes:
+      - Certains bâtiments portent un symbole de chaînage blanc. Une carte des Âges II ou III qui affiche ce symbole sous son coût se construit **gratuitement** si vous possédez déjà le bâtiment qui le porte.
+    note: "Exemples : Bains → Aqueduc, Palissade → Fortifications."

@@ -1,0 +1,48 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { enrichir } from '../../lib/texte';
+import { geometrieStructure, descriptionStructure } from '../../scripts/logique/structures.js';
+
+type MiseEnPlace = Extract<CollectionEntry<'modules'>['data'], { type: 'mise-en-place' }>;
+interface Props {
+  structures: NonNullable<MiseEnPlace['structures']>;
+}
+const { structures } = Astro.props;
+const dessins = structures.liste.map((s) => ({ ...s, g: geometrieStructure(s), description: descriptionStructure(s) }));
+---
+
+<section class="section">
+  <h2>{structures.titre}</h2>
+  <p set:html={enrichir(structures.intro)} />
+  {
+    dessins.map((s, i) => (
+      <figure class="bloc structure">
+        <svg class="schema" viewBox={`0 0 ${s.g.largeur} ${s.g.hauteur}`} role="img" aria-labelledby={`structure-${i}`}>
+          <title id={`structure-${i}`}>{s.description}</title>
+          <defs>
+            <pattern id={`hachure-${i}`} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" class="hachure-fond" />
+              <line x1="0" y1="0" x2="0" y2="6" class="hachure" />
+            </pattern>
+          </defs>
+          {s.g.cartes.map((c) => (
+            <>
+              <rect
+                x={c.x} y={c.y} width={s.g.carte.largeur} height={s.g.carte.hauteur} rx="4"
+                class={`carte ${c.face === 'V' ? 'visible' : 'cachee'}`}
+                fill={c.face === 'C' ? `url(#hachure-${i})` : undefined}
+              />
+              <text x={c.x + s.g.carte.largeur / 2} y={c.y + s.g.carte.hauteur / 2 + 4.5} text-anchor="middle" class="lettre">{c.face}</text>
+            </>
+          ))}
+        </svg>
+        <figcaption>
+          <strong>{s.nom}</strong> · {s.rangees.join('-')} · {s.faces.split('').join('-')}
+        </figcaption>
+      </figure>
+    ))
+  }
+  <p class="note">
+    {structures.legende && `${structures.legende}. `}{structures.note}
+  </p>
+</section>

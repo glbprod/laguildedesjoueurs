@@ -1,0 +1,49 @@
+# Tour avec rappel par étiquette, compteur, fin de manche lue sur une piste, blocs de suite.
+# La piste vient du module victoire-decompte du même jeu ; les fiches, du module effets.
+type: tour
+titre: Exemple de tour
+validation:
+  statut: brouillon
+  source: exemple technique
+blocs:
+  - titre: Exemple de bloc
+    paragraphes:
+      - "Exemple de texte d'un tour."
+rappels:
+  - id: symbole
+    titre: Rappel d'exemple
+    modele: "**{n} jeton à symbole** : {liste}."
+    groupe: jetons
+    etiquette: symbole
+    complement:
+      groupe: jetons
+      fiche: jeton-multiplicateur
+suivis:
+  - id: construits
+    titre: Compteur d'exemple
+    description: "Exemple : 3 éléments au plus."
+    suivi:
+      type: jauge
+      max: 3
+      parCamp: false
+      alertes:
+        - comparaison: ">="
+          seuil: 3
+          niveau: chaud
+          texte: "Le maximum est atteint."
+finDeManche:
+  titre: Fin de manche d'exemple
+  points:
+    - "Exemple de règle de fin de manche."
+  piste:
+    module: victoire-decompte
+    condition: course
+  question: "Qui a joué en dernier ?"
+  messages:
+    mene: "{joueur} est mené et choisit qui commence."
+    centre: "Le marqueur est au centre : indiquez le dernier joueur actif."
+    centreChoisi: "{joueur} a joué en dernier : {joueur} choisit."
+blocsApres:
+  - titre: Bloc placé après les suivis
+    paragraphes:
+      - "Exemple de texte de suite."

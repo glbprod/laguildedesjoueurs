@@ -1,0 +1,28 @@
+---
+import { enrichir } from '../lib/texte';
+
+// Liste dont chaque élément est une case à cocher, mémorisée dans la partie (îlot coches.js).
+interface Props {
+  id: string;       // préfixe des clés mémorisées
+  elements: string[];
+  cle: string;      // clé de stockage de la partie
+}
+const { id, elements, cle } = Astro.props;
+---
+
+<ul class="check sans-puce" data-ilot="coches" data-stockage={cle}>
+  {
+    elements.map((li, i) => (
+      <li>
+        <label class="coche">
+          <input type="checkbox" data-coche={`${id}-${i}`} />
+          <span set:html={enrichir(li)} />
+        </label>
+      </li>
+    ))
+  }
+</ul>
+
+<script>
+  import '../scripts/ilots/coches.js';
+</script>

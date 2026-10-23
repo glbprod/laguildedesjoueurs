@@ -1,0 +1,16 @@
+---
+// Compteur à deux boutons de 44 px. L'îlot qui le porte lit `data-pas` et écrit `data-val`.
+interface Props {
+  libelle: string;
+  min?: number;
+  max?: number;
+  cle?: string; // identifie la valeur pour l'îlot (data-cle)
+}
+const { libelle, min = 0, max = 20, cle } = Astro.props;
+---
+
+<div class="compte" role="group" aria-label={libelle} data-champ={cle} data-min={min} data-max={max}>
+  <button type="button" class="pas" data-pas="-1" aria-label={`Diminuer : ${libelle}`}>−</button>
+  <span class="val" data-val>0</span>
+  <button type="button" class="pas" data-pas="1" aria-label={`Augmenter : ${libelle}`}>+</button>
+</div>

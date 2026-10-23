@@ -1,0 +1,93 @@
+# Mise en place. Textes repris de la page v1.1, tels quels.
+type: mise-en-place
+titre: Mise en place
+validation:
+  statut: valide
+  source: 7wduel_regles_v1.md §2
+blocs:
+  - id: plateau
+    cochable: true
+    titre: Plateau et trésor
+    liste:
+      - Posez le plateau sur un côté de l'aire de jeu, entre les deux joueurs.
+      - Pion Conflit sur la case neutre, au centre.
+      - Les 4 jetons Militaire sur leurs emplacements, **face visible**.
+      - Mélangez les jetons Progrès, posez-en **5 au hasard face visible** sur le plateau, rangez les autres dans la boîte.
+      - Chaque joueur prend **7 pièces** à la Banque.
+  - id: paquets
+    cochable: true
+    titre: Paquets d'Âge
+    liste:
+      - Retirez **3 cartes de chaque paquet d'Âge**, sans les regarder, et rangez-les dans la boîte.
+      - Tirez au hasard **3 Guildes** (cartes violettes), sans les regarder, et ajoutez-les au paquet de l'Âge III. Rangez les autres Guildes.
+    note: Les cartes retirées à la préparation **ne font pas partie de la défausse**.
+selection:
+  titre: Sélection des Merveilles
+  intro: "Désignez un premier joueur : c'est le **Joueur 1**, il commence aussi l'Âge I. Mélangez les 12 Merveilles."
+  objet:
+    singulier: Merveille
+    pluriel: Merveilles
+  phases:
+    - libelle: Révélez 4 Merveilles.
+      nombre: 4
+      ordre:
+        - j1
+        - j2
+        - j2
+        - j1
+    - libelle: Révélez 4 autres Merveilles.
+      nombre: 4
+      ordre:
+        - j2
+        - j1
+        - j1
+        - j2
+  fin: Chaque joueur pose ses 4 Merveilles en colonne devant lui.
+  lotsFixes:
+    titre: Première partie
+    texte: Sautez la sélection et utilisez ces lots fixes.
+    lots:
+      j1:
+        - Les Pyramides
+        - Le Grand Phare
+        - Le Temple d'Artémis
+        - La Statue de Zeus
+      j2:
+        - Le Circus Maximus
+        - Le Pirée
+        - La Via Appia
+        - Le Colosse
+    fin: Chaque joueur pose ses 4 Merveilles en colonne devant lui.
+structures:
+  titre: Structures d'Âge
+  intro: Au début de chaque Âge, mélangez le paquet de l'Âge et disposez **20 cartes**. Les rangées alternent face visible (**V**) et face cachée (**C**), en commençant et en finissant par une rangée visible.
+  cartes: 20
+  legende: V = face visible · C = face cachée
+  note: "Schéma simplifié : il montre le nombre de cartes et la face de chaque rangée, de haut en bas, pas leur recouvrement exact."
+  liste:
+    - nom: Âge I
+      rangees:
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+      faces: VCVCV
+    - nom: Âge II
+      rangees:
+        - 6
+        - 5
+        - 4
+        - 3
+        - 2
+      faces: VCVCV
+    - nom: Âge III
+      rangees:
+        - 2
+        - 3
+        - 4
+        - 2
+        - 4
+        - 3
+        - 2
+      faces: VCVCVCV

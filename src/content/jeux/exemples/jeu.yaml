@@ -1,0 +1,27 @@
+# Jeu d'exemple : valide chaque type de suivi et de module générique au build.
+# `publie: false` : jamais de page ni de lien, mais les données sont contrôlées.
+# Les textes sont neutres : ce ne sont pas des règles de jeu.
+titre: Exemples de types de suivi
+sousTitre: Données d'exemple
+auteurs: La Guilde des Joueurs
+editeur: sans objet
+joueurs: "2"
+duree: sans objet
+theme: 7wduel
+publie: false
+stockage: partie
+camps:
+  - id: j1
+    nom: Joueur 1
+    couleur: j1
+  - id: j2
+    nom: Joueur 2
+    couleur: j2
+modules:
+  - mise-en-place
+  - tour
+  - victoire-piste
+  - victoire-symboles
+  - victoire-decompte
+  - commerce
+  - effets

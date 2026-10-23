@@ -1,0 +1,90 @@
+# Les quatre suivis ensemble : le décompte lit la piste et la possession, les symboles
+# lisent la possession. Les fiches des jetons viennent du module effets du même jeu.
+type: victoire
+titre: Exemple de décompte
+validation:
+  statut: brouillon
+  source: exemple technique
+conditions:
+  - id: course
+    titre: Piste
+    description: "Exemple de piste."
+    suivi:
+      type: piste
+      camps: [j1, j2]
+      casesTotal: 7
+      zones:
+        - id: A
+          cases: 2
+          points: 2
+      action: Avancée
+      messages:
+        centre: "Marqueur au centre."
+        zone: "Zone {zone} : {points} points pour {leader}."
+        extremite: "Extrémité de {perdant} : {gagnant} gagne."
+        victoire: "{gagnant} gagne."
+        annule: "Annulé."
+  - id: jetons
+    titre: Jetons possédés
+    description: "Exemple : chaque jeton va à un seul camp."
+    suivi:
+      type: possession
+      groupe: jetons
+  - id: collection
+    titre: Symboles
+    description: "Exemple de symboles, avec un jeton qui en ajoute un."
+    suivi:
+      type: symboles
+      symboles:
+        - id: rond
+          nom: rond
+        - id: carre
+          nom: carré
+      paire:
+        message: "Paire {symbole} pour {joueur}."
+      victoire: 2
+      bonus:
+        - condition: jetons
+          fiche: jeton-symbole
+          symbole: rond
+      messages:
+        presque: "{joueur} : {n} sur {max}."
+        victoire: "{joueur} gagne ({max} symboles)."
+        defaut: "{joueur} : {n} sur {max}."
+  - id: final
+    titre: Décompte
+    description: "Exemple de décompte final."
+    suivi:
+      type: decompte
+      categories:
+        - id: piste
+          mode: piste
+          nom: Piste
+          condition: course
+        - id: jetons
+          mode: possession
+          nom: Jetons
+          condition: jetons
+          fiches:
+            jeton-fixe:
+              fixe: 4
+            jeton-multiplicateur:
+              parJeton: 3
+        - id: saisie
+          mode: saisie
+          nom: Points saisis
+          couleur: c-bleue
+        - id: reserve
+          mode: lot
+          nom: Réserve
+          lot: 3
+          unite: pièces
+          note: "1 point par lot de 3"
+      departage: [saisie]
+      arret: [course, collection]
+      messages:
+        vide: "Saisissez les points."
+        points: "{joueur} l'emporte : {a} contre {b}."
+        departage: "Égalité à {a}. {joueur} l'emporte au départage ({categorie} : {x} contre {y})."
+        partage: "Égalité parfaite : victoire partagée."
+        arret: "{condition} : {joueur} a déjà gagné."

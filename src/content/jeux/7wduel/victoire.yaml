@@ -1,0 +1,151 @@
+# Les 3 victoires : piste militaire, symboles scientifiques, jetons Progrès, décompte civil.
+# Le décompte lit la piste et les jetons ; les symboles lisent les jetons (jeton Loi).
+type: victoire
+titre: Les 3 victoires
+validation:
+  statut: valide
+  source: 7wduel_regles_v1.md §5, §6, §7, §8
+  note: "Déduit de l'image, validé par GLB : les noms descriptifs des 7 symboles scientifiques et l'attribution de la balance au jeton Loi."
+intro: La partie s'arrête **immédiatement** en cas de suprématie militaire ou scientifique. Sinon, elle se termine à l'issue de l'Âge III et la victoire civile décide.
+conditions:
+  - id: militaire
+    titre: Suprématie militaire
+    description: Chaque **Bouclier** d'une carte rouge ou d'une Merveille fait avancer **immédiatement** le pion Conflit d'une case vers la capitale adverse. Le pion peut faire des allers-retours. S'il atteint la capitale adverse, le joueur actif **gagne immédiatement**.
+    suivi:
+      type: piste
+      camps:
+        - j1
+        - j2
+      casesTotal: 19
+      pointsCentre: 0
+      zones:
+        - id: A
+          cases: 2
+          points: 2
+        - id: B
+          cases: 3
+          points: 5
+          jeton:
+            valeur: 2
+        - id: C
+          cases: 3
+          points: 10
+          jeton:
+            valeur: 5
+      action: Bouclier
+      extremite: Capitale
+      notes:
+        - "Chaque joueur a sa capitale de son côté : Joueur 1 à gauche, Joueur 2 à droite. Un Bouclier du Joueur 1 pousse le pion vers la droite, un Bouclier du Joueur 2 vers la gauche."
+        - Quand le pion entre dans une zone portant un jeton Militaire, le joueur actif applique l'effet du jeton, puis le jeton retourne dans la boîte.
+        - "Saccage : l'adversaire perd 2 ou 5 pièces selon le jeton, rendues à la Banque. Le jeton retourne ensuite dans la boîte. S'il n'en a pas assez, il perd tout son trésor."
+      messages:
+        centre: "Pion au centre : 0 point militaire."
+        zone: Pion à {cases} du centre, côté {cote} · zone {zone} · {points} points pour {leader}.
+        extremite: "Pion dans la capitale de {perdant} : suprématie militaire, {gagnant} gagne la partie."
+        jeton: "{perdant} perd {valeur} pièces, rendues à la Banque (tout son trésor s'il en a moins). Le jeton retourne dans la boîte."
+        victoire: "Le pion atteint la capitale de {perdant} : suprématie militaire, {gagnant} gagne la partie."
+        annule: Dernier coup annulé.
+  - id: science
+    titre: Suprématie scientifique
+    description: "**7 symboles scientifiques** existent. On les trouve sur les cartes vertes et sur un jeton Progrès. À chaque **paire** de symboles identiques, choisissez immédiatement un jeton Progrès sur le plateau : vous le gardez jusqu'à la fin de la partie. **6 symboles différents** : victoire immédiate."
+    suivi:
+      type: symboles
+      symboles:
+        - id: spherearmillaire
+          nom: sphère armillaire
+        - id: roue
+          nom: roue
+        - id: cadransolaire
+          nom: cadran solaire
+        - id: mortier
+          nom: mortier
+        - id: equerre
+          nom: équerre
+        - id: plume
+          nom: plume
+        - id: balance
+          nom: balance
+      plafond: 9
+      paire:
+        seuil: 2
+        message: "Paire du symbole {symbole} pour {joueur} : choisissez un jeton Progrès sur le plateau. Il reste à vous jusqu'à la fin de la partie."
+      victoire: 6
+      bonus:
+        - condition: progres
+          fiche: loi
+          symbole: balance
+      notes:
+        - "Non précisé par le livret : un 3e ou un 4e symbole identique donne-t-il un nouveau Progrès ? Cette aide signale seulement la première paire."
+        - "Le livret ne nomme pas les symboles : ces noms descriptifs sont déduits de l'image (déduit, validé par GLB). Le 7e symbole, la balance, serait celui du jeton Loi (déduit, validé par GLB)."
+      messages:
+        presque: "{joueur} : {n} symboles différents sur {max}. Un symbole différent de plus suffit."
+        victoire: "{joueur} réunit {max} symboles différents : suprématie scientifique, victoire immédiate."
+        defaut: "{joueur} : {n} sur {max} symboles différents."
+  - id: progres
+    titre: Progrès possédés
+    description: "Un jeton Progrès va à un seul joueur : l'attribuer à l'un le retire à l'autre. Le décompte civil et la science s'en servent."
+    suivi:
+      type: possession
+      groupe: progres
+  - id: civil
+    titre: Victoire civile
+    description: "Si personne n'a gagné par suprématie, la partie se termine à l'issue de l'Âge III : le plus de **points de victoire** l'emporte. On additionne les points ci-dessous."
+    suivi:
+      type: decompte
+      categories:
+        - mode: piste
+          id: militaire
+          nom: Militaire
+          note: 0, 2, 5 ou 10 selon la position du pion
+          condition: militaire
+        - mode: saisie
+          id: bleues
+          nom: Bâtiments bleus
+          couleur: c-bleue
+        - mode: saisie
+          id: vertes
+          nom: Bâtiments verts
+          couleur: c-verte
+        - mode: saisie
+          id: jaunes
+          nom: Bâtiments jaunes
+          couleur: c-jaune
+        - mode: saisie
+          id: violettes
+          nom: Guildes (bâtiments violets)
+          note: "à saisir : les points vont au propriétaire de la Guilde, comptés d'après la Cité qui a le plus d'éléments du type indiqué, la sienne ou celle de l'adversaire (voir Cartes)"
+          couleur: c-violette
+        - mode: saisie
+          id: merveilles
+          nom: Merveilles
+        - mode: possession
+          id: progres
+          nom: Progrès
+          note: calculés d'après les jetons possédés
+          condition: progres
+          fiches:
+            agriculture:
+              fixe: 4
+            mathematiques:
+              parJeton: 3
+            philosophie:
+              fixe: 7
+        - mode: lot
+          id: tresor
+          nom: Trésor
+          note: 1 point par lot complet de 3 pièces
+          lot: 3
+          unite: pièces
+      departage:
+        - bleues
+      arret:
+        - militaire
+        - science
+      notes:
+        - "**Égalité** : le plus de points sur les cartes bleues l'emporte. Si l'égalité persiste, la victoire est partagée."
+      messages:
+        vide: Saisissez les points de chaque joueur.
+        points: "{joueur} l'emporte : {a} points contre {b}."
+        departage: Égalité à {a} points. {joueur} l'emporte grâce aux cartes bleues ({x} points contre {y}).
+        partage: "Égalité parfaite (même total, mêmes points bleus) : victoire partagée."
+        arret: "{condition} : {joueur} a déjà gagné, la partie s'est arrêtée immédiatement."

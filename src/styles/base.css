@@ -58,7 +58,8 @@ h1 a { text-decoration: none; }
 .nav .lib { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; }
 
 /* ---- sections et blocs ---- */
-.section + .section { margin-top: 1.9rem; }
+/* Frère général : le <script> d'un îlot peut s'intercaler entre deux sections. */
+.section ~ .section { margin-top: 1.9rem; }
 h2 {
   font-family: var(--police-titre); font-weight: 400; font-size: 1.25rem;
   margin: 0 0 0.6rem; padding-bottom: 0.25rem;
@@ -145,9 +146,204 @@ ul.check li::before {
   color: var(--encre-pale); font-family: inherit; font-size: 1rem; cursor: pointer;
 }
 
+/* Les messages des îlots n'occupent de place que lorsqu'ils disent quelque chose. */
+[data-ilot] .alerte:empty { display: none; }
+
+.btn.confirme { background: var(--rouge); border-color: var(--rouge); color: var(--velin); font-weight: 700; }
+
 .averti { border: 1px solid var(--rouge); border-radius: 4px; padding: 0.8rem 0.95rem; margin-top: 1.4rem; }
 .averti h2 { border-bottom: 0; padding-bottom: 0; font-size: 1.05rem; color: var(--rouge); margin-bottom: 0.35rem; }
 .averti ul { margin: 0; padding-left: 1.1rem; color: var(--encre-douce); }
+
+/* ---- fiches d'effets (module effets) ---- */
+.fiche {
+  background: var(--velin-fonce); border-radius: 4px; padding: 0.85rem 1rem; margin-bottom: 0.55rem;
+  border-left: 4px solid var(--encre-pale);
+}
+.fiche.imm { border-left-color: var(--rouge); }
+.fiche h3 { font-family: var(--police-titre); font-weight: 400; font-size: 1.1rem; margin: 0 0 0.1rem; }
+.fiche .sous-titre { font-size: 0.85rem; color: var(--encre-pale); margin-bottom: 0.2rem; }
+.fiche p { margin: 0.3rem 0 0; }
+.fiche ul { margin: 0.35rem 0 0; padding-left: 1.1rem; }
+.fiche li { margin-bottom: 0.28rem; }
+.fiche .precisions { font-size: 0.95rem; color: var(--encre-douce); }
+.tagimm {
+  display: inline-block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--rouge); color: var(--velin); border-radius: 2px;
+  padding: 0.08rem 0.35rem; margin-left: 0.4rem; vertical-align: 0.1rem;
+}
+.etiquettes { margin: 0.4rem 0 0; display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.etiquette {
+  font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--encre-pale);
+  border: 1px solid var(--velin-creux); border-radius: 2px; padding: 0.05rem 0.4rem;
+}
+
+/* ---- compteurs à deux boutons, cases à cocher, boutons à bascule ---- */
+.compte { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.compte .val { font-size: 1.6rem; font-weight: 700; min-width: 1.7ch; text-align: center; }
+ul.check.sans-puce li { padding-left: 0; }
+ul.check.sans-puce li::before { content: none; }
+.coche { display: flex; align-items: center; gap: 0.8rem; min-height: 3rem; cursor: pointer; padding: 0.15rem 0; }
+.coche input { width: 1.75rem; height: 1.75rem; flex: none; accent-color: var(--accent, var(--encre)); margin: 0; }
+.coche input:checked + span { opacity: 0.55; }
+.coche:focus-within { outline: 2px solid var(--rouge); outline-offset: 2px; }
+.bascule, .bascule-mode button {
+  min-height: 3rem; padding: 0.4rem 0.6rem; background: transparent; color: var(--encre);
+  border: 1px solid var(--encre-pale); border-radius: 4px; font-family: inherit; font-size: 1rem; cursor: pointer;
+}
+.bascule { width: 100%; }
+.bascule[aria-pressed='true'], .bascule-mode button[aria-pressed='true'] {
+  background: var(--accent, var(--encre)); border-color: var(--accent, var(--encre)); color: var(--velin); font-weight: 700;
+}
+
+/* ---- assistant de sélection ---- */
+.bascule-mode { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin: 0.6rem 0; }
+.etape-courante {
+  background: var(--velin); border: 2px solid var(--accent, var(--encre)); border-radius: 4px;
+  padding: 0.8rem 1rem; margin: 0.6rem 0; text-align: center;
+}
+.etape-courante .rang { font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--encre-pale); }
+.etape-courante .texte { font-size: 1.5rem; line-height: 1.25; margin-top: 0.2rem; }
+.commandes { display: grid; grid-template-columns: 1fr 2fr; gap: 0.5rem; }
+.commandes .btn { min-height: 3.5rem; font-size: 1.05rem; color: var(--encre); }
+.commandes .btn.primaire { background: var(--accent, var(--encre)); border-color: var(--accent, var(--encre)); color: var(--velin); font-weight: 700; }
+.commandes .btn:disabled { opacity: 0.35; cursor: default; }
+ol.etapes { margin: 0.6rem 0 0; padding-left: 1.6rem; font-size: 0.92rem; color: var(--encre-pale); }
+ol.etapes li { padding: 0.1rem 0; }
+ol.etapes li.fait { text-decoration: line-through; opacity: 0.6; }
+ol.etapes li.courant { color: var(--encre); font-weight: 700; }
+.puce-camp {
+  display: inline-block; padding: 0 0.5rem; border-radius: 3px; background: var(--couleur); color: var(--velin);
+  font-weight: 700; font-size: 0.9em;
+}
+.lots { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 0.6rem; }
+.lot { background: var(--velin); border-top: 4px solid var(--couleur); border-radius: 4px; padding: 0.7rem 0.9rem; }
+.lot h3 { font-family: var(--police-titre); font-weight: 400; font-size: 1.1rem; margin: 0; }
+.lot ul { margin: 0.3rem 0 0; padding-left: 1.1rem; }
+.lot li { padding: 0.15rem 0; }
+
+/* ---- structures de cartes (schéma SVG dessiné au build) ---- */
+.structure { margin: 0.6rem 0 0; text-align: center; }
+.structure figcaption { font-size: 0.9rem; margin-top: 0.3rem; color: var(--encre-pale); }
+.structure figcaption strong { color: var(--encre); }
+svg.schema { width: 100%; max-width: 340px; height: auto; display: block; margin: 0 auto; }
+.schema .carte.visible { fill: var(--face-v, var(--velin)); stroke: var(--accent, var(--encre)); stroke-width: 1.6; }
+.schema .carte.cachee { stroke: var(--encre); stroke-width: 1.6; }
+.schema .hachure-fond { fill: var(--velin-creux); }
+.schema .hachure { stroke: var(--encre-pale); stroke-width: 2; }
+.schema .lettre { font: 700 13px var(--police-texte); fill: var(--encre); paint-order: stroke; stroke: var(--velin); stroke-width: 3px; }
+
+/* ---- calculateur de commerce ---- */
+.calc { margin-top: 0.9rem; }
+.ligne-pieces { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.choix-camp { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.6rem; }
+.ress { border: 1px solid var(--velin-creux); border-radius: 4px; margin: 0.6rem 0 0; padding: 0.4rem 0.9rem 0.9rem; background: var(--velin-fonce); }
+.ress legend { padding: 0 0.4rem; font-weight: 700; font-size: 1.1rem; }
+.pastille { display: inline-block; width: 0.9rem; height: 0.9rem; border-radius: 2px; margin-right: 0.45rem; vertical-align: -1px; }
+.champs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-bottom: 0.6rem; }
+.champ { display: flex; flex-direction: column; justify-content: space-between; gap: 0.35rem; text-align: center; }
+.champ .lib { font-size: 0.78rem; line-height: 1.25; color: var(--encre-pale); }
+.total {
+  position: sticky; bottom: 0; z-index: 5; margin-top: 0.8rem; padding: 0.7rem 1rem; border-radius: 4px;
+  background: var(--accent, var(--encre)); color: var(--velin); box-shadow: 0 -2px 10px rgba(28, 40, 50, 0.3);
+}
+.total .grand { font-size: 1.6rem; font-weight: 700; line-height: 1.2; }
+.total .detail { font-size: 0.9rem; }
+
+/* ---- piste à deux sens (SVG dessiné au build, îlot piste.js) ---- */
+svg.piste { width: 100%; height: auto; display: block; margin: 0.4rem 0; }
+.piste .case { stroke: var(--encre); stroke-width: 0.7; }
+.piste .zone-centre { fill: var(--neutre, var(--velin)); }
+.piste .zone-0 { fill: var(--zone-a, var(--velin-creux)); }
+.piste .zone-1 { fill: var(--zone-b, var(--velin-creux)); }
+.piste .zone-2, .piste .zone-3 { fill: var(--zone-c, var(--velin-creux)); }
+.piste .zone-extremite { fill: var(--capitale, var(--encre)); }
+.piste .jeton { fill: var(--accent, var(--encre)); stroke: var(--velin); stroke-width: 1.5; }
+.piste .jeton-val { font: 700 11px var(--police-texte); fill: var(--velin); }
+.piste .jeton-groupe.pris { opacity: 0.25; }
+.piste .pion { fill: var(--rouge); stroke: var(--velin); stroke-width: 2.5; }
+.piste .pion-groupe { transition: transform 0.25s; }
+.piste .lettre-zone { font: 700 12px var(--police-texte); fill: var(--encre); }
+.piste .etiquette { font: 500 10px var(--police-texte); fill: var(--encre-pale); }
+@media (prefers-reduced-motion: reduce) { .piste .pion-groupe { transition: none; } }
+.legende-zones { font-size: 0.88rem; color: var(--encre-pale); margin: 0.2rem 0 0.5rem; }
+.etat-pion { font-weight: 700; font-size: 1.05rem; margin: 0.4rem 0; }
+.boutons-camps { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0.5rem 0; }
+.gros {
+  min-height: 4rem; border: 0; border-radius: 4px; background: var(--couleur); color: var(--velin);
+  font: 700 1.1rem var(--police-texte); cursor: pointer; padding: 0.5rem;
+}
+.gros:disabled { opacity: 0.35; cursor: default; }
+.btn:disabled { opacity: 0.35; cursor: default; }
+
+/* ---- symboles, jetons attribués, décompte ---- */
+.petit { display: block; font-size: 0.75rem; color: var(--encre-pale); font-weight: 400; line-height: 1.3; }
+.grille-sci, .grille-progres, .grille-civil { display: grid; gap: 0.4rem 0.6rem; align-items: center; }
+.grille-sci { grid-template-columns: minmax(5rem, 1fr) auto auto; }
+.grille-progres { grid-template-columns: minmax(7rem, 1fr) auto auto; }
+.grille-civil { grid-template-columns: minmax(7rem, 1fr) auto auto; }
+.entete { font-weight: 700; text-align: center; font-size: 0.95rem; color: var(--couleur); }
+.cellule-sci { display: flex; flex-direction: column; align-items: center; }
+.cellule-sci .conv { font-size: 0.75rem; color: var(--encre-pale); min-height: 1em; }
+.jauge-lecture { display: flex; gap: 0.25rem; align-items: center; }
+.pastille-ronde { width: 0.9rem; height: 0.9rem; border-radius: 3px; border: 1px solid var(--encre-pale); }
+.pastille-ronde.on { background: var(--couleur); border-color: var(--couleur); }
+.ligne-joueur { display: flex; align-items: center; gap: 0.7rem; padding: 0.4rem 0; border-top: 1px solid var(--velin-creux); }
+.ligne-joueur .qui { width: 6.5rem; font-weight: 700; flex: none; color: var(--couleur); }
+.ligne-joueur .lisible { font-size: 0.9rem; }
+.possede {
+  min-width: 4rem; min-height: 3rem; border: 1px solid var(--encre-pale); border-radius: 4px; background: transparent;
+  color: var(--encre); font: 700 1rem var(--police-texte); cursor: pointer;
+}
+.possede[aria-pressed='true'] { background: var(--couleur); border-color: var(--couleur); color: var(--velin); }
+.lib-cat { display: flex; align-items: center; gap: 0.5rem; font-weight: 500; }
+.lib-cat .barre { width: 5px; align-self: stretch; min-height: 1.6rem; border-radius: 2px; background: var(--velin-creux); }
+.cellule { text-align: center; }
+.cellule .auto { font-size: 1.6rem; font-weight: 700; display: block; min-height: 2.75rem; line-height: 2.75rem; }
+.cellule .conv { font-size: 0.8rem; color: var(--encre-pale); display: block; }
+.saisie {
+  width: 3.7rem; height: 2.75rem; font: 700 1.4rem var(--police-texte); text-align: center; color: var(--encre);
+  background: var(--velin); border: 1px solid var(--encre-pale); border-radius: 4px; appearance: textfield; -moz-appearance: textfield;
+}
+.saisie::-webkit-outer-spin-button, .saisie::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.ligne-total { display: contents; }
+.ligne-total > * { border-top: 2px solid var(--encre); padding-top: 0.5rem; margin-top: 0.3rem; }
+.gros-total { font-size: 2rem; font-weight: 700; text-align: center; line-height: 1.1; color: var(--couleur); }
+
+@media (max-width: 560px) {
+  .champs { grid-template-columns: 1fr; }
+  .champ { flex-direction: row; align-items: center; text-align: left; gap: 0.6rem; }
+  .champ .lib { flex: 1; }
+  .lots { grid-template-columns: 1fr; }
+  .course { padding: 0.9rem 0.6rem; }
+  .grille-sci { grid-template-columns: minmax(3.5rem, 1fr) auto auto; column-gap: 0.3rem; }
+  .grille-sci .compte, .grille-civil .compte { gap: 0.2rem; }
+  .grille-sci .compte .val { min-width: 1.3ch; font-size: 1.4rem; }
+  .grille-progres { grid-template-columns: 1fr auto auto; }
+  .grille-civil { grid-template-columns: auto auto; }
+  .grille-civil > :first-child { display: none; }
+  .grille-civil .lib-cat { grid-column: 1 / -1; margin-top: 0.5rem; }
+  .grille-civil .saisie { width: 2.9rem; }
+  .ligne-total .lib-cat { grid-column: 1 / -1; }
+  .ligne-joueur { flex-wrap: wrap; }
+}
+
+/* ---- recherche de fiches (module effets) ---- */
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.recherche-cartes { position: sticky; top: 0; z-index: 6; background: var(--velin); padding: 0.4rem 0 0.2rem; margin-bottom: 0.4rem; }
+.recherche { display: flex; gap: 0.5rem; }
+.recherche input {
+  flex: 1; min-width: 0; height: 3rem; padding: 0 0.9rem; font: 1.05rem var(--police-texte); color: var(--encre);
+  background: var(--velin); border: 1px solid var(--encre-pale); border-radius: 4px;
+}
+.filtres { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0 0.2rem; }
+.filtres button {
+  min-height: 2.75rem; padding: 0.3rem 0.9rem; border: 1px solid var(--encre-pale); border-radius: 22px; background: transparent;
+  color: var(--encre); font: 0.95rem var(--police-texte); cursor: pointer;
+}
+.filtres button[aria-pressed='true'] { background: var(--accent, var(--encre)); border-color: var(--accent, var(--encre)); color: var(--velin); font-weight: 700; }
+.resultats { font-size: 0.9rem; color: var(--encre-pale); margin: 0.3rem 0 0; }
+.compte-fiches { font-family: var(--police-texte); font-size: 0.9rem; color: var(--encre-pale); }
 
 /* ---- grandes cartes tactiles (accueil du site, accueil d'un jeu) ---- */
 .cartes { display: grid; gap: 0.7rem; margin-top: 1.3rem; }

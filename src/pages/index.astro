@@ -4,7 +4,7 @@ import Page from '../layouts/Page.astro';
 import EnTete from '../components/EnTete.astro';
 import { url } from '../lib/url';
 
-const jeux = await getCollection('jeux');
+const jeux = await getCollection('jeux', (j) => j.data.publie);
 ---
 
 <!-- Le site n'a pas de thème propre : on emprunte celui du jeu pilote. -->

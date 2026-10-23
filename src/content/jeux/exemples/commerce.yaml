@@ -1,0 +1,54 @@
+# Les exemples sont recalculés au build : un total faux casse le build.
+type: commerce
+titre: Exemple de commerce
+validation:
+  statut: brouillon
+  source: exemple technique
+regle: "**Prix d'une ressource = 2 + symboles de cette ressource chez l'adversaire.**"
+points:
+  - "Exemple de précision sur le commerce."
+rappels:
+  - "Exemple de rappel."
+prixBase: 2
+prixFixe: 1
+familles:
+  - id: premiere
+    nom: première famille
+    couleur: c-marron
+  - id: seconde
+    nom: seconde famille
+    couleur: c-grise
+ressources:
+  - id: r1
+    nom: Ressource 1
+    famille: premiere
+  - id: r2
+    nom: Ressource 2
+    famille: premiere
+  - id: r3
+    nom: Ressource 3
+    famille: seconde
+libelles:
+  pieces: Coût en pièces
+  besoin: Besoin
+  mienne: Ma production
+  adverse: Production adverse
+  fixe: Prix fixé
+  effacer: Effacer le coût
+  total: Coût total
+  rien: Votre production couvre tout.
+exemples:
+  - nom: Deux ressources achetées
+    besoin: { r1: 2, r2: 1 }
+    mienne: { r1: 1 }
+    adverse: { r2: 1 }
+    total: 5
+  - nom: Prix fixé et coût en pièces
+    pieces: 1
+    besoin: { r3: 2 }
+    fixe: { r3: true }
+    total: 3
+  - nom: Tout acheté, adversaire producteur
+    besoin: { r1: 3 }
+    adverse: { r1: 2 }
+    total: 12

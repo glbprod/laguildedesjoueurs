@@ -1,0 +1,86 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { enrichir } from '../lib/texte';
+
+// Jetons d'un groupe d'effets, chacun attribué à un seul camp. Les étiquettes (points, symbole)
+// viennent des autres suivis du module qui désignent ces jetons.
+type Camp = CollectionEntry<'jeux'>['data']['camps'][number];
+type Condition = Extract<CollectionEntry<'modules'>['data'], { type: 'victoire' }>['conditions'][number];
+
+interface Props {
+  condition: Condition;
+  conditions: Condition[];
+  camps: Camp[];
+  groupes: Map<string, { fiches: { id?: string; nom: string }[] }>;
+  cle: string;
+}
+const { condition: c, conditions, camps, groupes, cle } = Astro.props;
+const s = c.suivi as Extract<NonNullable<Condition['suivi']>, { type: 'possession' }>;
+const fiches = (groupes.get(s.groupe)?.fiches ?? []).filter((f) => f.id);
+
+// Ce que rapporte chaque jeton, d'après le décompte et les bonus de symbole qui le citent.
+const etiquette = (id: string) => {
+  for (const x of conditions) {
+    const t = x.suivi;
+    if (t?.type === 'decompte') {
+      for (const k of t.categories) {
+        if (k.mode === 'possession' && k.condition === c.id && k.fiches[id]) {
+          const r = k.fiches[id];
+          if (r.fixe !== undefined) return `${r.fixe} points`;
+          if (r.parJeton !== undefined) return `${r.parJeton} points par jeton`;
+        }
+      }
+    }
+    if (t?.type === 'symboles') {
+      const b = t.bonus.find((y) => y.condition === c.id && y.fiche === id);
+      if (b) return `+1 symbole : ${t.symboles.find((y) => y.id === b.symbole)?.nom ?? b.symbole}`;
+    }
+  }
+  return null;
+};
+
+const config = {
+  section: `condition.${c.id}`,
+  camps: camps.map((k) => k.id),
+  ids: fiches.map((f) => f.id),
+};
+---
+
+<section class="course" data-ilot="possession" data-stockage={cle} data-config={JSON.stringify(config)}>
+  <h2>{c.titre}</h2>
+  <div class="quoi" set:html={enrichir(c.description)} />
+  <div class="grille-progres">
+    <span></span>
+    {camps.map((k) => <span class="entete" style={`--couleur: var(--${k.couleur})`}>{k.nom}</span>)}
+    {
+      fiches.map((f) => (
+        <>
+          <span class="lib-cat">
+            <span>
+              {f.nom}
+              {etiquette(f.id!) && <span class="petit">{etiquette(f.id!)}</span>}
+            </span>
+          </span>
+          {camps.map((k) => (
+            <button
+              type="button"
+              class="possede"
+              style={`--couleur: var(--${k.couleur})`}
+              data-fiche={f.id}
+              data-camp={k.id}
+              aria-pressed="false"
+              aria-label={`${k.nom} possède ${f.nom}`}
+            >
+              {k.court ?? k.nom}
+            </button>
+          ))}
+        </>
+      ))
+    }
+  </div>
+  <p class="note" data-compte role="status"></p>
+</section>
+
+<script>
+  import '../scripts/ilots/possession.js';
+</script>

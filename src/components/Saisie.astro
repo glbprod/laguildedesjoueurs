@@ -1,0 +1,15 @@
+---
+// Saisie d'un nombre : un champ entouré de deux boutons de 44 px (îlot décompte).
+interface Props {
+  libelle: string;
+  cle: string; // identifie la valeur pour l'îlot (data-champ)
+  max?: number;
+}
+const { libelle, cle, max = 999 } = Astro.props;
+---
+
+<div class="compte" role="group" aria-label={libelle} data-champ={cle} data-min="0" data-max={max}>
+  <button type="button" class="pas" data-pas="-1" aria-label={`Diminuer : ${libelle}`}>−</button>
+  <input class="saisie" type="number" inputmode="numeric" min="0" max={max} aria-label={libelle} data-saisie />
+  <button type="button" class="pas" data-pas="1" aria-label={`Augmenter : ${libelle}`}>+</button>
+</div>

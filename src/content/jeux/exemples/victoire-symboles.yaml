@@ -1,0 +1,30 @@
+# Des symboles à réunir, comptés par camp. Sans bonus : pas besoin de possession.
+type: victoire
+titre: Exemple de symboles
+validation:
+  statut: brouillon
+  source: exemple technique
+conditions:
+  - id: collection
+    titre: Symboles d'exemple
+    description: "Exemple : réunir 3 symboles différents met fin à la partie."
+    suivi:
+      type: symboles
+      symboles:
+        - id: rond
+          nom: rond
+        - id: carre
+          nom: carré
+        - id: triangle
+          nom: triangle
+      plafond: 5
+      paire:
+        seuil: 2
+        message: "Paire du symbole {symbole} pour {joueur}."
+      victoire: 3
+      notes:
+        - "Exemple de note sous la grille."
+      messages:
+        presque: "{joueur} : {n} symboles différents sur {max}. Un de plus suffit."
+        victoire: "{joueur} réunit {max} symboles différents : victoire immédiate."
+        defaut: "{joueur} : {n} sur {max} symboles différents."
