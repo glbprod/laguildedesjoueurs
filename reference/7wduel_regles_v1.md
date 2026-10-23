@@ -3,6 +3,7 @@
 > Source unique pour l'aide de jeu et ses futures données JSON.
 > Règles paraphrasées d'après le livret et l'aide de jeu fournis par GLB (photos du 01/10/2026).
 > Statut : sections 1 à 7 **validées par GLB**. Sections 8 et 9 **validées par GLB** (23/10/2026). Section 10 : manques connus.
+> Convention d'affichage : la page met les consignes à l'impératif et en "vous" ; le sens reste celui du md.
 > Sources : livret p. 2 à 17 et aide de jeu (photos de GLB, 01/10, 03/10 et 23/10/2026).
 
 ---

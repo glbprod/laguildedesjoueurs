@@ -596,7 +596,7 @@ details.progres dd{margin:.1rem 0 0}
     "militaire": {
       "validation": { "statut": "valide", "source": "7wduel_regles_v1.md §5, §7" },
       "titre": "Suprématie militaire",
-      "regle": "Chaque **Bouclier** d'une carte rouge ou d'une Merveille fait avancer le pion Conflit d'une case vers la capitale adverse. Le pion peut faire des allers-retours. S'il atteint la capitale adverse, le joueur actif **gagne immédiatement**.",
+      "regle": "Chaque **Bouclier** d'une carte rouge ou d'une Merveille fait avancer **immédiatement** le pion Conflit d'une case vers la capitale adverse. Le pion peut faire des allers-retours. S'il atteint la capitale adverse, le joueur actif **gagne immédiatement**.",
       "cotes": "Chaque joueur a sa capitale de son côté : Joueur 1 à gauche, Joueur 2 à droite. Un Bouclier du Joueur 1 pousse le pion vers la droite, un Bouclier du Joueur 2 vers la gauche.",
       "jetons": {
         "regle": "Quand le pion entre dans une zone portant un jeton Militaire, le joueur actif applique l'effet du jeton, puis le jeton retourne dans la boîte.",
@@ -610,8 +610,6 @@ details.progres dd{margin:.1rem 0 0}
         { "id": "B", "cases": 3, "points": 5, "jeton": 2 },
         { "id": "C", "cases": 3, "points": 10, "jeton": 5 }
       ],
-      "sourceZones": "Découpage relevé sur le plateau (7wduel_regles_v1.md §5) : A + B + C = 8 cases de chaque côté du centre.",
-      "zonesManquantes": "Le nombre de cases de chaque zone n'est pas encore saisi (données : victoires → militaire → zones → cases). Sans lui, la piste ne repère ni les zones, ni les jetons, ni les points : le pion et la suprématie fonctionnent, mais les points militaires du décompte civil se saisissent à la main.",
       "messages": {
         "centre": "Pion au centre : 0 point militaire.",
         "zone": "Pion à {cases} du centre, côté {cote} · zone {zone} · {points} points pour {leader}.",
@@ -639,10 +637,10 @@ details.progres dd{margin:.1rem 0 0}
       "noteSymboles": "Le livret ne nomme pas les symboles : ces noms descriptifs sont déduits de l'image (déduit, validé par GLB). Le 7e symbole, la balance, serait celui du jeton Loi (déduit, validé par GLB).",
       "pourVictoire": 6,
       "seuilPaire": 2,
-      "noteAuDela": "Au-delà de deux exemplaires d'un même symbole, cette aide ne dit rien : voir le livret.",
+      "noteAuDela": "Non précisé par le livret : un 3e ou un 4e symbole identique donne-t-il un nouveau Progrès ? Cette aide signale seulement la première paire.",
       "messages": {
         "paire": "Paire du symbole {symbole} pour {joueur} : choisissez un jeton Progrès sur le plateau. Il reste à vous jusqu'à la fin de la partie.",
-        "presque": "{joueur} : {n} symboles différents sur {max}. Un de plus suffit.",
+        "presque": "{joueur} : {n} symboles différents sur {max}. Un symbole différent de plus suffit.",
         "victoire": "{joueur} réunit {max} symboles différents : suprématie scientifique, victoire immédiate.",
         "defaut": "{joueur} : {n} sur {max} symboles différents."
       }
@@ -665,7 +663,7 @@ details.progres dd{margin:.1rem 0 0}
         { "id": "bleues", "nom": "Bâtiments bleus", "couleur": "c-bleue" },
         { "id": "vertes", "nom": "Bâtiments verts", "couleur": "c-verte" },
         { "id": "jaunes", "nom": "Bâtiments jaunes", "couleur": "c-jaune" },
-        { "id": "violettes", "nom": "Guildes (bâtiments violets)", "couleur": "c-violette", "note": "à saisir : une Guilde compte dans la Cité qui en a le plus (voir Cartes)" },
+        { "id": "violettes", "nom": "Guildes (bâtiments violets)", "couleur": "c-violette", "note": "à saisir : les points vont au propriétaire de la Guilde, comptés d'après la Cité qui a le plus d'éléments du type indiqué, la sienne ou celle de l'adversaire (voir Cartes)" },
         { "id": "merveilles", "nom": "Merveilles" },
         { "id": "progres", "nom": "Progrès", "calcule": "progres", "note": "calculés d'après les jetons possédés" },
         { "id": "tresor", "nom": "Trésor", "note": "1 point par lot complet de 3 pièces", "pieces": true }
@@ -786,6 +784,12 @@ function pointsMilitaires(pos, zones) {
   if (z.type === 'capitale') return { etat: 'capitale', joueur: leader, points: null };
   if (z.type === 'zone') return { etat: 'zone', joueur: leader, points: z.zone.points, zone: z.zone };
   return { etat: 'inconnu', joueur: leader, points: null };
+}
+
+// Les points vont à celui qui pousse le pion : pion côté J2 → J1, pion côté J1 → J2.
+function pointsMilitairesDe(joueur, pos, zones) {
+  const p = pointsMilitaires(pos, zones);
+  return p.joueur === joueur && p.points !== null ? p.points : 0;
 }
 
 // --- Fin d'Âge : le joueur mené choisit ; au centre, le dernier joueur actif.
@@ -1220,8 +1224,6 @@ function construireVictoires(el) {
     : null;
   ajouter(el, h('div', { class: 'course', id: 'courseMilitaire' },
     h('h3', {}, MIL.titre), h('div', { class: 'quoi' }, riche(MIL.regle)),
-    ZONES ? null : h('div', { class: 'averti', role: 'note' },
-      h('h4', {}, 'Données à compléter'), h('p', {}, MIL.zonesManquantes), h('p', { class: 'note' }, MIL.sourceZones)),
     construirePiste(), legende,
     h('p', { class: 'note' }, MIL.cotes),
     h('div', { class: 'etat-pion', id: 'etatPion', role: 'status', 'aria-live': 'polite' }),
@@ -1316,9 +1318,7 @@ function victoireImmediate() {
   return null;
 }
 function pointsMilJoueur(j) {
-  if (!ZONES) return etat.civil[j].militaire;
-  const p = pointsMilitaires(etat.militaire.pos, ZONES);
-  return p.joueur === j && p.points !== null ? p.points : 0;
+  return ZONES ? pointsMilitairesDe(j, etat.militaire.pos, ZONES) : etat.civil[j].militaire;
 }
 function totalCivil(j) {
   return CIV.categories.reduce((somme, c) => {
@@ -1394,17 +1394,24 @@ function majFinAge() {
     b.setAttribute('aria-pressed', String(etat.transitoire.dernierActif === b.dataset.joueur)));
 }
 
+function resumeCommerce(r) {
+  const morceaux = [];
+  if (r.pieces) morceaux.push(r.pieces + (r.pieces > 1 ? ' pièces' : ' pièce'));
+  r.lignes.forEach(l => morceaux.push(l.nom + ' ' + l.manque + ' × ' + l.prix + ' = ' + l.sous));
+  return {
+    grand: D.commerce.messages.total + ' : ' + r.total + (r.total > 1 ? ' pièces' : ' pièce'),
+    detail: morceaux.length ? morceaux.join(' · ') : D.commerce.messages.rien
+  };
+}
+
 function majCommerce() {
   const r = calculerCommerce({
     pieces: etat.transitoire.pieces, besoin: etat.transitoire.besoin,
     mienne: etat.commerce.mienne, adverse: etat.commerce.adverse, fixe: etat.commerce.fixe
   });
-  const morceaux = [];
-  if (r.pieces) morceaux.push(r.pieces + ' pièces');
-  r.lignes.forEach(l => morceaux.push(l.nom + ' ' + l.manque + ' × ' + l.prix + ' = ' + l.sous));
+  const t = resumeCommerce(r);
   document.getElementById('totalCommerce').replaceChildren(
-    h('div', { class: 'grand' }, D.commerce.messages.total + ' : ' + r.total + (r.total > 1 ? ' pièces' : ' pièce')),
-    h('div', { class: 'detail' }, morceaux.length ? morceaux.join(' · ') : D.commerce.messages.rien));
+    h('div', { class: 'grand' }, t.grand), h('div', { class: 'detail' }, t.detail));
 }
 
 function textePion(pos) {
@@ -1717,6 +1724,26 @@ if (/[?&]test\b/.test(location.search)) {
   egal('Points : centre = 0', pointsMilitaires(0, Z).points, 0);
   egal('Points : capitale = suprématie', pointsMilitaires(9, Z).etat, 'capitale');
   egal('Points : zones inconnues → pas de points', pointsMilitaires(3, null).points, null);
+
+  // Calculateur : production qui couvre tout + coût en pièces → le total affiche le coût en pièces
+  const couvert = calculerCommerce({ pieces: 2, besoin: { bois: 2 }, mienne: { bois: 3 }, adverse: { bois: 4 }, fixe: {} });
+  egal('Calculateur : production qui couvre tout + 2 pièces → total 2', couvert.total, 2);
+  egal('Calculateur : le total affiché est le coût en pièces', resumeCommerce(couvert).grand, 'Coût total : 2 pièces');
+  egal('Calculateur : le détail affiche les pièces, pas « rien à acheter »', resumeCommerce(couvert).detail, '2 pièces');
+  egal('Calculateur : 1 pièce au singulier', resumeCommerce(calculerCommerce({ pieces: 1, besoin: {}, mienne: {}, adverse: {}, fixe: {} })).grand, 'Coût total : 1 pièce');
+  egal('Calculateur : rien à payer', resumeCommerce(calculerCommerce({ pieces: 0, besoin: { bois: 1 }, mienne: { bois: 1 }, adverse: {}, fixe: {} })).detail, COM.messages.rien);
+
+  // Points militaires : le joueur qui pousse le pion les reçoit
+  egal('Points militaires : pion côté J2 (+4) → J1 reçoit 5', pointsMilitairesDe('j1', 4, Z), 5);
+  egal('Points militaires : pion côté J2 (+4) → J2 ne reçoit rien', pointsMilitairesDe('j2', 4, Z), 0);
+  egal('Points militaires : pion côté J1 (−7) → J2 reçoit 10', pointsMilitairesDe('j2', -7, Z), 10);
+  egal('Points militaires : pion côté J1 (−7) → J1 ne reçoit rien', pointsMilitairesDe('j1', -7, Z), 0);
+  egal('Points militaires : centre → personne', pointsMilitairesDe('j1', 0, Z) + pointsMilitairesDe('j2', 0, Z), 0);
+  egal('Points militaires : zones inconnues → personne', pointsMilitairesDe('j1', 3, null), 0);
+  if (ZONES) {
+    egal('Points militaires (plateau) : pion +3 → J1 reçoit 5, J2 rien', pointsMilitairesDe('j1', 3, ZONES) + '/' + pointsMilitairesDe('j2', 3, ZONES), '5/0');
+    egal('Points militaires (plateau) : pion −6 → J2 reçoit 10, J1 rien', pointsMilitairesDe('j2', -6, ZONES) + '/' + pointsMilitairesDe('j1', -6, ZONES), '10/0');
+  }
 
   // Science
   egal('Science : symboles différents [1,0,2,0,0,3,1] = 4', symbolesDifferents([1, 0, 2, 0, 0, 3, 1]), 4);
