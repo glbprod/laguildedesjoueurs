@@ -1,0 +1,30 @@
+/* Thème « 7 Wonders Duel » (sable et lapis) : tokens uniquement.
+   Mêmes noms de tokens que les autres thèmes : base.css n'en connaît pas d'autres.
+   Bornés à data-theme pour coexister dans le même bundle CSS. */
+:root[data-theme='7wduel'] {
+  --velin: #efe6d2;        /* sable */
+  --velin-fonce: #e4d9bf;
+  --velin-creux: #cdbf9a;
+  --encre: #1c2832;
+  /* Contrastes mesurés (WCAG) : encre-pale 5,7:1 sur --velin-fonce, encre-douce 7,4:1,
+     rouge 5,9:1. Le texte atténué n'est pas posé sur --velin-creux (4,4:1). */
+  --encre-pale: #46525c;
+  --encre-douce: #36424b;
+  --rouge: #8c2f1b;        /* accent : alertes, focus, titre de l'en-tête */
+
+  /* Camps : les deux joueurs (jeu.yaml : couleur: j1 / j2) */
+  --j1: #1d4a73;           /* lapis */
+  --j2: #9a3b22;           /* terre cuite */
+
+  /* Couleurs de cartes : repères visuels, jamais seul porteur d'information */
+  --c-marron: #7b5230;
+  --c-grise: #6c7378;
+  --c-jaune: #b58900;
+  --c-bleue: #2b64a8;
+  --c-verte: #3f7d3a;
+  --c-rouge: #b0382a;
+  --c-violette: #6e4585;
+
+  --police-titre: 'IM Fell English SC', Georgia, serif;
+  --police-texte: 'Karla', system-ui, sans-serif;
+}

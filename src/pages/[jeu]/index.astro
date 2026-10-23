@@ -5,7 +5,7 @@ import { modulesDuJeu } from '../../lib/jeux';
 import { url } from '../../lib/url';
 
 export async function getStaticPaths() {
-  const jeux = await getCollection('jeux');
+  const jeux = await getCollection('jeux', (j) => j.data.publie);
   return jeux.map((jeu) => ({ params: { jeu: jeu.id } }));
 }
 

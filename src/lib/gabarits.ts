@@ -7,3 +7,8 @@ export const MOTS_RESERVES = ['camp', 'max', 'somme'] as const;
 export function nomsDeGabarit(texte: string): string[] {
   return [...texte.matchAll(/\{([^{}]*)\}/g)].map((m) => m[1]);
 }
+
+// Noms d'un texte qui ne figurent pas dans la liste de ceux qu'il a le droit d'employer.
+export function gabaritsInconnus(texte: string, autorises: readonly string[]): string[] {
+  return nomsDeGabarit(texte).filter((nom) => !autorises.includes(nom));
+}

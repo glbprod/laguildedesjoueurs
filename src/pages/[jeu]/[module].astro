@@ -7,13 +7,17 @@ import { modulesDuJeu } from '../../lib/jeux';
 // Une page par module listé dans jeu.yaml : /<jeu>/<module>/
 export async function getStaticPaths() {
   const jeux = await getCollection('jeux');
+  // Tous les jeux sont validés, publiés ou non : une donnée invalide casse le build.
+  // Seuls les jeux publiés ont des pages.
   const chemins = await Promise.all(
-    jeux.map(async (jeu) =>
-      (await modulesDuJeu(jeu.id)).map((m) => ({
+    jeux.map(async (jeu) => {
+      const modules = await modulesDuJeu(jeu.id);
+      if (!jeu.data.publie) return [];
+      return modules.map((m) => ({
         params: { jeu: jeu.id, module: m.id.slice(jeu.id.length + 1) },
         props: { module: m },
-      })),
-    ),
+      }));
+    }),
   );
   return chemins.flat();
 }

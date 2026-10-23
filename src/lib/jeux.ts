@@ -11,7 +11,7 @@ export async function modulesDuJeu(slug: string) {
   return jeu.data.modules.map((nom) => {
     const m = tous.find((e) => e.id === `${slug}/${nom}`);
     if (!m) throw new Error(`${slug}/jeu.yaml cite « ${nom} », fichier ${nom}.yaml absent`);
-    verifierModule(jeu, m);
+    verifierModule(jeu, m, tous);
     return m;
   });
 }

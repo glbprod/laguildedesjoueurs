@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { enrichir } from '../../lib/texte';
+import { cleStockage } from '../../lib/stockage';
 
 type Camp = CollectionEntry<'jeux'>['data']['camps'][number];
 
@@ -9,11 +10,19 @@ interface Props {
   camps: Camp[];
   slug: string;
   nom: string;
+  stockageDuJeu?: 'module' | 'partie';
 }
-const { data, camps, slug, nom } = Astro.props;
+const { data, camps, slug, nom, stockageDuJeu = 'module' } = Astro.props;
 
 // Clé localStorage préfixée : l'origine glbprod.github.io est partagée.
-const stockage = `guilde:${slug}:${nom}`;
+const stockage = cleStockage(slug, nom, stockageDuJeu);
+
+// Un type de suivi sans rendu fait échouer le build : pas de page à moitié vide.
+for (const c of data.conditions) {
+  if (c.suivi && c.suivi.type !== 'jauge' && c.suivi.type !== 'poursuite') {
+    throw new Error(`Pas de rendu pour le suivi « ${c.suivi.type} » (${slug}/${nom}, condition ${c.id})`);
+  }
+}
 
 const entiers = (n: number) => Array.from({ length: n }, (_, i) => i + 1);
 ---

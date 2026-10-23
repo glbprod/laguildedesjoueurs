@@ -1,0 +1,32 @@
+# Groupe de fiches désignées par leur `id` : la possession et le décompte s'y réfèrent.
+type: effets
+titre: Exemple d'effets
+validation:
+  statut: brouillon
+  source: exemple technique
+groupes:
+  - id: jetons
+    titre: Jetons d'exemple
+    regles:
+      - "Exemple de règle commune à toutes les fiches du groupe."
+    notes:
+      - "Exemple de note de pied de groupe."
+    fiches:
+      - id: jeton-fixe
+        nom: Jeton à points fixes
+        sousTitre: Exemple
+        effets:
+          - "Exemple : rapporte 4 points en fin de partie."
+      - id: jeton-multiplicateur
+        nom: Jeton multiplicateur
+        nomCourt: Multiplicateur
+        effets:
+          - "Exemple : 3 points par jeton possédé, celui-ci compris."
+        precisions:
+          - "exemple de précision qui complète l'effet."
+      - id: jeton-symbole
+        nom: Jeton à symbole
+        etiquettes:
+          - symbole
+        effets:
+          - "Exemple : rapporte un symbole."

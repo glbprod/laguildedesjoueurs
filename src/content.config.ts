@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { MOTS_RESERVES } from './lib/gabarits';
+import { calculerCommerce } from './lib/commerce';
 
 const DOSSIER_JEUX = './src/content/jeux';
 
@@ -9,9 +10,13 @@ const DOSSIER_JEUX = './src/content/jeux';
 /* Briques communes                                                    */
 /* ------------------------------------------------------------------ */
 
+// Tous les objets du schéma sont stricts (z.strictObject) : une clé mal orthographiée
+// (« precision » pour « precisions ») ferait disparaître un texte sans alerte.
+// Un nom de champ inconnu casse le build.
+
 // Statut de relecture d'un module. Un module « valide » a été relu par
 // GLB contre le livret : ses textes ne sont plus reformulés (principe 2).
-const validation = z.object({
+const validation = z.strictObject({
   statut: z.enum(['brouillon', 'valide']),
   source: z.string().optional(), // ex. « livret de règles, p. 6 »
 });
@@ -19,12 +24,12 @@ const validation = z.object({
 // Bloc de texte générique : titre + paragraphes et/ou liste + note.
 // La légende colorée (couleurs de cartes, types d'action…) est portée par le
 // bloc lui-même : sa place dans la page suit celle du bloc, sans index fragile.
-const bloc = z.object({
+const bloc = z.strictObject({
   titre: z.string(),
   paragraphes: z.array(z.string()).default([]),
   liste: z.array(z.string()).default([]),
   note: z.string().optional(),
-  legende: z.array(z.object({
+  legende: z.array(z.strictObject({
     nom: z.string(),
     couleur: z.string(), // nom d'un token CSS du thème, sans « -- » (ex. c-grise)
     texte: z.string(),
@@ -40,13 +45,13 @@ const communs = {
 /* Types de modules (un fichier YAML = un module)                      */
 /* ------------------------------------------------------------------ */
 
-const miseEnPlace = z.object({
+const miseEnPlace = z.strictObject({
   type: z.literal('mise-en-place'),
   ...communs,
   // Points de départ de chaque camp. Les camps eux-mêmes (nom, couleur) vivent
   // dans jeu.yaml ; `camp` est un id de ce fichier, vérifié par lib/coherence.ts.
   titreCamps: z.string().optional(),
-  departs: z.array(z.object({
+  departs: z.array(z.strictObject({
     camp: z.string(),
     points: z.array(z.string()),
   })).default([]),
@@ -54,7 +59,7 @@ const miseEnPlace = z.object({
   blocs: z.array(bloc),
 });
 
-const tour = z.object({
+const tour = z.strictObject({
   type: z.literal('tour'),
   ...communs,
   blocs: z.array(bloc),
@@ -68,7 +73,7 @@ const tour = z.object({
 //   - ni l'un ni l'autre : n'importe quelle valeur du suivi (le premier camp
 //     qui correspond fournit alors {camp}).
 // Gabarits du texte : {camp}, {max}, {somme}, {<id de compteur ou de camp>}.
-const alerte = z.object({
+const alerte = z.strictObject({
   compteur: z.string().optional(),
   camp: z.string().optional(),
   comparaison: z.enum(['<=', '>=']),
@@ -82,17 +87,119 @@ const alertes = {
   defaut: z.string().optional(), // message quand aucune alerte ne correspond
 };
 
-const victoire = z.object({
+/* ---- Nouveaux suivis de victoire ---- */
+// Chaque suivi est générique : il ne connaît ni le jeu ni ses règles, seulement
+// une mécanique (marqueur sur une piste, symboles à réunir, jetons attribués,
+// points à additionner). Les textes et les nombres viennent du YAML.
+
+const identifiant = z.string().regex(/^[a-z0-9-]+$/, 'minuscules, chiffres et tirets');
+
+// Piste à deux sens entre deux camps (ex. un marqueur qu'on pousse vers la base
+// adverse). Les zones, du centre vers l'extrémité, sont les mêmes de chaque côté.
+// Gabarits des messages (vérifiés par lib/coherence.ts) :
+//   centre : aucun ; zone : {cases} {cote} {zone} {points} {leader} ;
+//   extremite et victoire : {perdant} {gagnant} ; jeton : {perdant} {valeur}.
+const piste = z.strictObject({
+  type: z.literal('piste'),
+  // [camp de gauche, camp de droite], ids de jeu.yaml. Une action du premier pousse
+  // le marqueur vers la droite, une action du second vers la gauche.
+  camps: z.tuple([z.string(), z.string()]),
+  // Cases au total, extrémités comprises. C'est un contrôle de saisie : il doit égaler
+  // 1 (centre) + 2 × (cases des zones + 1 extrémité), sinon le build échoue.
+  casesTotal: z.number().int().positive(),
+  pointsCentre: z.number().int().nonnegative().default(0),
+  zones: z.array(z.strictObject({
+    id: z.string().min(1), // affiché tel quel dans {zone} (ex. « A »)
+    cases: z.number().int().positive(),
+    points: z.number().int().nonnegative(),
+    // Jeton posé sur la zone : appliqué à la première entrée du marqueur, puis retiré.
+    jeton: z.strictObject({ valeur: z.number().int().positive() }).optional(),
+  })).min(1),
+  action: z.string(), // ce qui fait avancer le marqueur, au singulier (ex. « Bouclier »)
+  messages: z.strictObject({
+    centre: z.string(),
+    zone: z.string(),
+    extremite: z.string(),
+    jeton: z.string().optional(), // requis si une zone porte un jeton
+    victoire: z.string(),
+    annule: z.string(),
+  }),
+});
+
+// Symboles à réunir, comptés par camp. Une alerte de paire au passage au seuil,
+// et une victoire immédiate à `victoire` symboles différents.
+// Gabarits : paire : {symbole} {joueur} ; presque, defaut : {joueur} {n} {max} ;
+// victoire : {joueur} {max}. Ici {max} est le nombre de symboles différents à réunir.
+const symboles = z.strictObject({
+  type: z.literal('symboles'),
+  symboles: z.array(z.strictObject({ id: identifiant, nom: z.string() })).min(2),
+  plafond: z.number().int().positive().default(9), // valeur maximale d'un compteur
+  paire: z.strictObject({ seuil: z.number().int().min(2).default(2), message: z.string() }),
+  victoire: z.number().int().min(2),
+  // Un jeton attribué (suivi `possession`) qui ajoute un symbole à son propriétaire.
+  bonus: z.array(z.strictObject({
+    condition: identifiant, // id d'une condition de ce module, de type possession
+    fiche: identifiant,     // id d'une fiche du groupe d'effets de cette possession
+    symbole: identifiant,
+  })).default([]),
+  notes: z.array(z.string()).default([]),
+  messages: z.strictObject({ presque: z.string(), victoire: z.string(), defaut: z.string() }),
+});
+
+// Jetons d'un groupe d'effets, chacun attribué à un seul camp (ou à personne).
+const possession = z.strictObject({
+  type: z.literal('possession'),
+  groupe: identifiant, // id d'un groupe d'un module effets du même jeu
+});
+
+// Décompte final : des points saisis, ou calculés depuis un autre suivi.
+//  - saisie     : points entrés à la main ;
+//  - lot        : une quantité saisie, `lot` unités = 1 point ;
+//  - piste      : points de la zone où se trouve le marqueur, pour le camp qui le pousse ;
+//  - possession : points des jetons attribués (`fixe`, ou `parJeton` × jetons possédés).
+// Gabarits : points : {joueur} {a} {b} ; departage : {joueur} {a} {x} {y} {categorie} ;
+// arret : {condition} {joueur}.
+const categorieDecompte = z.discriminatedUnion('mode', [
+  z.strictObject({ mode: z.literal('saisie'), id: identifiant, nom: z.string(), note: z.string().optional(), couleur: z.string().optional() }),
+  z.strictObject({ mode: z.literal('lot'), id: identifiant, nom: z.string(), note: z.string().optional(), lot: z.number().int().positive(), unite: z.string() }),
+  z.strictObject({ mode: z.literal('piste'), id: identifiant, nom: z.string(), note: z.string().optional(), condition: identifiant }),
+  z.strictObject({
+    mode: z.literal('possession'), id: identifiant, nom: z.string(), note: z.string().optional(),
+    condition: identifiant,
+    fiches: z.record(identifiant, z.strictObject({
+      fixe: z.number().int().optional(),
+      parJeton: z.number().int().optional(),
+    })),
+  }),
+]);
+
+const decompte = z.strictObject({
+  type: z.literal('decompte'),
+  categories: z.array(categorieDecompte).min(1),
+  // Catégories à comparer, dans l'ordre, si les totaux sont égaux.
+  departage: z.array(identifiant).default([]),
+  // Conditions de ce module (piste, symboles) dont la victoire immédiate arrête la partie.
+  arret: z.array(identifiant).default([]),
+  messages: z.strictObject({
+    vide: z.string(),
+    points: z.string(),
+    departage: z.string(),
+    partage: z.string(),
+    arret: z.string(),
+  }),
+});
+
+const victoire = z.strictObject({
   type: z.literal('victoire'),
   ...communs,
   intro: z.string().optional(),
-  conditions: z.array(z.object({
+  conditions: z.array(z.strictObject({
     id: z.string(),
     titre: z.string(),
     description: z.string(),
     suivi: z.discriminatedUnion('type', [
       // Une valeur de 0 à `max`, une par camp (parCamp) ou une seule.
-      z.object({
+      z.strictObject({
         type: z.literal('jauge'),
         max: z.number().int().positive(),
         // Défaut résolu au rendu : vrai si le jeu déclare des camps.
@@ -100,9 +207,9 @@ const victoire = z.object({
         ...alertes,
       }),
       // Plusieurs compteurs liés (ex. une poursuite : écart et cases restantes).
-      z.object({
+      z.strictObject({
         type: z.literal('poursuite'),
-        compteurs: z.array(z.object({
+        compteurs: z.array(z.strictObject({
           id: z.string(),
           libelle: z.string(),
           depart: z.number().int().nonnegative(),
@@ -110,18 +217,20 @@ const victoire = z.object({
         })).min(1),
         ...alertes,
       }),
+      piste,
+      symboles,
+      possession,
+      decompte,
     ]).optional(),
   })),
   finDePartie: z.string().optional(),
   // Rappel de ce qu'il faut relever sur le plateau avant de jouer.
-  aReporter: z.object({
+  aReporter: z.strictObject({
     titre: z.string(),
     points: z.array(z.string()).min(1),
   }).optional(),
 });
 
-// Strict : une clé mal orthographiée (« precision ») ferait disparaître un texte
-// sans alerte. Un nom de champ inconnu casse le build.
 const effets = z.strictObject({
   type: z.literal('effets'),
   ...communs,
@@ -158,17 +267,48 @@ const effets = z.strictObject({
   }).optional(),
 });
 
-const erreurs = z.object({
-  type: z.literal('erreurs'),
+// Prix d'achat des ressources d'une carte : un prix de base majoré de ce que produit
+// l'adversaire, ou un prix fixe. Les exemples du livret sont recalculés au build.
+const commerce = z.strictObject({
+  type: z.literal('commerce'),
   ...communs,
-  erreurs: z.array(z.object({ erreur: z.string(), correction: z.string() })),
+  regle: z.string(),
+  points: z.array(z.string()).default([]),
+  rappels: z.array(z.string()).default([]),
+  prixBase: z.number().int().nonnegative(),
+  prixFixe: z.number().int().nonnegative(),
+  familles: z.array(z.strictObject({
+    id: identifiant,
+    nom: z.string(),
+    couleur: z.string(), // token CSS du thème, sans « -- »
+  })).min(1),
+  ressources: z.array(z.strictObject({ id: identifiant, nom: z.string(), famille: identifiant })).min(1),
+  libelles: z.strictObject({
+    pieces: z.string(), besoin: z.string(), mienne: z.string(), adverse: z.string(),
+    fixe: z.string(), effacer: z.string(), total: z.string(), rien: z.string(),
+  }),
+  exemples: z.array(z.strictObject({
+    nom: z.string(),
+    pieces: z.number().int().nonnegative().default(0),
+    besoin: z.record(identifiant, z.number().int().positive()),
+    mienne: z.record(identifiant, z.number().int().positive()).default({}),
+    adverse: z.record(identifiant, z.number().int().positive()).default({}),
+    fixe: z.record(identifiant, z.boolean()).default({}),
+    total: z.number().int().nonnegative(),
+  })).default([]),
 });
 
-const animateur = z.object({
+const erreurs = z.strictObject({
+  type: z.literal('erreurs'),
+  ...communs,
+  erreurs: z.array(z.strictObject({ erreur: z.string(), correction: z.string() })),
+});
+
+const animateur = z.strictObject({
   type: z.literal('animateur'),
   ...communs,
   dureeMinutes: z.number().int().positive(),
-  etapes: z.array(z.object({
+  etapes: z.array(z.strictObject({
     minutes: z.number().int().positive(),
     titre: z.string(),
     consignes: z.array(z.string()),
@@ -177,7 +317,7 @@ const animateur = z.object({
 
 // Nouveau type de module (ex. accompagnement Sauron IA) = un membre de plus ici.
 const module = z
-  .discriminatedUnion('type', [miseEnPlace, tour, victoire, effets, erreurs, animateur])
+  .discriminatedUnion('type', [miseEnPlace, tour, victoire, effets, commerce, erreurs, animateur])
   .superRefine((m, ctx) => {
     const erreur = (path: (string | number)[], message: string) =>
       ctx.addIssue({ code: 'custom', path, message });
@@ -207,41 +347,136 @@ const module = z
       });
     }
 
-    // Intégrité interne d'une victoire : compteurs et alertes cohérents.
-    // Ce qui dépend de jeu.yaml (camps, gabarits) est vérifié par lib/coherence.ts.
+    // Intégrité interne d'un commerce : familles, ressources et exemples cohérents.
+    if (m.type === 'commerce') {
+      const familles = new Set<string>();
+      m.familles.forEach((f, i) => {
+        if (familles.has(f.id)) erreur(['familles', i, 'id'], `Famille en double : « ${f.id} »`);
+        familles.add(f.id);
+      });
+      const ressources = new Set<string>();
+      m.ressources.forEach((r, i) => {
+        if (ressources.has(r.id)) erreur(['ressources', i, 'id'], `Ressource en double : « ${r.id} »`);
+        ressources.add(r.id);
+        if (!familles.has(r.famille)) erreur(['ressources', i, 'famille'], `Famille inconnue : « ${r.famille} »`);
+      });
+      m.exemples.forEach((x, i) => {
+        for (const champ of ['besoin', 'mienne', 'adverse', 'fixe'] as const) {
+          for (const id of Object.keys(x[champ])) {
+            if (!ressources.has(id)) erreur(['exemples', i, champ, id], `Ressource inconnue : « ${id} »`);
+          }
+        }
+        const { total } = calculerCommerce(x, m.ressources, m.prixBase, m.prixFixe);
+        if (total !== x.total) erreur(['exemples', i, 'total'], `${x.nom} : le calcul donne ${total}, l'exemple annonce ${x.total}`);
+      });
+    }
+
+    // Intégrité interne d'une victoire : compteurs, alertes et références entre conditions.
+    // Ce qui dépend de jeu.yaml ou d'un autre module (camps, gabarits, groupes d'effets)
+    // est vérifié par lib/coherence.ts.
     if (m.type === 'victoire') {
       const conditions = new Set<string>();
+      const parId = new Map(m.conditions.map((c) => [c.id, c.suivi]));
       m.conditions.forEach((c, i) => {
         if (conditions.has(c.id)) erreur(['conditions', i, 'id'], `Identifiant en double : « ${c.id} »`);
         conditions.add(c.id);
 
         const s = c.suivi;
         if (!s) return;
-        const compteurs = new Set<string>();
-        if (s.type === 'poursuite') {
-          s.compteurs.forEach((k, j) => {
-            const chemin = ['conditions', i, 'suivi', 'compteurs', j];
-            if ((MOTS_RESERVES as readonly string[]).includes(k.id)) {
-              erreur([...chemin, 'id'], `« ${k.id} » est un mot réservé des gabarits`);
+        const ici = ['conditions', i, 'suivi'];
+
+        if (s.type === 'jauge' || s.type === 'poursuite') {
+          const compteurs = new Set<string>();
+          if (s.type === 'poursuite') {
+            s.compteurs.forEach((k, j) => {
+              const chemin = [...ici, 'compteurs', j];
+              if ((MOTS_RESERVES as readonly string[]).includes(k.id)) {
+                erreur([...chemin, 'id'], `« ${k.id} » est un mot réservé des gabarits`);
+              }
+              if (compteurs.has(k.id)) erreur([...chemin, 'id'], `Compteur en double : « ${k.id} »`);
+              compteurs.add(k.id);
+              if (k.depart > k.max) erreur([...chemin, 'depart'], `Départ (${k.depart}) supérieur au max (${k.max})`);
+            });
+          }
+          s.alertes.forEach((a, j) => {
+            const chemin = [...ici, 'alertes', j];
+            if (a.compteur !== undefined && a.camp !== undefined) {
+              erreur(chemin, 'Une alerte cite un compteur ou un camp, pas les deux');
             }
-            if (compteurs.has(k.id)) erreur([...chemin, 'id'], `Compteur en double : « ${k.id} »`);
-            compteurs.add(k.id);
-            if (k.depart > k.max) erreur([...chemin, 'depart'], `Départ (${k.depart}) supérieur au max (${k.max})`);
+            if (s.type === 'poursuite') {
+              if (a.compteur === undefined) erreur(chemin, 'Une alerte de poursuite doit citer un compteur');
+              else if (!compteurs.has(a.compteur)) erreur([...chemin, 'compteur'], `Compteur inconnu : « ${a.compteur} »`);
+              if (a.camp !== undefined) erreur([...chemin, 'camp'], 'Un camp n\'a pas de sens dans une poursuite');
+            } else if (a.compteur !== undefined) {
+              erreur([...chemin, 'compteur'], 'Un compteur n\'a pas de sens dans une jauge');
+            }
           });
         }
-        s.alertes.forEach((a, j) => {
-          const chemin = ['conditions', i, 'suivi', 'alertes', j];
-          if (a.compteur !== undefined && a.camp !== undefined) {
-            erreur(chemin, 'Une alerte cite un compteur ou un camp, pas les deux');
+
+        if (s.type === 'piste') {
+          if (s.camps[0] === s.camps[1]) erreur([...ici, 'camps'], 'Les deux camps d\'une piste doivent différer');
+          const zones = new Set<string>();
+          s.zones.forEach((z, j) => {
+            if (zones.has(z.id)) erreur([...ici, 'zones', j, 'id'], `Zone en double : « ${z.id} »`);
+            zones.add(z.id);
+          });
+          const attendu = 1 + 2 * (s.zones.reduce((t, z) => t + z.cases, 0) + 1);
+          if (s.casesTotal !== attendu) {
+            erreur([...ici, 'casesTotal'], `casesTotal vaut ${s.casesTotal}, les zones donnent ${attendu} (1 + 2 × (zones + extrémité))`);
           }
-          if (s.type === 'poursuite') {
-            if (a.compteur === undefined) erreur(chemin, 'Une alerte de poursuite doit citer un compteur');
-            else if (!compteurs.has(a.compteur)) erreur([...chemin, 'compteur'], `Compteur inconnu : « ${a.compteur} »`);
-            if (a.camp !== undefined) erreur([...chemin, 'camp'], 'Un camp n\'a pas de sens dans une poursuite');
-          } else if (a.compteur !== undefined) {
-            erreur([...chemin, 'compteur'], 'Un compteur n\'a pas de sens dans une jauge');
+          if (s.zones.some((z) => z.jeton) && s.messages.jeton === undefined) {
+            erreur([...ici, 'messages', 'jeton'], 'Une zone porte un jeton : le message « jeton » est requis');
           }
-        });
+        }
+
+        if (s.type === 'symboles') {
+          const ids = new Set<string>();
+          s.symboles.forEach((y, j) => {
+            if (ids.has(y.id)) erreur([...ici, 'symboles', j, 'id'], `Symbole en double : « ${y.id} »`);
+            ids.add(y.id);
+          });
+          if (s.victoire > s.symboles.length) {
+            erreur([...ici, 'victoire'], `${s.victoire} symboles différents demandés, ${s.symboles.length} existent`);
+          }
+          s.bonus.forEach((b, j) => {
+            const chemin = [...ici, 'bonus', j];
+            if (!ids.has(b.symbole)) erreur([...chemin, 'symbole'], `Symbole inconnu : « ${b.symbole} »`);
+            if (parId.get(b.condition)?.type !== 'possession') {
+              erreur([...chemin, 'condition'], `« ${b.condition} » n'est pas une condition de type possession`);
+            }
+          });
+        }
+
+        if (s.type === 'decompte') {
+          const categories = new Set<string>();
+          s.categories.forEach((k, j) => {
+            const chemin = [...ici, 'categories', j];
+            if (categories.has(k.id)) erreur([...chemin, 'id'], `Catégorie en double : « ${k.id} »`);
+            categories.add(k.id);
+            if (k.mode === 'piste' && parId.get(k.condition)?.type !== 'piste') {
+              erreur([...chemin, 'condition'], `« ${k.condition} » n'est pas une condition de type piste`);
+            }
+            if (k.mode === 'possession') {
+              if (parId.get(k.condition)?.type !== 'possession') {
+                erreur([...chemin, 'condition'], `« ${k.condition} » n'est pas une condition de type possession`);
+              }
+              Object.entries(k.fiches).forEach(([fiche, v]) => {
+                if (v.fixe === undefined && v.parJeton === undefined) {
+                  erreur([...chemin, 'fiches', fiche], 'Ni « fixe » ni « parJeton » : la fiche ne rapporte rien');
+                }
+              });
+            }
+          });
+          s.departage.forEach((id, j) => {
+            if (!categories.has(id)) erreur([...ici, 'departage', j], `Catégorie inconnue : « ${id} »`);
+          });
+          s.arret.forEach((id, j) => {
+            const t = parId.get(id)?.type;
+            if (t !== 'piste' && t !== 'symboles') {
+              erreur([...ici, 'arret', j], `« ${id} » n'est pas une condition de type piste ou symboles`);
+            }
+          });
+        }
       });
     }
   });
@@ -257,7 +492,7 @@ const jeux = defineCollection({
     base: DOSSIER_JEUX,
     generateId: ({ entry }) => entry.split('/')[0],
   }),
-  schema: z.object({
+  schema: z.strictObject({
     titre: z.string(),
     sousTitre: z.string().optional(),
     auteurs: z.string(),
@@ -267,12 +502,17 @@ const jeux = defineCollection({
     duree: z.string(),
     theme: z.string(),          // nom du fichier src/styles/themes/<theme>.css
     // Camps ou rôles des joueurs ; liste vide pour un jeu coopératif.
-    camps: z.array(z.object({
+    camps: z.array(z.strictObject({
       id: z.string(),
       nom: z.string(),
       couleur: z.string(), // token CSS du thème, sans « -- » (ex. bien, rouge)
     })).default([]),
     modules: z.array(z.string()).min(1), // ordre d'affichage, par nom de fichier
+    // Où l'état de partie est stocké : une clé par module (défaut), ou une clé pour
+    // tout le jeu quand ses modules se lisent entre eux (voir lib/stockage.ts).
+    stockage: z.enum(['module', 'partie']).default('module'),
+    // Faux : le jeu est validé au build mais n'a aucune page ni lien (brouillon, exemples).
+    publie: z.boolean().default(true),
   }).superRefine((j, ctx) => {
     const vus = new Set<string>();
     j.camps.forEach((c, i) => {
