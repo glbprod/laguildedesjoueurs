@@ -2,7 +2,8 @@
 
 > Source unique pour l'aide de jeu et ses futures données JSON.
 > Règles paraphrasées d'après le livret et l'aide de jeu fournis par GLB (photos du 01/10/2026).
-> Statut : sections 1 à 7 **validées par GLB**. Section 8 **à valider**. Section 9 : manques connus.
+> Statut : sections 1 à 7 **validées par GLB**. Sections 8 et 9 **validées par GLB** (23/10/2026). Section 10 : manques connus.
+> Sources : livret p. 2 à 17 et aide de jeu (photos de GLB, 01/10, 03/10 et 23/10/2026).
 
 ---
 
@@ -20,6 +21,7 @@ Contrôle : chaque paquet donne bien 20 cartes en jeu (I et II : 23 − 3 ; III 
 ## 2. Mise en place
 
 ### Plateau et trésor
+
 1. Plateau sur un côté de l'aire de jeu, entre les deux joueurs.
 2. Pion Conflit sur la case neutre, au centre.
 3. Les 4 jetons Militaire sur leurs emplacements, face visible.
@@ -27,6 +29,7 @@ Contrôle : chaque paquet donne bien 20 cartes en jeu (I et II : 23 − 3 ; III 
 5. Chaque joueur prend 7 pièces à la Banque.
 
 ### Sélection des Merveilles
+
 1. Désigner un premier joueur, mélanger les 12 Merveilles.
 2. Révéler 4 Merveilles : J1 en prend 1, J2 en prend 2, J1 prend la dernière.
 3. Révéler 4 autres Merveilles : même chose, mais J2 ouvre (J2 : 1, J1 : 2, J2 : la dernière).
@@ -34,26 +37,28 @@ Contrôle : chaque paquet donne bien 20 cartes en jeu (I et II : 23 − 3 ; III 
 
 **Première partie** : sauter la sélection et utiliser les lots fixes.
 
-| Joueur 1 | Joueur 2 |
-|---|---|
-| Les Pyramides | Le Circus Maximus |
-| Le Grand Phare | Le Pirée |
-| Le Temple d'Artémis | La Via Appia |
-| La Statue de Zeus | Le Colosse |
+| Joueur 1            | Joueur 2          |
+| ------------------- | ----------------- |
+| Les Pyramides       | Le Circus Maximus |
+| Le Grand Phare      | Le Pirée          |
+| Le Temple d'Artémis | La Via Appia      |
+| La Statue de Zeus   | Le Colosse        |
 
 ### Paquets d'Âge
+
 1. Retirer 3 cartes de chaque paquet d'Âge, sans les regarder, et les ranger dans la boîte.
 2. Tirer au hasard 3 Guildes, sans les regarder, et les ajouter au paquet de l'Âge III. Ranger les autres Guildes.
 3. Les cartes retirées à la préparation **ne font pas partie de la défausse**.
 
 ### Structures (au début de chaque Âge)
+
 Mélanger le paquet de l'Âge et disposer 20 cartes. Les rangées alternent face visible (V) et face cachée (C), en commençant et en finissant par une rangée visible.
 
-| Âge | Cartes par rangée (haut → bas) | Faces |
-|---|---|---|
-| I | 2-3-4-5-6 | V-C-V-C-V |
-| II | 6-5-4-3-2 | V-C-V-C-V |
-| III | 2-3-4-2-4-3-2 | V-C-V-C-V-C-V |
+| Âge | Cartes par rangée (haut → bas) | Faces         |
+| --- | ------------------------------ | ------------- |
+| I   | 2-3-4-5-6                      | V-C-V-C-V     |
+| II  | 6-5-4-3-2                      | V-C-V-C-V     |
+| III | 2-3-4-2-4-3-2                  | V-C-V-C-V-C-V |
 
 ## 3. Déroulement
 
@@ -61,6 +66,7 @@ Mélanger le paquet de l'Âge et disposer 20 cartes. Les rangées alternent face
 - Les joueurs jouent chacun leur tour. Le premier joueur commence l'Âge I.
 
 ### Le tour
+
 Prendre une carte **accessible**, c'est-à-dire qu'aucune autre carte ne recouvre, même partiellement, puis la jouer de l'une de ces trois façons :
 
 1. **Construire le bâtiment** : payer son coût et poser la carte dans sa Cité. Ranger ses cartes par couleur est conseillé.
@@ -73,6 +79,7 @@ Ensuite, le joueur actif retourne les cartes cachées devenues accessibles.
 - **7 Merveilles maximum** : dès que la 7e Merveille de la partie est construite, la Merveille restante non construite retourne dans la boîte.
 
 ### Fin d'un Âge
+
 - L'Âge se termine quand les 20 cartes de la structure ont été jouées. Préparer la structure suivante.
 - Le joueur **mené militairement** choisit qui commence l'Âge suivant. Est mené le joueur du côté duquel se trouve le pion Conflit.
 - Si le pion est au centre, c'est le dernier joueur actif (celui qui a joué la dernière carte de l'Âge) qui choisit.
@@ -80,6 +87,7 @@ Ensuite, le joueur actif retourne les cartes cachées devenues accessibles.
 ## 4. Construire
 
 ### Types de coût
+
 - **Gratuit** : zone de coût vide.
 - **Ressources** : produire chaque ressource demandée, ou acheter celles qui manquent (commerce).
 - **Pièces** : payer la somme à la Banque.
@@ -87,11 +95,13 @@ Ensuite, le joueur actif retourne les cartes cachées devenues accessibles.
 - Toutes les Merveilles ont un coût en ressources.
 
 ### Production
+
 - Les ressources viennent des cartes marron et grises, de certaines cartes jaunes et de certaines Merveilles.
 - Les ressources **ne se dépensent pas** : elles servent à chaque tour, toute la partie.
 - Sauf exception, la production d'une Cité ne diminue jamais.
 
 ### Commerce
+
 **Prix d'une ressource = 2 + nombre de symboles de cette ressource produits par les cartes marron et grises de l'adversaire.**
 
 - On regarde la Cité adverse, mais on paie la Banque.
@@ -101,41 +111,46 @@ Ensuite, le joueur actif retourne les cartes cachées devenues accessibles.
 
 ### Exemples du livret (jeux de test)
 
-| Situation | Détail | Total |
-|---|---|---|
-| Fortifications (2 Pierres, 1 Argile, 1 Papyrus). L'acheteur produit 2 Pierres, l'adversaire 1 Argile et 0 Papyrus | 0 + 0 + 3 + 2 | 5 |
-| Aqueduc (3 Pierres). L'acheteur n'en produit aucune, l'adversaire en produit 2 | 4 + 4 + 4 | 12 |
-| Caravansérail (2 pièces, 1 Verre, 1 Papyrus). L'adversaire produit 1 Verre et 0 Papyrus | 2 + 3 + 2 | 7 |
+| Situation                                                                                                         | Détail        | Total |
+| ----------------------------------------------------------------------------------------------------------------- | ------------- | ----- |
+| Fortifications (2 Pierres, 1 Argile, 1 Papyrus). L'acheteur produit 2 Pierres, l'adversaire 1 Argile et 0 Papyrus | 0 + 0 + 3 + 2 | 5     |
+| Aqueduc (3 Pierres). L'acheteur n'en produit aucune, l'adversaire en produit 2                                    | 4 + 4 + 4     | 12    |
+| Caravansérail (2 pièces, 1 Verre, 1 Papyrus). L'adversaire produit 1 Verre et 0 Papyrus                           | 2 + 3 + 2     | 7     |
 
 ### Chaînage
+
 - Certains bâtiments portent un symbole de chaînage blanc.
 - Une carte des Âges II ou III qui affiche ce symbole sous son coût se construit gratuitement si on possède déjà le bâtiment qui le porte.
 - Exemples : Bains → Aqueduc, Palissade → Fortifications.
 
 ## 5. Militaire
+
 - Chaque Bouclier, sur une carte rouge ou une Merveille, avance immédiatement le pion Conflit d'une case vers la capitale adverse. Le pion peut faire des allers-retours.
 - Quand le pion entre dans une zone portant un jeton Militaire, le joueur actif applique l'effet du jeton, puis le jeton retourne dans la boîte.
 - **Suprématie militaire** : le pion atteint la capitale adverse, et le joueur actif gagne immédiatement.
 
 ### Découpage de la piste (relevé sur le plateau)
+
 Symétrique de part et d'autre de la case neutre. De chaque côté, du centre vers la capitale :
 
-| Zone | Cases | Points en fin de partie | Jeton Militaire |
-|---|---|---|---|
-| Centre (neutre) | 1 (commune) | 0 | — |
-| A | 2 | 2 | — |
-| B | 3 | 5 | 2 pièces |
-| C | 3 | 10 | 5 pièces |
-| Capitale | 1 | — (suprématie) | — |
+| Zone            | Cases       | Points en fin de partie | Jeton Militaire |
+| --------------- | ----------- | ----------------------- | --------------- |
+| Centre (neutre) | 1 (commune) | 0                       | —               |
+| A               | 2           | 2                       | —               |
+| B               | 3           | 5                       | 2 pièces        |
+| C               | 3           | 10                      | 5 pièces        |
+| Capitale        | 1           | — (suprématie)          | —               |
 
 Total : 1 + 2 × (2 + 3 + 3 + 1) = 19 cases, 9 zones.
 
 ## 6. Science et Progrès
+
 - 7 symboles scientifiques existent. On les trouve sur les cartes vertes et sur un jeton Progrès.
 - À chaque **paire de symboles identiques**, choisir immédiatement un jeton Progrès sur le plateau. On le garde jusqu'à la fin de la partie.
 - **Suprématie scientifique** : 6 symboles **différents**, victoire immédiate.
 
 ## 7. Fin de partie et victoire civile
+
 - La partie s'arrête immédiatement en cas de suprématie, sinon à l'issue de l'Âge III.
 - Victoire civile : le plus de points de victoire l'emporte. On additionne :
   - les points militaires : 0, 2, 5 ou 10 selon la position du pion Conflit ;
@@ -147,46 +162,147 @@ Total : 1 + 2 × (2 + 3 + 3 + 1) = 19 cases, 9 zones.
 
 ---
 
-## 8. Aide de jeu : symboles et Progrès — À VALIDER
+## 8. Symboles, Guildes et Progrès
 
-### Jetons Militaire
-- L'adversaire perd 2 ou 5 pièces, rendues à la Banque.
+### Jetons Militaire (livret p. 14) — `validé`
+
+- Saccage : l'adversaire perd 2 ou 5 pièces selon le jeton, rendues à la Banque. Le jeton retourne ensuite dans la boîte.
 - S'il n'en a pas assez, il perd tout son trésor.
 
-### Symboles des cartes
-- **Ressource(s) représentée(s)** : la carte produit ces ressources.
-- **Laurier chiffré** : points de victoire.
-- **Bouclier** : nombre de Boucliers.
-- **Symbole scientifique** : la carte ou le jeton donne ce symbole.
-- **Ressource avec une pièce « 1 »** : à partir du tour suivant, cette ressource s'achète à la Banque au prix fixe de 1 pièce l'unité.
-- **Symbole de chaînage** : permet, lors d'un Âge suivant, de construire gratuitement la carte qui porte ce symbole dans son coût.
-- **Ressources séparées par des barres** : la carte produit chaque tour 1 unité de l'une de ces ressources, au choix. Cette production ne compte pas dans le prix du commerce.
-- **Pièce chiffrée** : la carte rapporte ce nombre de pièces.
-- **Pièces par carte d'une couleur ou par Merveille** : à la construction, 1 à 3 pièces par élément représenté dans sa propre Cité. Pièces prises à la Banque une seule fois.
-- **Défausse barrée** : prendre toute la défausse depuis le début de la partie et construire gratuitement une carte au choix. Les cartes retirées à la préparation n'en font pas partie.
+### Symboles des cartes Âge I, II et III (livret p. 15) — `validé`
+
+**Production**
+
+| Symbole                                        | Effet                                       |
+| ---------------------------------------------- | ------------------------------------------- |
+| Une matière première (Argile, Bois ou Pierre)  | La carte produit 1 unité de cette matière.  |
+| Deux fois la même matière première             | La carte produit 2 unités de cette matière. |
+| Un produit manufacturé (Verre ou Papyrus)      | La carte produit 1 unité de ce produit.     |
+| Bois / Argile / Pierre, séparés par des barres | Chaque tour, 1 unité au choix parmi les 3.  |
+| Verre / Papyrus, séparés par une barre         | Chaque tour, 1 unité au choix parmi les 2.  |
+
+Les productions « au choix » ne comptent pas dans le prix du commerce payé par l'adversaire.
+
+**Commerce**
+
+- Une ressource marquée d'une pièce « 1 » : à partir du tour suivant, le joueur achète cette ressource à la Banque au prix fixe de 1 pièce l'unité.
+- Deux ressources marquées chacune d'une pièce « 1 » : même règle, pour les 2 ressources.
+
+**Points, Boucliers, science, chaînage**
+
+- **Laurier chiffré** : la carte rapporte ce nombre de points de victoire.
+- **Bouclier** : la carte rapporte ce nombre de Boucliers.
+- **Symbole scientifique** : la carte rapporte ce symbole.
+- **Symbole de chaînage** : lors d'un Âge suivant, il permet de construire gratuitement une carte qui porte ce symbole dans son coût.
+
+**Pièces à la construction (dans sa propre Cité)**
+
+| Symbole          | Pièces                                   |
+| ---------------- | ---------------------------------------- |
+| Pièce chiffrée   | le nombre indiqué                        |
+| Merveille + 2    | 2 par Merveille construite               |
+| Carte grise + 3  | 3 par carte grise                        |
+| Carte marron + 2 | 2 par carte marron                       |
+| Carte jaune + 1  | 1 par carte jaune, **celle-ci comprise** |
+| Carte rouge + 1  | 1 par carte rouge                        |
+
+Pour toutes ces cartes, les pièces sont prises à la Banque une seule fois, au moment de la construction.
+
+**Effets décrits par l'aide de jeu, repris sur les Merveilles (§9)**
+
+- **Défausse** : prendre toute la défausse et construire gratuitement une carte au choix. Les cartes retirées à la préparation n'en font pas partie.
 - **Trois jetons Progrès** : tirer au hasard 3 jetons parmi ceux écartés à la préparation, en garder 1, ranger les 2 autres.
-- **Carte marron ou grise barrée** : désigner une carte de cette couleur dans la Cité adverse, qui est défaussée.
-- **Flèches circulaires** : rejouer un tour complet juste après celui-ci.
+- **Carte marron ou grise barrée** : défausser une carte de cette couleur, au choix, dans la Cité adverse.
+- **Flèches circulaires** : rejouer un tour juste après celui-ci.
 
-### Guildes (cartes violettes)
-- **Guildes par couleur** : à la construction, 1 pièce par carte de la couleur représentée dans la Cité qui en a le plus. En fin de partie, 1 point par carte de cette couleur dans la Cité qui en a le plus. La Cité retenue peut être différente pour les pièces et pour les points. Pièces prises à la Banque une seule fois.
-- **Guilde des Armateurs** : une seule Cité doit être retenue pour ses 2 couleurs de cartes.
-- **Guilde des Merveilles** : en fin de partie, 2 points par Merveille construite dans la Cité qui en a le plus.
-- **Guilde du trésor** : en fin de partie, 1 point par lot complet de 3 pièces dans la Cité la plus riche.
+**Déductions de l'image (validées par GLB)**
 
-### Jetons Progrès connus (7)
-*(L'aide de jeu décrit Architecture et Maçonnerie dans une seule entrée.)*
-- **Mathématiques** : en fin de partie, 3 points par jeton Progrès possédé, celui-ci compris.
-- **Stratégie** : les cartes rouges construites ensuite donnent 1 Bouclier de plus. Sans effet sur les Merveilles à Boucliers et sur les cartes rouges déjà construites.
-- **Architecture** : les Merveilles construites ensuite coûtent 2 ressources de moins, au choix à chaque construction. *(Attribution déduite de l'icône.)*
-- **Maçonnerie** : les cartes bleues construites ensuite coûtent 2 ressources de moins, au choix à chaque construction. *(Attribution déduite de l'icône.)*
-- **Urbanisme** : 6 pièces immédiatement, puis 4 pièces à chaque construction gratuite par chaînage.
-- **Économie** : on récupère les pièces que l'adversaire dépense pour acheter des ressources par le commerce. Seuls comptent les achats de ressources, pas les coûts en pièces des bâtiments. L'effet s'applique même quand l'adversaire bénéficie de réductions commerciales (Dépôts, Douane).
-- **Théologie** : les Merveilles construites ensuite ont toutes l'effet « Rejouer ». Les Merveilles qui l'ont déjà ne sont pas concernées : pas de double effet.
+- **Symboles scientifiques** : la p. 15 en dessine 6 sur les cartes ; la p. 12 en dessine 7, avec en plus une balance. Le 7e symbole, la balance, serait donc celui du jeton Loi. Le livret ne nomme pas les symboles ; noms descriptifs proposés pour la page : sphère armillaire, roue, cadran solaire, mortier, équerre, plume, balance.
+- **Symboles de chaînage** : la p. 15 en dessine 17 (2 jaunes, 6 bleus, 5 rouges, 4 verts). Ils ne servent qu'à repérer les chaînes sur les cartes ; la page n'a pas besoin de les reproduire.
+
+### Guildes (cartes violettes, livret p. 16) — 7 cartes — `validé`
+
+**Règles communes**
+
+- On compte dans la Cité qui a le plus d'éléments du type indiqué : la sienne **ou celle de l'adversaire**. _(Déduction : le livret dit « la Cité qui en possède le plus grand nombre » sans préciser laquelle.)_
+- Les pièces sont prises à la Banque une seule fois, au moment de la construction.
+- En fin de partie, la Cité retenue pour les points peut être différente de celle retenue pour les pièces.
+
+| Guilde        | À la construction                 | En fin de partie                                                |
+| ------------- | --------------------------------- | --------------------------------------------------------------- |
+| Armateurs     | 1 pièce par carte marron et grise | 1 point par carte marron et grise                               |
+| Commerçants   | 1 pièce par carte jaune           | 1 point par carte jaune                                         |
+| Magistrats    | 1 pièce par carte bleue           | 1 point par carte bleue                                         |
+| Tacticiens    | 1 pièce par carte rouge           | 1 point par carte rouge                                         |
+| Scientifiques | 1 pièce par carte verte           | 1 point par carte verte                                         |
+| Bâtisseurs    | —                                 | 2 points par Merveille construite                               |
+| Usuriers      | —                                 | 1 point par lot complet de 3 pièces, dans la Cité la plus riche |
+
+**Armateurs** : une seule Cité doit être retenue pour les 2 couleurs, marron et grise.
+
+### Jetons Progrès (livret p. 14) — 10 jetons — `validé`
+
+| Progrès       | Effet                                                                                                |
+| ------------- | ---------------------------------------------------------------------------------------------------- |
+| Agriculture   | 6 pièces immédiatement. Le jeton rapporte 4 points de victoire.                                      |
+| Architecture  | Les Merveilles construites ensuite coûtent 2 ressources de moins, au choix à chaque construction.    |
+| Économie      | On récupère les pièces que l'adversaire dépense pour acheter des ressources.                         |
+| Loi           | Le jeton rapporte un symbole scientifique.                                                           |
+| Maçonnerie    | Les cartes bleues construites ensuite coûtent 2 ressources de moins, au choix à chaque construction. |
+| Mathématiques | En fin de partie, 3 points par jeton Progrès possédé, celui-ci compris.                              |
+| Philosophie   | Le jeton rapporte 7 points de victoire.                                                              |
+| Stratégie     | Les cartes rouges construites ensuite donnent 1 Bouclier de plus.                                    |
+| Théologie     | Les Merveilles construites ensuite ont toutes l'effet « Rejouer ».                                   |
+| Urbanisme     | 6 pièces immédiatement, puis 4 pièces à chaque construction gratuite par chaînage.                   |
+
+**Précisions**
+
+- **Économie** :
+  - seules comptent les pièces dépensées pour obtenir des ressources, pas celles du coût des bâtiments ;
+  - les réductions commerciales de l'adversaire (Dépôt de Pierre, Dépôt de Bois, Dépôt d'Argile, Douane) changent le prix, mais on récupère quand même les pièces dépensées.
+- **Stratégie** :
+  - exemple : une carte rouge à 2 Boucliers fait avancer le pion de 3 cases ;
+  - sans effet sur les Merveilles à Boucliers ;
+  - sans effet sur les cartes rouges construites avant d'avoir le jeton.
+- **Théologie** : les Merveilles qui ont déjà l'effet « Rejouer » ne sont pas concernées. Une Merveille ne peut pas avoir deux fois cet effet.
 
 ---
 
-## 9. Manques connus
-- 3 jetons Progrès sur 10 sans texte (dont Philosophie, visible sur le schéma).
-- Les effets des 12 Merveilles. Décision possible : s'en passer en V1, puisque les cartes sont iconographiées et que la section 8 explique les symboles.
-- Le contenu exact du symbole scientifique porté par un jeton Progrès (lequel des jetons).
+## 9. Les 12 Merveilles (livret p. 17) — `validé`
+
+Le livret décrit l'effet de chaque Merveille, pas son coût (le coût est imprimé sur la carte).
+
+| Merveille              | Effet à la construction                                                                                 | PV  |
+| ---------------------- | ------------------------------------------------------------------------------------------------------- | --- |
+| Le Circus Maximus      | Défausser une carte grise, au choix, construite par l'adversaire. 1 Bouclier.                           | 3   |
+| Le Colosse             | 2 Boucliers.                                                                                            | 3   |
+| Le Grand Phare         | Produit chaque tour 1 unité au choix : Bois, Pierre ou Argile.                                          | 4   |
+| Les Jardins Suspendus  | 6 pièces. Rejouer.                                                                                      | 3   |
+| La Grande Bibliothèque | Tirer au hasard 3 jetons Progrès parmi ceux écartés à la préparation, en garder 1, ranger les 2 autres. | 4   |
+| Le Mausolée            | Prendre toutes les cartes défaussées depuis le début de la partie et en construire une gratuitement.    | 2   |
+| Le Pirée               | Produit chaque tour 1 unité au choix : Papyrus ou Verre. Rejouer.                                       | 2   |
+| Les Pyramides          | —                                                                                                       | 9   |
+| Le Sphinx              | Rejouer.                                                                                                | 6   |
+| La Statue de Zeus      | Défausser une carte marron, au choix, construite par l'adversaire. 1 Bouclier.                          | 3   |
+| Le Temple d'Artémis    | 12 pièces. Rejouer.                                                                                     | —   |
+| La Via Appia           | 3 pièces. L'adversaire perd 3 pièces, rendues à la Banque. Rejouer.                                     | 3   |
+
+**Précisions du livret**
+
+- Grand Phare et Pirée : leur production ne compte pas dans le prix du commerce payé par l'adversaire.
+- Mausolée : les cartes retirées à la préparation ne font pas partie de la défausse.
+
+**Recoupements utiles pour la page**
+
+- **5 Merveilles « Rejouer »** : Jardins Suspendus, Pirée, Sphinx, Temple d'Artémis, Via Appia. Théologie ne leur ajoute rien.
+- **3 Merveilles à Boucliers** : Circus Maximus (1), Colosse (2), Statue de Zeus (1). Stratégie ne s'y applique pas.
+- **2 Merveilles qui défaussent** une carte adverse : Circus Maximus (grise), Statue de Zeus (marron). C'est l'« exception » du §4 : la production d'une Cité peut alors diminuer. _(Rapprochement déduit, le §4 validé n'est pas réécrit.)_
+- Cohérence avec la p. 11 : le Colosse y avance le pion de 2 cases, comme ses 2 Boucliers.
+
+---
+
+## 10. Manques connus
+
+- Science : un 3e ou un 4e symbole identique donne-t-il un nouveau Progrès ? Le livret dit seulement « chaque fois qu'un joueur réunit une paire » (p. 12). Lecture prudente retenue : une alerte au passage à 2.
+- Coûts des Merveilles : imprimés sur les cartes, absents du texte du livret (seul le Colosse est cité p. 11 : 3 Argiles et 1 Verre). Inutiles pour la v1.
+- Contenu des paquets d'Âge (liste des cartes) : non décrit par le livret, imprimé sur les cartes.
