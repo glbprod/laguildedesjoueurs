@@ -8,6 +8,7 @@
 export const PAGES_PUBLIEES = [
   'chateaux_aide-de-jeu_v1.html',
   'chateaux_grille-observation_v1.html',
+  '7wduel_aide-de-jeu_v1.html',
 ];
 
 export const DOSSIER_REFERENCE = new URL('../reference/', import.meta.url);
