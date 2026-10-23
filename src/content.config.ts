@@ -21,10 +21,16 @@ const validation = z.strictObject({
   source: z.string().optional(), // ex. « livret de règles, p. 6 »
 });
 
+const identifiant = z.string().regex(/^[a-z0-9-]+$/, 'minuscules, chiffres et tirets');
+
 // Bloc de texte générique : titre + paragraphes et/ou liste + note.
 // La légende colorée (couleurs de cartes, types d'action…) est portée par le
 // bloc lui-même : sa place dans la page suit celle du bloc, sans index fragile.
 const bloc = z.strictObject({
+  // Cochable : chaque élément de `liste` devient une case à cocher, mémorisée dans l'état
+  // de partie. L'`id` du bloc préfixe les clés mémorisées : il est alors obligatoire.
+  id: identifiant.optional(),
+  cochable: z.boolean().default(false),
   titre: z.string(),
   paragraphes: z.array(z.string()).default([]),
   liste: z.array(z.string()).default([]),
@@ -45,6 +51,42 @@ const communs = {
 /* Types de modules (un fichier YAML = un module)                      */
 /* ------------------------------------------------------------------ */
 
+// Sélection alternée entre camps (ex. des cartes à se répartir, un camp après l'autre).
+// Les consignes sont générées : « <camp> en prend 2 Merveilles », « <camp> prend la dernière ».
+const selection = z.strictObject({
+  titre: z.string(),
+  intro: z.string().optional(),
+  objet: z.strictObject({ singulier: z.string(), pluriel: z.string() }), // ce qu'on prend
+  phases: z.array(z.strictObject({
+    libelle: z.string(),                 // consigne de révélation
+    nombre: z.number().int().positive(), // éléments révélés
+    ordre: z.array(z.string()).min(1),   // ids de camps, dans l'ordre des prises (autant que `nombre`)
+  })).min(1),
+  fin: z.string(),
+  // Variante sans sélection : un lot fixe d'éléments par camp (ex. pour une première partie).
+  lotsFixes: z.strictObject({
+    titre: z.string(),
+    texte: z.string(),
+    lots: z.record(z.string(), z.array(z.string()).min(1)), // id de camp → éléments
+    fin: z.string(),
+  }).optional(),
+});
+
+// Dispositions de cartes en rangées centrées, de haut en bas, avec la face de chaque
+// rangée : V (visible) ou C (cachée). Le schéma est dessiné au rendu.
+const structures = z.strictObject({
+  titre: z.string(),
+  intro: z.string(),
+  cartes: z.number().int().positive(), // total attendu : contrôle de saisie
+  legende: z.string().optional(),      // ex. « V = face visible · C = face cachée »
+  note: z.string().optional(),
+  liste: z.array(z.strictObject({
+    nom: z.string(),
+    rangees: z.array(z.number().int().positive()).min(1),
+    faces: z.string().regex(/^[VC]+$/, 'V (visible) ou C (cachée), une lettre par rangée'),
+  })).min(1),
+});
+
 const miseEnPlace = z.strictObject({
   type: z.literal('mise-en-place'),
   ...communs,
@@ -57,12 +99,9 @@ const miseEnPlace = z.strictObject({
   })).default([]),
   schema: z.string().optional(), // nom du composant SVG original
   blocs: z.array(bloc),
-});
-
-const tour = z.strictObject({
-  type: z.literal('tour'),
-  ...communs,
-  blocs: z.array(bloc),
+  // Après les blocs, dans cet ordre : sélection, puis structures.
+  selection: selection.optional(),
+  structures: structures.optional(),
 });
 
 // Alerte déclarative d'un suivi. Aucune expression : une comparaison, un seuil.
@@ -91,8 +130,6 @@ const alertes = {
 // Chaque suivi est générique : il ne connaît ni le jeu ni ses règles, seulement
 // une mécanique (marqueur sur une piste, symboles à réunir, jetons attribués,
 // points à additionner). Les textes et les nombres viennent du YAML.
-
-const identifiant = z.string().regex(/^[a-z0-9-]+$/, 'minuscules, chiffres et tirets');
 
 // Piste à deux sens entre deux camps (ex. un marqueur qu'on pousse vers la base
 // adverse). Les zones, du centre vers l'extrémité, sont les mêmes de chaque côté.
@@ -189,40 +226,81 @@ const decompte = z.strictObject({
   }),
 });
 
+// Jauge : une valeur de 0 à `max`, une par camp (parCamp) ou une seule.
+const jauge = z.strictObject({
+  type: z.literal('jauge'),
+  max: z.number().int().positive(),
+  // Défaut résolu au rendu : vrai si le jeu déclare des camps.
+  parCamp: z.boolean().optional(),
+  ...alertes,
+});
+
+// Plusieurs compteurs liés (ex. une poursuite : écart et cases restantes).
+const poursuite = z.strictObject({
+  type: z.literal('poursuite'),
+  compteurs: z.array(z.strictObject({
+    id: z.string(),
+    libelle: z.string(),
+    depart: z.number().int().nonnegative(),
+    max: z.number().int().positive().default(30),
+  })).min(1),
+  ...alertes,
+});
+
+// Une condition = un titre, un texte et, le plus souvent, un suivi. Le module `victoire`
+// les accepte tous ; le module `tour` n'accepte que les compteurs (jauge, poursuite).
+const conditionDe = <S extends z.ZodType>(suivi: S) => z.strictObject({
+  id: z.string(),
+  titre: z.string(),
+  description: z.string(),
+  suivi,
+});
+const conditionVictoire = conditionDe(
+  z.discriminatedUnion('type', [jauge, poursuite, piste, symboles, possession, decompte]).optional(),
+);
+const conditionCompteur = conditionDe(z.discriminatedUnion('type', [jauge, poursuite]));
+
+// Rappel : retrouve, dans un groupe d'un module effets, les fiches portant une étiquette
+// et les cite dans une phrase. Gabarits du modèle : {n} (leur nombre) et {liste} (leurs
+// noms courts, séparés par des virgules). Un complément cite en dessous une autre fiche.
+const rappel = z.strictObject({
+  id: identifiant,
+  titre: z.string(),
+  modele: z.string(),
+  groupe: identifiant,   // id d'un groupe d'un module effets du même jeu
+  etiquette: z.string(), // étiquette des fiches de ce groupe à citer
+  complement: z.strictObject({ groupe: identifiant, fiche: identifiant }).optional(),
+});
+
+// Fin de manche : le camp mené choisit qui commence la suivante, d'après la position
+// d'un marqueur de piste. Le camp mené est celui du côté duquel se trouve le marqueur
+// (`camps[0]` de la piste côté négatif, `camps[1]` côté positif) ; au centre, c'est le
+// dernier joueur actif, que l'on indique. Gabarits : mene et centreChoisi : {joueur}.
+const finDeManche = z.strictObject({
+  titre: z.string(),
+  points: z.array(z.string()).min(1),
+  // Piste qui décide : fichier d'un module `victoire` du même jeu et id de la condition.
+  piste: z.strictObject({ module: z.string(), condition: z.string() }),
+  question: z.string(),
+  messages: z.strictObject({ mene: z.string(), centre: z.string(), centreChoisi: z.string() }),
+});
+
+const tour = z.strictObject({
+  type: z.literal('tour'),
+  ...communs,
+  blocs: z.array(bloc),
+  // Après les blocs, dans cet ordre : rappels, suivis, fin de manche, puis `blocsApres`.
+  rappels: z.array(rappel).default([]),
+  suivis: z.array(conditionCompteur).default([]),
+  finDeManche: finDeManche.optional(),
+  blocsApres: z.array(bloc).default([]),
+});
+
 const victoire = z.strictObject({
   type: z.literal('victoire'),
   ...communs,
   intro: z.string().optional(),
-  conditions: z.array(z.strictObject({
-    id: z.string(),
-    titre: z.string(),
-    description: z.string(),
-    suivi: z.discriminatedUnion('type', [
-      // Une valeur de 0 à `max`, une par camp (parCamp) ou une seule.
-      z.strictObject({
-        type: z.literal('jauge'),
-        max: z.number().int().positive(),
-        // Défaut résolu au rendu : vrai si le jeu déclare des camps.
-        parCamp: z.boolean().optional(),
-        ...alertes,
-      }),
-      // Plusieurs compteurs liés (ex. une poursuite : écart et cases restantes).
-      z.strictObject({
-        type: z.literal('poursuite'),
-        compteurs: z.array(z.strictObject({
-          id: z.string(),
-          libelle: z.string(),
-          depart: z.number().int().nonnegative(),
-          max: z.number().int().positive().default(30),
-        })).min(1),
-        ...alertes,
-      }),
-      piste,
-      symboles,
-      possession,
-      decompte,
-    ]).optional(),
-  })),
+  conditions: z.array(conditionVictoire),
   finDePartie: z.string().optional(),
   // Rappel de ce qu'il faut relever sur le plateau avant de jouer.
   aReporter: z.strictObject({
@@ -315,6 +393,118 @@ const animateur = z.strictObject({
   })),
 });
 
+type Condition = z.infer<typeof conditionVictoire>;
+type Erreur = (path: (string | number)[], message: string) => void;
+
+// Contrôles internes d'une liste de conditions : celles d'un module `victoire`, ou les
+// suivis d'un `tour`. Ce qui dépend de jeu.yaml ou d'un autre module (camps, gabarits,
+// groupes d'effets, pistes d'un autre fichier) est vérifié par lib/coherence.ts.
+function verifierConditions(conditions: Condition[], base: string, erreur: Erreur) {
+  const conditionsVues = new Set<string>();
+  const parId = new Map(conditions.map((c) => [c.id, c.suivi]));
+  conditions.forEach((c, i) => {
+    if (conditionsVues.has(c.id)) erreur([base, i, 'id'], `Identifiant en double : « ${c.id} »`);
+    conditionsVues.add(c.id);
+
+    const s = c.suivi;
+    if (!s) return;
+    const ici = [base, i, 'suivi'];
+
+    if (s.type === 'jauge' || s.type === 'poursuite') {
+      const compteurs = new Set<string>();
+      if (s.type === 'poursuite') {
+        s.compteurs.forEach((k, j) => {
+          const chemin = [...ici, 'compteurs', j];
+          if ((MOTS_RESERVES as readonly string[]).includes(k.id)) {
+            erreur([...chemin, 'id'], `« ${k.id} » est un mot réservé des gabarits`);
+          }
+          if (compteurs.has(k.id)) erreur([...chemin, 'id'], `Compteur en double : « ${k.id} »`);
+          compteurs.add(k.id);
+          if (k.depart > k.max) erreur([...chemin, 'depart'], `Départ (${k.depart}) supérieur au max (${k.max})`);
+        });
+      }
+      s.alertes.forEach((a, j) => {
+        const chemin = [...ici, 'alertes', j];
+        if (a.compteur !== undefined && a.camp !== undefined) {
+          erreur(chemin, 'Une alerte cite un compteur ou un camp, pas les deux');
+        }
+        if (s.type === 'poursuite') {
+          if (a.compteur === undefined) erreur(chemin, 'Une alerte de poursuite doit citer un compteur');
+          else if (!compteurs.has(a.compteur)) erreur([...chemin, 'compteur'], `Compteur inconnu : « ${a.compteur} »`);
+          if (a.camp !== undefined) erreur([...chemin, 'camp'], 'Un camp n\'a pas de sens dans une poursuite');
+        } else if (a.compteur !== undefined) {
+          erreur([...chemin, 'compteur'], 'Un compteur n\'a pas de sens dans une jauge');
+        }
+      });
+    }
+
+    if (s.type === 'piste') {
+      if (s.camps[0] === s.camps[1]) erreur([...ici, 'camps'], 'Les deux camps d\'une piste doivent différer');
+      const zones = new Set<string>();
+      s.zones.forEach((z, j) => {
+        if (zones.has(z.id)) erreur([...ici, 'zones', j, 'id'], `Zone en double : « ${z.id} »`);
+        zones.add(z.id);
+      });
+      const attendu = 1 + 2 * (s.zones.reduce((t, z) => t + z.cases, 0) + 1);
+      if (s.casesTotal !== attendu) {
+        erreur([...ici, 'casesTotal'], `casesTotal vaut ${s.casesTotal}, les zones donnent ${attendu} (1 + 2 × (zones + extrémité))`);
+      }
+      if (s.zones.some((z) => z.jeton) && s.messages.jeton === undefined) {
+        erreur([...ici, 'messages', 'jeton'], 'Une zone porte un jeton : le message « jeton » est requis');
+      }
+    }
+
+    if (s.type === 'symboles') {
+      const ids = new Set<string>();
+      s.symboles.forEach((y, j) => {
+        if (ids.has(y.id)) erreur([...ici, 'symboles', j, 'id'], `Symbole en double : « ${y.id} »`);
+        ids.add(y.id);
+      });
+      if (s.victoire > s.symboles.length) {
+        erreur([...ici, 'victoire'], `${s.victoire} symboles différents demandés, ${s.symboles.length} existent`);
+      }
+      s.bonus.forEach((b, j) => {
+        const chemin = [...ici, 'bonus', j];
+        if (!ids.has(b.symbole)) erreur([...chemin, 'symbole'], `Symbole inconnu : « ${b.symbole} »`);
+        if (parId.get(b.condition)?.type !== 'possession') {
+          erreur([...chemin, 'condition'], `« ${b.condition} » n'est pas une condition de type possession`);
+        }
+      });
+    }
+
+    if (s.type === 'decompte') {
+      const categories = new Set<string>();
+      s.categories.forEach((k, j) => {
+        const chemin = [...ici, 'categories', j];
+        if (categories.has(k.id)) erreur([...chemin, 'id'], `Catégorie en double : « ${k.id} »`);
+        categories.add(k.id);
+        if (k.mode === 'piste' && parId.get(k.condition)?.type !== 'piste') {
+          erreur([...chemin, 'condition'], `« ${k.condition} » n'est pas une condition de type piste`);
+        }
+        if (k.mode === 'possession') {
+          if (parId.get(k.condition)?.type !== 'possession') {
+            erreur([...chemin, 'condition'], `« ${k.condition} » n'est pas une condition de type possession`);
+          }
+          Object.entries(k.fiches).forEach(([fiche, v]) => {
+            if (v.fixe === undefined && v.parJeton === undefined) {
+              erreur([...chemin, 'fiches', fiche], 'Ni « fixe » ni « parJeton » : la fiche ne rapporte rien');
+            }
+          });
+        }
+      });
+      s.departage.forEach((id, j) => {
+        if (!categories.has(id)) erreur([...ici, 'departage', j], `Catégorie inconnue : « ${id} »`);
+      });
+      s.arret.forEach((id, j) => {
+        const t = parId.get(id)?.type;
+        if (t !== 'piste' && t !== 'symboles') {
+          erreur([...ici, 'arret', j], `« ${id} » n'est pas une condition de type piste ou symboles`);
+        }
+      });
+    }
+  });
+}
+
 // Nouveau type de module (ex. accompagnement Sauron IA) = un membre de plus ici.
 const module = z
   .discriminatedUnion('type', [miseEnPlace, tour, victoire, effets, commerce, erreurs, animateur])
@@ -371,112 +561,48 @@ const module = z
       });
     }
 
-    // Intégrité interne d'une victoire : compteurs, alertes et références entre conditions.
-    // Ce qui dépend de jeu.yaml ou d'un autre module (camps, gabarits, groupes d'effets)
-    // est vérifié par lib/coherence.ts.
-    if (m.type === 'victoire') {
-      const conditions = new Set<string>();
-      const parId = new Map(m.conditions.map((c) => [c.id, c.suivi]));
-      m.conditions.forEach((c, i) => {
-        if (conditions.has(c.id)) erreur(['conditions', i, 'id'], `Identifiant en double : « ${c.id} »`);
-        conditions.add(c.id);
+    if (m.type === 'victoire') verifierConditions(m.conditions, 'conditions', erreur);
 
-        const s = c.suivi;
-        if (!s) return;
-        const ici = ['conditions', i, 'suivi'];
+    // Blocs cochables : un `id` obligatoire, unique dans le module (il préfixe les clés mémorisées).
+    if (m.type === 'mise-en-place' || m.type === 'tour') {
+      const blocs = m.type === 'tour' ? [...m.blocs, ...m.blocsApres] : m.blocs;
+      const ids = new Set<string>();
+      blocs.forEach((b, i) => {
+        if (b.cochable && b.id === undefined) erreur(['blocs', i, 'id'], 'Un bloc cochable doit avoir un id');
+        if (b.id === undefined) return;
+        if (ids.has(b.id)) erreur(['blocs', i, 'id'], `Bloc en double : « ${b.id} »`);
+        ids.add(b.id);
+      });
+    }
 
-        if (s.type === 'jauge' || s.type === 'poursuite') {
-          const compteurs = new Set<string>();
-          if (s.type === 'poursuite') {
-            s.compteurs.forEach((k, j) => {
-              const chemin = [...ici, 'compteurs', j];
-              if ((MOTS_RESERVES as readonly string[]).includes(k.id)) {
-                erreur([...chemin, 'id'], `« ${k.id} » est un mot réservé des gabarits`);
-              }
-              if (compteurs.has(k.id)) erreur([...chemin, 'id'], `Compteur en double : « ${k.id} »`);
-              compteurs.add(k.id);
-              if (k.depart > k.max) erreur([...chemin, 'depart'], `Départ (${k.depart}) supérieur au max (${k.max})`);
-            });
-          }
-          s.alertes.forEach((a, j) => {
-            const chemin = [...ici, 'alertes', j];
-            if (a.compteur !== undefined && a.camp !== undefined) {
-              erreur(chemin, 'Une alerte cite un compteur ou un camp, pas les deux');
-            }
-            if (s.type === 'poursuite') {
-              if (a.compteur === undefined) erreur(chemin, 'Une alerte de poursuite doit citer un compteur');
-              else if (!compteurs.has(a.compteur)) erreur([...chemin, 'compteur'], `Compteur inconnu : « ${a.compteur} »`);
-              if (a.camp !== undefined) erreur([...chemin, 'camp'], 'Un camp n\'a pas de sens dans une poursuite');
-            } else if (a.compteur !== undefined) {
-              erreur([...chemin, 'compteur'], 'Un compteur n\'a pas de sens dans une jauge');
-            }
-          });
+    // Sélection et structures d'une mise en place.
+    if (m.type === 'mise-en-place') {
+      m.selection?.phases.forEach((ph, i) => {
+        if (ph.ordre.length !== ph.nombre) {
+          erreur(['selection', 'phases', i, 'ordre'], `${ph.ordre.length} prises pour ${ph.nombre} éléments révélés`);
         }
-
-        if (s.type === 'piste') {
-          if (s.camps[0] === s.camps[1]) erreur([...ici, 'camps'], 'Les deux camps d\'une piste doivent différer');
-          const zones = new Set<string>();
-          s.zones.forEach((z, j) => {
-            if (zones.has(z.id)) erreur([...ici, 'zones', j, 'id'], `Zone en double : « ${z.id} »`);
-            zones.add(z.id);
-          });
-          const attendu = 1 + 2 * (s.zones.reduce((t, z) => t + z.cases, 0) + 1);
-          if (s.casesTotal !== attendu) {
-            erreur([...ici, 'casesTotal'], `casesTotal vaut ${s.casesTotal}, les zones donnent ${attendu} (1 + 2 × (zones + extrémité))`);
-          }
-          if (s.zones.some((z) => z.jeton) && s.messages.jeton === undefined) {
-            erreur([...ici, 'messages', 'jeton'], 'Une zone porte un jeton : le message « jeton » est requis');
-          }
+      });
+      const noms = new Set<string>();
+      m.structures?.liste.forEach((st, i) => {
+        if (noms.has(st.nom)) erreur(['structures', 'liste', i, 'nom'], `Structure en double : « ${st.nom} »`);
+        noms.add(st.nom);
+        if (st.faces.length !== st.rangees.length) {
+          erreur(['structures', 'liste', i, 'faces'], `${st.faces.length} faces pour ${st.rangees.length} rangées`);
         }
-
-        if (s.type === 'symboles') {
-          const ids = new Set<string>();
-          s.symboles.forEach((y, j) => {
-            if (ids.has(y.id)) erreur([...ici, 'symboles', j, 'id'], `Symbole en double : « ${y.id} »`);
-            ids.add(y.id);
-          });
-          if (s.victoire > s.symboles.length) {
-            erreur([...ici, 'victoire'], `${s.victoire} symboles différents demandés, ${s.symboles.length} existent`);
-          }
-          s.bonus.forEach((b, j) => {
-            const chemin = [...ici, 'bonus', j];
-            if (!ids.has(b.symbole)) erreur([...chemin, 'symbole'], `Symbole inconnu : « ${b.symbole} »`);
-            if (parId.get(b.condition)?.type !== 'possession') {
-              erreur([...chemin, 'condition'], `« ${b.condition} » n'est pas une condition de type possession`);
-            }
-          });
+        const total = st.rangees.reduce((t, n) => t + n, 0);
+        if (total !== m.structures!.cartes) {
+          erreur(['structures', 'liste', i, 'rangees'], `${st.nom} : ${total} cartes, ${m.structures!.cartes} attendues`);
         }
+      });
+    }
 
-        if (s.type === 'decompte') {
-          const categories = new Set<string>();
-          s.categories.forEach((k, j) => {
-            const chemin = [...ici, 'categories', j];
-            if (categories.has(k.id)) erreur([...chemin, 'id'], `Catégorie en double : « ${k.id} »`);
-            categories.add(k.id);
-            if (k.mode === 'piste' && parId.get(k.condition)?.type !== 'piste') {
-              erreur([...chemin, 'condition'], `« ${k.condition} » n'est pas une condition de type piste`);
-            }
-            if (k.mode === 'possession') {
-              if (parId.get(k.condition)?.type !== 'possession') {
-                erreur([...chemin, 'condition'], `« ${k.condition} » n'est pas une condition de type possession`);
-              }
-              Object.entries(k.fiches).forEach(([fiche, v]) => {
-                if (v.fixe === undefined && v.parJeton === undefined) {
-                  erreur([...chemin, 'fiches', fiche], 'Ni « fixe » ni « parJeton » : la fiche ne rapporte rien');
-                }
-              });
-            }
-          });
-          s.departage.forEach((id, j) => {
-            if (!categories.has(id)) erreur([...ici, 'departage', j], `Catégorie inconnue : « ${id} »`);
-          });
-          s.arret.forEach((id, j) => {
-            const t = parId.get(id)?.type;
-            if (t !== 'piste' && t !== 'symboles') {
-              erreur([...ici, 'arret', j], `« ${id} » n'est pas une condition de type piste ou symboles`);
-            }
-          });
-        }
+    // Compteurs, rappels et fin de manche d'un tour.
+    if (m.type === 'tour') {
+      verifierConditions(m.suivis, 'suivis', erreur);
+      const rappels = new Set<string>();
+      m.rappels.forEach((rp, i) => {
+        if (rappels.has(rp.id)) erreur(['rappels', i, 'id'], `Rappel en double : « ${rp.id} »`);
+        rappels.add(rp.id);
       });
     }
   });

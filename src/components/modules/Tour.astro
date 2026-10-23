@@ -6,6 +6,16 @@ interface Props {
   data: Extract<CollectionEntry<'modules'>['data'], { type: 'tour' }>;
 }
 const { data } = Astro.props;
+
+// Rappels, compteurs et fin de manche relèvent d'îlots à venir : mieux vaut échouer
+// au build que les omettre en silence.
+const sansRendu = [
+  data.rappels.length > 0 && 'rappels',
+  data.suivis.length > 0 && 'suivis',
+  data.finDeManche && 'finDeManche',
+].filter(Boolean);
+if (sansRendu.length > 0) throw new Error(`Pas de rendu pour « ${sansRendu.join(', ')} » du module tour`);
 ---
 
 {data.blocs.map((bloc) => <Bloc bloc={bloc} />)}
+{data.blocsApres.map((bloc) => <Bloc bloc={bloc} />)}

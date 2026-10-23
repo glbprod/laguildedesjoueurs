@@ -5,6 +5,8 @@ import { enrichir } from '../lib/texte';
 // Le type est reconstruit ici pour ne pas exporter le schéma de content.config.ts.
 interface Props {
   bloc: {
+    id?: string;
+    cochable: boolean;
     titre: string;
     paragraphes: string[];
     liste: string[];
@@ -13,6 +15,10 @@ interface Props {
   };
 }
 const { bloc } = Astro.props;
+
+// Les cases à cocher relèvent d'un îlot qui n'existe pas encore : échouer au build
+// plutôt que d'afficher une simple liste sans mémoire.
+if (bloc.cochable) throw new Error(`Pas de rendu pour un bloc cochable (« ${bloc.titre} »)`);
 const aUneBoite = bloc.paragraphes.length > 0 || bloc.liste.length > 0 || !!bloc.note;
 ---
 

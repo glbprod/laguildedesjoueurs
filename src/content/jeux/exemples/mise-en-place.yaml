@@ -1,0 +1,46 @@
+# Mise en place avec cases à cocher, sélection alternée et structures de cartes.
+type: mise-en-place
+titre: Exemple de mise en place
+validation:
+  statut: brouillon
+  source: exemple technique
+blocs:
+  - id: preparation
+    cochable: true
+    titre: Préparation d'exemple
+    liste:
+      - "Exemple d'élément à cocher."
+      - "Autre exemple d'élément à cocher."
+selection:
+  titre: Sélection d'exemple
+  intro: "Exemple d'introduction de la sélection."
+  objet:
+    singulier: carte
+    pluriel: cartes
+  phases:
+    - libelle: "Révélez 3 cartes."
+      nombre: 3
+      ordre: [j1, j2, j1]
+    - libelle: "Révélez 3 autres cartes."
+      nombre: 3
+      ordre: [j2, j1, j2]
+  fin: "Exemple de consigne finale."
+  lotsFixes:
+    titre: Lots fixes
+    texte: "Exemple : utilisez ces lots."
+    lots:
+      j1: [Élément A, Élément B]
+      j2: [Élément C, Élément D]
+    fin: "Exemple de consigne finale des lots."
+structures:
+  titre: Structures d'exemple
+  intro: "Exemple : disposez 6 cartes en rangées."
+  cartes: 6
+  legende: "V = face visible · C = face cachée"
+  liste:
+    - nom: Exemple 1
+      rangees: [1, 2, 3]
+      faces: VCV
+    - nom: Exemple 2
+      rangees: [3, 2, 1]
+      faces: VCV

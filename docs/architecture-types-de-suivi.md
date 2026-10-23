@@ -1,6 +1,6 @@
 # Types de suivi et de module génériques
 
-Note d'architecture, phase 3 du devplan 7 Wonders Duel. Elle dit ce que sont les nouveaux
+Note d'architecture, phase 3 du devplan 7 Wonders Duel (schéma). Elle dit ce que sont les nouveaux
 types du schéma (`src/content.config.ts`), ce qu'ils lisent, et pourquoi ils ne sont pas
 propres à un jeu.
 
@@ -56,15 +56,44 @@ les jetons. La fonction est `cleStockage` dans `src/lib/stockage.ts`.
   ce qu'utilise le jeu d'exemple `src/content/jeux/exemples/`.
 - **rendu :** un type de suivi, ou de module, sans composant fait échouer le build.
 
+## Mise en place et tour
+
+Ajouts optionnels aux modules existants. Duel ne s'en sert pas : son YAML est inchangé.
+
+| Où | Champ | Rôle |
+|---|---|---|
+| `mise-en-place` | `blocs[].cochable` + `id` | Les éléments de la liste deviennent des cases à cocher, mémorisées dans l'état de partie. |
+| `mise-en-place` | `selection` | Sélection alternée entre camps : phases (consigne, nombre d'éléments, ordre des camps) et variante `lotsFixes` sans sélection. |
+| `mise-en-place` | `structures` | Dispositions de cartes en rangées, avec la face (V ou C) de chaque rangée. Le schéma est dessiné au rendu. |
+| `tour` | `suivis` | Compteurs (jauge ou poursuite seulement) : mêmes alertes déclaratives qu'en victoire. |
+| `tour` | `rappels` | Retrouve les fiches d'un groupe d'effets portant une étiquette et les cite dans une phrase. |
+| `tour` | `finDeManche` | Le camp mené choisit qui commence : il lit la position d'un marqueur de piste dans un module `victoire` du même jeu. |
+| `tour` | `blocsApres` | Blocs placés après les rappels, les suivis et la fin de manche. |
+
+Ordre d'affichage d'un `tour` : `blocs`, `rappels`, `suivis`, `finDeManche`, `blocsApres`.
+Celui d'une `mise-en-place` : `departs`, `blocs`, `selection`, `structures`.
+
+Contrôles faits au build :
+- un bloc cochable a un `id`, unique dans le module ;
+- une sélection compte autant de prises que d'éléments révélés ; ses camps existent ; les
+  lots fixes couvrent tous les camps ;
+- une structure a autant de faces que de rangées, et le total de cartes annoncé ;
+- un rappel vise un groupe d'effets du jeu dont au moins une fiche porte l'étiquette ;
+- une fin de manche vise une condition de type `piste` d'un module `victoire` du jeu ;
+- les gabarits des messages sont ceux autorisés.
+
+## `commerce` : une page à part
+
+Avec une page par module, `commerce` est un module de plein droit : une entrée de plus dans
+la navigation de 7 Wonders Duel, à côté de « Un tour ». Rien de plus au schéma.
+
 ## Ce que cette phase ne fait pas
 
-- **Aucun rendu des nouveaux types** : les îlots et les composants sont la phase 5.
-- **Mise en place de 7 Wonders Duel :** l'assistant de sélection des Merveilles et les
-  schémas des structures d'Âge n'ont pas encore de place dans le schéma.
-- **Tour de 7 Wonders Duel :** la fin d'Âge qui lit la piste, le compteur de Merveilles
-  construites (0 à 7) et le rappel « Rejouer » retrouvé par étiquette n'ont pas encore de place
-  dans le schéma.
-- **Où vit `commerce` :** une page à part dans la navigation, ou rattaché à « Un tour ».
+- **Aucun rendu des nouveaux types ni des nouveaux champs.** Les îlots et les composants sont
+  la phase 5. En attendant, un contenu sans rendu fait échouer le build : suivi sans rendu
+  en victoire, bloc cochable, rappels, suivis ou fin de manche d'un tour, sélection ou
+  structures d'une mise en place. Seul `blocsApres` est déjà rendu.
+- **Aucune donnée de 7 Wonders Duel :** la migration du JSON de la page est la phase 4.
 
 ## Lignes proposées pour le CLAUDE.md (non appliquées)
 
