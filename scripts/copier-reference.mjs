@@ -1,20 +1,14 @@
 // Copie dans dist/reference/ les pages autonomes de reference/ qui doivent être publiées.
-//
-// Liste explicite, volontairement : seul ce qui est nommé ici part en ligne.
-// On ajoute un jeu à la liste seulement quand ses textes sont validés.
+// La liste (explicite) est dans scripts/pages-reference.mjs.
 //
 // Lancé par `npm run build`, après `astro build` (qui vide dist/ avant de le remplir).
 // Un fichier listé mais absent fait échouer le build : mieux vaut un déploiement bloqué
 // qu'une page manquante découverte à table.
 import { copyFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { DOSSIER_REFERENCE, PAGES_PUBLIEES } from './pages-reference.mjs';
 
-const PAGES_PUBLIEES = [
-  'chateaux_aide-de-jeu_v1.html',
-  'chateaux_grille-observation_v1.html',
-];
-
-const source = fileURLToPath(new URL('../reference/', import.meta.url));
+const source = fileURLToPath(DOSSIER_REFERENCE);
 const destination = fileURLToPath(new URL('../dist/reference/', import.meta.url));
 
 const manquantes = PAGES_PUBLIEES.filter((nom) => !existsSync(source + nom));
