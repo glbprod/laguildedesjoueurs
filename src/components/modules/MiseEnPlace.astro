@@ -2,18 +2,17 @@
 import type { CollectionEntry } from 'astro:content';
 import Bloc from '../Bloc.astro';
 import { enrichir } from '../../lib/texte';
+import Selection from './Selection.astro';
+import Structures from './Structures.astro';
 
 type Camp = CollectionEntry<'jeux'>['data']['camps'][number];
 
 interface Props {
   data: Extract<CollectionEntry<'modules'>['data'], { type: 'mise-en-place' }>;
   camps: Camp[];
+  cle: string; // clé de stockage de la partie
 }
-const { data, camps } = Astro.props;
-// La sélection et les structures relèvent d'un îlot et d'un schéma SVG à venir.
-if (data.selection || data.structures) {
-  throw new Error('Pas de rendu pour « selection » ni « structures » du module mise-en-place');
-}
+const { data, camps, cle } = Astro.props;
 // Cohérence camp <-> jeu.yaml déjà vérifiée par lib/coherence.ts.
 const parId = new Map(camps.map((c) => [c.id, c]));
 ---
@@ -38,4 +37,6 @@ const parId = new Map(camps.map((c) => [c.id, c]));
     </section>
   )
 }
-{data.blocs.map((bloc) => <Bloc bloc={bloc} />)}
+{data.blocs.map((bloc) => <Bloc bloc={bloc} cle={cle} />)}
+{data.selection && <Selection selection={data.selection} camps={camps} cle={cle} />}
+{data.structures && <Structures structures={data.structures} />}

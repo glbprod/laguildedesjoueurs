@@ -2,7 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { MOTS_RESERVES } from './lib/gabarits';
-import { calculerCommerce } from './lib/commerce';
+import { calculerCommerce } from './scripts/logique/commerce.js';
 
 const DOSSIER_JEUX = './src/content/jeux';
 
@@ -155,6 +155,7 @@ const piste = z.strictObject({
     jeton: z.strictObject({ valeur: z.number().int().positive() }).optional(),
   })).min(1),
   action: z.string(), // ce qui fait avancer le marqueur, au singulier (ex. « Bouclier »)
+  extremite: z.string().default('Extrémité'), // nom des deux bouts de la piste (ex. « Capitale »)
   notes: z.array(z.string()).default([]), // sous la piste : orientation, effet des jetons…
   messages: z.strictObject({
     centre: z.string(),
@@ -316,6 +317,8 @@ const victoire = z.strictObject({
 const effets = z.strictObject({
   type: z.literal('effets'),
   ...communs,
+  // Champ de recherche par nom et filtre par groupe, pour les longues listes de fiches.
+  recherche: z.boolean().default(false),
   groupes: z.array(z.strictObject({
     id: z.string(),
     titre: z.string(),

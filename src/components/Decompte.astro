@@ -1,0 +1,112 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { enrichir } from '../lib/texte';
+import Saisie from './Saisie.astro';
+
+// Décompte final : des points saisis, ou calculés depuis la piste et les jetons attribués.
+// Le balisage est rendu au build ; l'îlot decompte.js calcule les totaux et le verdict.
+type Camp = CollectionEntry<'jeux'>['data']['camps'][number];
+type Condition = Extract<CollectionEntry<'modules'>['data'], { type: 'victoire' }>['conditions'][number];
+
+interface Props {
+  condition: Condition;
+  conditions: Condition[];
+  camps: Camp[];
+  cle: string;
+}
+const { condition: c, conditions, camps, cle } = Astro.props;
+const s = c.suivi as Extract<NonNullable<Condition['suivi']>, { type: 'decompte' }>;
+const parId = new Map(conditions.map((x) => [x.id, x]));
+const section = (id: string) => `condition.${id}`;
+
+// Ce que l'îlot doit connaître des autres suivis, résolu ici au build.
+const pisteDe = (id: string) => {
+  const t = parId.get(id)!.suivi as Extract<NonNullable<Condition['suivi']>, { type: 'piste' }>;
+  return { section: section(id), camps: t.camps, casesTotal: t.casesTotal, pointsCentre: t.pointsCentre, zones: t.zones };
+};
+const pistes: Record<string, unknown> = {};
+const possessions: Record<string, string> = {};
+for (const k of s.categories) {
+  if (k.mode === 'piste') pistes[k.condition] = pisteDe(k.condition);
+  if (k.mode === 'possession') possessions[k.condition] = section(k.condition);
+}
+const arret = s.arret.map((id) => {
+  const cond = parId.get(id)!;
+  const t = cond.suivi!;
+  if (t.type === 'piste') return { type: 'piste', titre: cond.titre, piste: pisteDe(id) };
+  if (t.type === 'symboles') {
+    return {
+      type: 'symboles',
+      titre: cond.titre,
+      section: section(id),
+      nombre: t.symboles.length,
+      victoire: t.victoire,
+      plafond: t.plafond,
+      bonus: t.bonus.map((b) => ({ section: section(b.condition), fiche: b.fiche, index: t.symboles.findIndex((y) => y.id === b.symbole) })),
+    };
+  }
+  return null;
+});
+
+const config = {
+  section: section(c.id),
+  camps: camps.map((k) => k.id),
+  noms: Object.fromEntries(camps.map((k) => [k.id, k.nom])),
+  categories: s.categories.map((k) => ({
+    id: k.id,
+    mode: k.mode,
+    nom: k.nom,
+    lot: k.mode === 'lot' ? k.lot : undefined,
+    condition: k.mode === 'piste' || k.mode === 'possession' ? k.condition : undefined,
+    fiches: k.mode === 'possession' ? k.fiches : undefined,
+  })),
+  pistes,
+  possessions,
+  departage: s.departage,
+  arret,
+  messages: s.messages,
+};
+---
+
+<section class="course" data-ilot="decompte" data-stockage={cle} data-config={JSON.stringify(config)}>
+  <h2>{c.titre}</h2>
+  <div class="quoi" set:html={enrichir(c.description)} />
+
+  <div class="grille-civil">
+    <span></span>
+    {camps.map((k) => <span class="entete" style={`--couleur: var(--${k.couleur})`}>{k.nom}</span>)}
+    {
+      s.categories.map((k) => (
+        <>
+          <span class="lib-cat">
+            <span class="barre" style={'couleur' in k && k.couleur ? `background: var(--${k.couleur})` : undefined} aria-hidden="true" />
+            <span>
+              {k.nom}
+              {k.note && <span class="petit">{k.note}</span>}
+            </span>
+          </span>
+          {camps.map((camp) => (
+            <span class="cellule">
+              {(k.mode === 'saisie' || k.mode === 'lot') && (
+                <Saisie libelle={`${camp.nom}, ${k.nom}${k.mode === 'lot' ? ` en ${k.unite}` : ''}`} cle={`${camp.id}.${k.id}`} />
+              )}
+              {k.mode === 'lot' && <span class="conv" data-conv={`${camp.id}.${k.id}`}></span>}
+              {(k.mode === 'piste' || k.mode === 'possession') && <span class="auto" data-auto={`${camp.id}.${k.id}`}></span>}
+            </span>
+          ))}
+        </>
+      ))
+    }
+    <div class="ligne-total">
+      <span class="lib-cat"><strong>Total</strong></span>
+      {camps.map((camp) => <span class="gros-total" style={`--couleur: var(--${camp.couleur})`} data-total={camp.id}></span>)}
+    </div>
+  </div>
+
+  <div class="alerte" data-verdict role="status" aria-live="polite"></div>
+  {s.notes.map((n) => <p class="note" set:html={enrichir(n)} />)}
+</section>
+
+<script>
+  import '../scripts/ilots/decompte.js';
+</script>

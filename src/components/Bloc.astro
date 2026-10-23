@@ -1,5 +1,6 @@
 ---
 import { enrichir } from '../lib/texte';
+import ListeCochable from './ListeCochable.astro';
 
 // Bloc générique du schéma (titre, paragraphes, liste, légende, note).
 // Le type est reconstruit ici pour ne pas exporter le schéma de content.config.ts.
@@ -13,12 +14,11 @@ interface Props {
     note?: string;
     legende: { nom: string; couleur: string; texte: string }[];
   };
+  cle?: string; // clé de stockage de la partie, requise pour un bloc cochable
 }
-const { bloc } = Astro.props;
+const { bloc, cle } = Astro.props;
 
-// Les cases à cocher relèvent d'un îlot qui n'existe pas encore : échouer au build
-// plutôt que d'afficher une simple liste sans mémoire.
-if (bloc.cochable) throw new Error(`Pas de rendu pour un bloc cochable (« ${bloc.titre} »)`);
+if (bloc.cochable && !cle) throw new Error(`Bloc cochable sans clé de stockage (« ${bloc.titre} »)`);
 const aUneBoite = bloc.paragraphes.length > 0 || bloc.liste.length > 0 || !!bloc.note;
 ---
 
@@ -29,12 +29,13 @@ const aUneBoite = bloc.paragraphes.length > 0 || bloc.liste.length > 0 || !!bloc
       <div class="bloc">
         {bloc.paragraphes.map((p) => <p set:html={enrichir(p)} />)}
         {
-          bloc.liste.length > 0 && (
+          bloc.liste.length > 0 && !bloc.cochable && (
             <ul class="check">
               {bloc.liste.map((li) => <li set:html={enrichir(li)} />)}
             </ul>
           )
         }
+        {bloc.liste.length > 0 && bloc.cochable && <ListeCochable id={bloc.id!} elements={bloc.liste} cle={cle!} />}
         {bloc.note && <p class="note" set:html={enrichir(bloc.note)} />}
       </div>
     )

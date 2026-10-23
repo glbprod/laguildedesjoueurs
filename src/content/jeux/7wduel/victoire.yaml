@@ -33,6 +33,7 @@ conditions:
           jeton:
             valeur: 5
       action: Bouclier
+      extremite: Capitale
       notes:
         - "Chaque joueur a sa capitale de son côté : Joueur 1 à gauche, Joueur 2 à droite. Un Bouclier du Joueur 1 pousse le pion vers la droite, un Bouclier du Joueur 2 vers la gauche."
         - Quand le pion entre dans une zone portant un jeton Militaire, le joueur actif applique l'effet du jeton, puis le jeton retourne dans la boîte.

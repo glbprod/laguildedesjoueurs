@@ -1,0 +1,113 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { enrichir } from '../lib/texte';
+import { demiPiste, zoneDe } from '../scripts/logique/piste.js';
+import { pluriel } from '../scripts/logique/texte.js';
+
+// Piste à deux sens entre deux camps : le dessin est calculé au build, l'îlot piste.js
+// déplace le marqueur, retire les jetons et écrit les messages.
+type Camp = CollectionEntry<'jeux'>['data']['camps'][number];
+type Condition = Extract<CollectionEntry<'modules'>['data'], { type: 'victoire' }>['conditions'][number];
+
+interface Props {
+  condition: Condition;
+  camps: Camp[];
+  cle: string; // clé de stockage de la partie
+}
+const { condition: c, camps, cle } = Astro.props;
+const s = c.suivi as Extract<NonNullable<Condition['suivi']>, { type: 'piste' }>;
+
+const parId = new Map(camps.map((k) => [k.id, k]));
+const demi = demiPiste(s.casesTotal);
+const piste = { camps: s.camps, casesTotal: s.casesTotal, pointsCentre: s.pointsCentre, zones: s.zones };
+
+// Géométrie du dessin (unités du viewBox).
+const CX = 10, CW = 20, CY = 44, CH = 26;
+const largeur = s.casesTotal * CW + 2 * CX;
+const xCase = (pos: number) => CX + (pos + demi) * CW;
+const indexZone = new Map(s.zones.map((z, i) => [z.id, i]));
+
+const cases = Array.from({ length: s.casesTotal }, (_, i) => {
+  const pos = i - demi;
+  const z = zoneDe(Math.abs(pos), piste);
+  const classe = z.type === 'zone' ? `zone-${indexZone.get(z.zone.id)}` : z.type === 'centre' ? 'zone-centre' : 'zone-extremite';
+  return { x: xCase(pos) + 1, classe };
+});
+
+// Lettre de chaque zone et jeton éventuel, de chaque côté du centre.
+const reperes = s.camps.flatMap((idCamp, k) => {
+  let cumul = 0;
+  return s.zones.map((z) => {
+    const debut = cumul + 1;
+    const fin = cumul + z.cases;
+    cumul = fin;
+    const [pa, pb] = k === 0 ? [-debut, -fin] : [debut, fin];
+    return { zone: z, jeton: z.jeton ? `${idCamp}-${z.id}` : null, cx: (xCase(pa) + xCase(pb)) / 2 + CW / 2 };
+  });
+});
+
+const config = {
+  section: `condition.${c.id}`,
+  camps: s.camps,
+  noms: Object.fromEntries(camps.map((k) => [k.id, k.nom])),
+  casesTotal: s.casesTotal,
+  pointsCentre: s.pointsCentre,
+  zones: s.zones,
+  messages: s.messages,
+  geometrie: { CX, CW, CY, CH },
+};
+const legende = s.zones.map(
+  (z) => `Zone ${z.id} (${pluriel(z.cases, 'case', 'cases')}) : ${z.points} points${z.jeton ? `, jeton ${z.jeton.valeur}` : ', pas de jeton'}`,
+);
+---
+
+<section class="course" data-ilot="piste" data-stockage={cle} data-config={JSON.stringify(config)}>
+  <h2>{c.titre}</h2>
+  <div class="quoi" set:html={enrichir(c.description)} />
+
+  <svg class="piste" viewBox={`0 0 ${largeur} 116`} role="img" data-svg>
+    {cases.map((k) => <rect class={`case ${k.classe}`} x={k.x} y={CY} width={CW - 2} height={CH} rx="2" />)}
+    {
+      reperes.map((r) => (
+        <>
+          <text x={r.cx} y="90" text-anchor="middle" class="lettre-zone">{r.zone.id}</text>
+          {r.jeton && (
+            <g class="jeton-groupe" data-jeton={r.jeton}>
+              <circle cx={r.cx} cy="24" r="11" class="jeton" />
+              <text x={r.cx} y="28" text-anchor="middle" class="jeton-val">{r.zone.jeton!.valeur}</text>
+            </g>
+          )}
+        </>
+      ))
+    }
+    <text x={CX} y="108" class="etiquette">{s.extremite} {parId.get(s.camps[0])!.nom}</text>
+    <text x={largeur - CX} y="108" text-anchor="end" class="etiquette">{s.extremite} {parId.get(s.camps[1])!.nom}</text>
+    <text x={largeur / 2} y="108" text-anchor="middle" class="etiquette">Centre</text>
+    <g class="pion-groupe" data-pion style={`transform: translate(${xCase(0) + CW / 2}px, ${CY + CH / 2}px)`}>
+      <circle r="10" class="pion" />
+    </g>
+  </svg>
+
+  <div class="legende-zones">
+    {legende.map((l) => <div>{l}</div>)}
+  </div>
+
+  <div class="etat-pion" data-etat role="status" aria-live="polite"></div>
+
+  <div class="boutons-camps">
+    {
+      s.camps.map((id, k) => (
+        <button type="button" class="gros" style={`--couleur: var(--${parId.get(id)!.couleur})`} data-camp={id}>
+          {parId.get(id)!.nom} · {s.action} +1 {k === 0 ? '→' : '←'}
+        </button>
+      ))
+    }
+  </div>
+  <div class="alerte" data-evenement role="status" aria-live="polite"></div>
+  <p><button type="button" class="btn" data-annuler>Annuler le dernier {s.action}</button></p>
+  {s.notes.map((n) => <p class="note" set:html={enrichir(n)} />)}
+</section>
+
+<script>
+  import '../scripts/ilots/piste.js';
+</script>

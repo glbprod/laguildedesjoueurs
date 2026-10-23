@@ -1,0 +1,52 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { enrichir } from '../lib/texte';
+
+// Fin de manche : le camp mené choisit qui commence. Il est lu sur une piste d'un module
+// victoire du même jeu (section de la piste) ; au centre, c'est le dernier joueur actif.
+type Camp = CollectionEntry<'jeux'>['data']['camps'][number];
+interface Props {
+  fin: {
+    titre: string;
+    points: string[];
+    question: string;
+    messages: { mene: string; centre: string; centreChoisi: string };
+  };
+  piste: { section: string; camps: [string, string]; casesTotal: number };
+  camps: Camp[];
+  cle: string;
+}
+const { fin, piste, camps, cle } = Astro.props;
+const parId = new Map(camps.map((k) => [k.id, k]));
+const config = {
+  section: piste.section,
+  camps: piste.camps,
+  noms: Object.fromEntries(camps.map((k) => [k.id, k.nom])),
+  casesTotal: piste.casesTotal,
+  messages: fin.messages,
+};
+---
+
+<section class="section" data-ilot="fin-de-manche" data-stockage={cle} data-config={JSON.stringify(config)}>
+  <h2>{fin.titre}</h2>
+  <div class="bloc">
+    <ul class="check">
+      {fin.points.map((p) => <li set:html={enrichir(p)} />)}
+    </ul>
+    <div class="alerte" data-alerte role="status" aria-live="polite"></div>
+    <div data-question hidden>
+      <p><strong>{fin.question}</strong></p>
+      <div class="choix-camp">
+        {
+          piste.camps.map((id) => (
+            <button type="button" class="bascule" data-dernier={id} aria-pressed="false">{parId.get(id)!.nom}</button>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../scripts/ilots/fin-de-manche.js';
+</script>

@@ -12,6 +12,14 @@
   --encre-douce: #36424b;
   --rouge: #8c2f1b;        /* accent : alertes, focus, titre de l'en-tête */
 
+  --accent: #1d4a73;       /* lapis : boutons actifs, total du commerce */
+  --face-v: #fbf6e8;       /* carte face visible */
+  --zone-a: #dccb90;       /* zones de la piste militaire */
+  --zone-b: #cba453;
+  --zone-c: #b0732f;
+  --capitale: #4a3a2a;
+  --neutre: #f3ecd9;
+
   /* Camps : les deux joueurs (jeu.yaml : couleur: j1 / j2) */
   --j1: #1d4a73;           /* lapis */
   --j2: #9a3b22;           /* terre cuite */

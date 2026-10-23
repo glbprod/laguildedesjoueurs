@@ -2,8 +2,10 @@
 import { getEntry } from 'astro:content';
 import Page from './Page.astro';
 import EnTete from '../components/EnTete.astro';
+import NouvellePartie from '../components/NouvellePartie.astro';
 import { modulesDuJeu } from '../lib/jeux';
 import { url } from '../lib/url';
+import { cleStockage } from '../lib/stockage';
 
 interface Props {
   slug: string;
@@ -59,6 +61,8 @@ const titrePage = actif
   <main>
     <slot />
   </main>
+
+  {actif && data.stockage === 'partie' && <NouvellePartie cle={cleStockage(slug, module ?? '', 'partie')} />}
 
   {pied && <footer class="pied">{pied}</footer>}
 </Page>

@@ -87,22 +87,63 @@ Contrôles faits au build :
 Avec une page par module, `commerce` est un module de plein droit : une entrée de plus dans
 la navigation de 7 Wonders Duel, à côté de « Un tour ». Rien de plus au schéma.
 
-## Données de 7 Wonders Duel
+## Rendu : composants, îlots et logique
 
-`src/content/jeux/7wduel/` (cinq modules : mise en place, tour, commerce, victoire, effets)
-est migré de la page autonome v1.1. Le jeu est en `publie: false` : validé au build, sans
-page ni lien, tant que les composants de rendu n'existent pas. Il passera à `publie: true`
-à la phase 5. Auteurs et éditeur ne figurent pas dans les sources : ils sont facultatifs.
+Le balisage est rendu au build par des composants Astro ; les îlots (JavaScript vanille,
+sans framework) ne font que lire et écrire l'état, poser des classes et écrire les messages.
+La règle de jeu vit dans des fonctions pures, partagées par le build, les îlots et les tests.
 
-## Ce que cette phase ne fait pas
+| Type | Composant | Îlot (`src/scripts/ilots/`) | Logique pure (`src/scripts/logique/`) |
+|---|---|---|---|
+| `piste` | `Piste.astro` (SVG dessiné au build) | `piste.js` | `piste.js` |
+| `symboles` | `Symboles.astro` | `symboles.js` | `symboles.js` |
+| `possession` | `Possession.astro` | `possession.js` | `possession.js` |
+| `decompte` | `Decompte.astro`, `Saisie.astro` | `decompte.js` | `decompte.js` |
+| `commerce` | `Commerce.astro`, `Stepper.astro` | `commerce.js` | `commerce.js` |
+| sélection | `Selection.astro` | `selection.js` | `selection.js` |
+| structures | `Structures.astro` (SVG au build) | aucun | `structures.js` |
+| blocs cochables | `ListeCochable.astro` | `coches.js` | aucune |
+| rappels | `Rappel.astro` | aucun | aucune |
+| fin de manche | `FinDeManche.astro` | `fin-de-manche.js` | `piste.js` (`quiChoisit`) |
+| recherche de fiches | `Effets.astro` | `cartes.js` | `recherche.js` |
+| compteurs d'un tour | `Suivi.astro` (extrait de `Victoire.astro`) | `suivi.js` | aucune |
 
-- **Aucun rendu des nouveaux types ni des nouveaux champs.** Les îlots et les composants sont
-  la phase 5. En attendant, un contenu sans rendu fait échouer le build : suivi sans rendu
-  en victoire, bloc cochable, rappels, suivis ou fin de manche d'un tour, sélection ou
-  structures d'une mise en place. Seul `blocsApres` est déjà rendu.
+Un script n'est embarqué que par les pages dont un composant le déclare : les pages de Duel
+pour la Terre du Milieu n'en reçoivent aucun de plus.
+
+## État de partie
+
+`src/scripts/partie.js` ouvre la partie d'une clé (`guilde:7wduel:partie`) : une instance par
+page, une section par îlot, un événement `partie:change` quand une section change. Les îlots
+d'une même page s'écoutent par ce biais ; entre deux pages, c'est le localStorage qui porte
+l'état. Tout est dans un `try/catch` : sans stockage, la page reste utilisable en mémoire.
+
+Sections : `condition.<id>` pour chaque suivi (le décompte lit `condition.militaire`,
+`condition.progres` et `condition.science`), puis `selection`, `coches`, `commerce` et
+`suivi` (les compteurs d'un tour). Le coût de la carte en cours (commerce) et la réponse
+« qui a joué la dernière carte » ne sont jamais mémorisés.
+
+« Nouvelle partie » est un seul bouton, en deux appuis, en bas de chaque page d'un jeu à
+état partagé : il efface la clé et recharge la page, ce qui remet tous les îlots à zéro.
+
+## Tests
+
+`npm test` lance `node --test` sur `tests/` : la logique pure et les données de 7 Wonders
+Duel (nombres de fiches, points des Merveilles, jetons Progrès, drapeaux « Rejouer »,
+découpage de la piste, exemples du livret). Les tests de données lisent les YAML avec
+`js-yaml`, déclaré en `devDependency`.
+
+## Ce que cette note ne couvre pas
+
+- **Le PWA** : l'approche (`workbox-build`) reste à valider.
+- **Les données de Duel pour la Terre du Milieu** : ses modules n'ont pas migré vers les
+  nouveaux types ; l'idée est consignée plus haut, à discuter.
 
 ## Lignes proposées pour le CLAUDE.md (non appliquées)
 
 - Schémas : tous stricts (`z.strictObject`). Un champ inconnu casse le build.
 - `jeu.yaml` : `stockage: partie` pour un jeu dont les modules se lisent entre eux ;
   `publie: false` pour valider un jeu sans le publier.
+- Commandes : `npm test` (logique pure et données, `node --test`).
+- Architecture : la logique de jeu vit dans `src/scripts/logique/` (fonctions pures, testées) ;
+  les îlots dans `src/scripts/ilots/` ; l'état partagé dans `src/scripts/partie.js`.

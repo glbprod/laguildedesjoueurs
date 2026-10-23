@@ -1,0 +1,77 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { enrichir } from '../../lib/texte';
+import Stepper from '../Stepper.astro';
+
+interface Props {
+  data: Extract<CollectionEntry<'modules'>['data'], { type: 'commerce' }>;
+  cle: string; // clé de stockage de la partie
+}
+const { data, cle } = Astro.props;
+const familles = new Map(data.familles.map((f) => [f.id, f]));
+
+// Plafond d'une saisie : un réglage de l'interface, pas une règle du jeu.
+const MAX = 20;
+const champs = [
+  { id: 'besoin', libelle: data.libelles.besoin },
+  { id: 'mienne', libelle: data.libelles.mienne },
+  { id: 'adverse', libelle: data.libelles.adverse },
+];
+const config = {
+  prixBase: data.prixBase,
+  prixFixe: data.prixFixe,
+  ressources: data.ressources.map((r) => ({ id: r.id, nom: r.nom })),
+  libelles: { total: data.libelles.total, rien: data.libelles.rien },
+  max: MAX,
+};
+---
+
+<section class="section">
+  <h2>{data.titre}</h2>
+  <div class="bloc">
+    <p set:html={enrichir(data.regle)} />
+    {
+      data.points.length > 0 && (
+        <ul class="check">
+          {data.points.map((p) => <li set:html={enrichir(p)} />)}
+        </ul>
+      )
+    }
+    {data.rappels.map((r) => <p class="note" set:html={enrichir(r)} />)}
+  </div>
+</section>
+
+<div class="calc" data-ilot="commerce" data-stockage={cle} data-config={JSON.stringify(config)}>
+  <div class="bloc ligne-pieces">
+    <strong>{data.libelles.pieces}</strong>
+    <Stepper libelle={data.libelles.pieces} cle="pieces" max={MAX} />
+    <button type="button" class="btn" data-effacer>{data.libelles.effacer}</button>
+  </div>
+
+  {
+    data.ressources.map((r) => (
+      <fieldset class="ress" data-ressource={r.id}>
+        <legend>
+          <span class="pastille" style={`background: var(--${familles.get(r.famille)!.couleur})`} aria-hidden="true" />
+          {r.nom}
+          <span class="note" style="font-weight: 400"> · {familles.get(r.famille)!.nom}</span>
+        </legend>
+        <div class="champs">
+          {champs.map((c) => (
+            <div class="champ">
+              <span class="lib">{c.libelle}</span>
+              <Stepper libelle={`${c.libelle} : ${r.nom}`} cle={`${c.id}.${r.id}`} max={MAX} />
+            </div>
+          ))}
+        </div>
+        <button type="button" class="bascule" data-fixe={r.id} aria-pressed="false">{data.libelles.fixe}</button>
+      </fieldset>
+    ))
+  }
+
+  <div class="total" data-total role="status" aria-live="polite"></div>
+</div>
+
+<script>
+  import '../../scripts/ilots/commerce.js';
+</script>

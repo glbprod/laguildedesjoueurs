@@ -4,6 +4,8 @@ import MiseEnPlace from './MiseEnPlace.astro';
 import Tour from './Tour.astro';
 import Victoire from './Victoire.astro';
 import Effets from './Effets.astro';
+import Commerce from './Commerce.astro';
+import { cleStockage } from '../../lib/stockage';
 
 interface Props {
   module: CollectionEntry<'modules'>;
@@ -17,12 +19,16 @@ const jeu = await getEntry('jeux', slug);
 if (!jeu) throw new Error(`Jeu introuvable : ${slug}`);
 
 // Un type de module sans composant fait échouer le build : pas de page vide.
-if (data.type !== 'mise-en-place' && data.type !== 'tour' && data.type !== 'victoire' && data.type !== 'effets') {
+if (!['mise-en-place', 'tour', 'victoire', 'effets', 'commerce'].includes(data.type)) {
   throw new Error(`Pas de composant de rendu pour le type « ${data.type} » (${module.id})`);
 }
+
+// Clé de stockage de la partie : propre au module, ou commune à tout le jeu (jeu.yaml).
+const cle = cleStockage(slug, nom, jeu.data.stockage);
 ---
 
-{data.type === 'mise-en-place' && <MiseEnPlace data={data} camps={jeu.data.camps} />}
-{data.type === 'tour' && <Tour data={data} />}
+{data.type === 'mise-en-place' && <MiseEnPlace data={data} camps={jeu.data.camps} cle={cle} />}
+{data.type === 'tour' && <Tour data={data} cle={cle} slug={slug} camps={jeu.data.camps} partie={jeu.data.stockage === 'partie'} />}
 {data.type === 'victoire' && <Victoire data={data} camps={jeu.data.camps} slug={slug} nom={nom} stockageDuJeu={jeu.data.stockage} />}
 {data.type === 'effets' && <Effets data={data} />}
+{data.type === 'commerce' && <Commerce data={data} cle={cle} />}

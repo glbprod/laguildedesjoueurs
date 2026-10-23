@@ -1,21 +1,48 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { getEntry, type CollectionEntry } from 'astro:content';
 import Bloc from '../Bloc.astro';
+import Rappel from '../Rappel.astro';
+import Suivi from '../Suivi.astro';
+import IlotSuivi from '../IlotSuivi.astro';
+import FinDeManche from '../FinDeManche.astro';
+import { groupesDEffets } from '../../lib/jeux';
+
+type Camp = CollectionEntry<'jeux'>['data']['camps'][number];
 
 interface Props {
   data: Extract<CollectionEntry<'modules'>['data'], { type: 'tour' }>;
+  cle: string; // clé de stockage de la partie
+  slug: string;
+  camps: Camp[];
+  partie: boolean; // jeu à état partagé (jeu.yaml : stockage: partie)
 }
-const { data } = Astro.props;
+const { data, cle, slug, camps, partie } = Astro.props;
 
-// Rappels, compteurs et fin de manche relèvent d'îlots à venir : mieux vaut échouer
-// au build que les omettre en silence.
-const sansRendu = [
-  data.rappels.length > 0 && 'rappels',
-  data.suivis.length > 0 && 'suivis',
-  data.finDeManche && 'finDeManche',
-].filter(Boolean);
-if (sansRendu.length > 0) throw new Error(`Pas de rendu pour « ${sansRendu.join(', ')} » du module tour`);
+const groupes = data.rappels.length > 0 ? await groupesDEffets(slug) : new Map();
+
+// La piste que lit la fin de manche : une condition d'un module victoire du même jeu.
+// Son existence et son type sont déjà vérifiés par lib/coherence.ts.
+let piste: { section: string; camps: [string, string]; casesTotal: number } | undefined;
+if (data.finDeManche) {
+  const { module, condition } = data.finDeManche.piste;
+  const victoire = await getEntry('modules', `${slug}/${module}`);
+  const suivi = victoire?.data.type === 'victoire' ? victoire.data.conditions.find((c) => c.id === condition)?.suivi : undefined;
+  if (suivi?.type !== 'piste') throw new Error(`finDeManche : « ${module}.${condition} » n'est pas une piste`);
+  piste = { section: `condition.${condition}`, camps: suivi.camps, casesTotal: suivi.casesTotal };
+}
 ---
 
-{data.blocs.map((bloc) => <Bloc bloc={bloc} />)}
-{data.blocsApres.map((bloc) => <Bloc bloc={bloc} />)}
+{data.blocs.map((bloc) => <Bloc bloc={bloc} cle={cle} />)}
+{data.rappels.map((rappel) => <Rappel rappel={rappel} groupes={groupes} />)}
+{
+  data.suivis.length > 0 && (
+    <>
+      <div data-suivi data-stockage={cle} data-partie={partie ? 'true' : undefined}>
+        {data.suivis.map((c) => <Suivi condition={c} camps={camps} />)}
+      </div>
+      <IlotSuivi />
+    </>
+  )
+}
+{data.finDeManche && piste && <FinDeManche fin={data.finDeManche} piste={piste} camps={camps} cle={cle} />}
+{data.blocsApres.map((bloc) => <Bloc bloc={bloc} cle={cle} />)}

@@ -2,6 +2,7 @@
 # Les jetons Progrès ont un `id` : la possession, les symboles et le décompte les désignent.
 type: effets
 titre: Cartes
+recherche: true
 validation:
   statut: valide
   source: 7wduel_regles_v1.md §8, §9

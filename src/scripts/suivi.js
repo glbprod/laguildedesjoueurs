@@ -2,6 +2,8 @@
 // Le balisage est rendu au build (components/modules/Victoire.astro). Ici :
 // l'état (localStorage), les classes des boutons et le message d'alerte.
 
+import { ouvrir } from './partie.js';
+
 // À incrémenter si la forme de l'état stocké change : un état d'une autre
 // version est ignoré, on repart des valeurs de départ.
 const VERSION = 1;
@@ -36,6 +38,23 @@ function effacer(cle) {
   }
 }
 
+/* ---- deux mémoires : une clé par module (Duel), ou la section « suivi » de l'état partagé ---- */
+
+function memoireModule(cle) {
+  return { lire: () => lire(cle), ecrire: (valeurs) => ecrire(cle, valeurs), effacer: () => effacer(cle) };
+}
+
+// Jeu à état partagé (jeu.yaml : stockage: partie) : les valeurs vivent dans la section
+// « suivi » de la partie. « Nouvelle partie » y est global, pas propre à ce module.
+function memoirePartie(cle) {
+  const partie = ouvrir(cle);
+  return {
+    lire: () => partie.brut('suivi') ?? null,
+    ecrire: (valeurs) => partie.ecrire('suivi', Object.assign({}, partie.brut('suivi'), valeurs)),
+    effacer: () => {},
+  };
+}
+
 /* ---- alertes : comparaisons déclaratives, première correspondance retenue ---- */
 
 function comparer(valeur, comparaison, seuil) {
@@ -67,6 +86,7 @@ function evaluer(config, lignes) {
 
 function initialiser(racine) {
   const stockage = racine.dataset.stockage;
+  const memoire = racine.dataset.partie === 'true' ? memoirePartie(stockage) : memoireModule(stockage);
   const lignes = [...racine.querySelectorAll('[data-cle]')].map((el) => ({
     el,
     condition: el.closest('[data-condition]').dataset.condition,
@@ -77,7 +97,7 @@ function initialiser(racine) {
   const identifiant = (l) => `${l.condition}.${l.cle}`;
 
   const valeurs = {};
-  const stockees = lire(stockage);
+  const stockees = memoire.lire();
   for (const l of lignes) {
     const v = stockees ? stockees[identifiant(l)] : undefined;
     valeurs[identifiant(l)] = Number.isInteger(v) && v >= 0 && v <= l.max ? v : l.depart;
@@ -122,7 +142,7 @@ function initialiser(racine) {
 
     if (bouton.matches('[data-nouvelle-partie]')) {
       for (const l of lignes) valeurs[identifiant(l)] = l.depart;
-      effacer(stockage);
+      memoire.effacer();
       afficher();
       return;
     }
@@ -139,7 +159,7 @@ function initialiser(racine) {
     } else {
       return;
     }
-    ecrire(stockage, valeurs);
+    memoire.ecrire(valeurs);
     afficher();
   });
 

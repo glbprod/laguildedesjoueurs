@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { enrichir } from '../../lib/texte';
+import IlotCartes from '../IlotCartes.astro';
 
 interface Props {
   data: Extract<CollectionEntry<'modules'>['data'], { type: 'effets' }>;
@@ -12,12 +13,35 @@ const { data } = Astro.props;
 if (data.entrainement) {
   throw new Error(`Le mode entraînement du module « effets » n'a pas encore de rendu (${data.titre})`);
 }
+
+const config = { groupes: data.groupes.map((g) => ({ id: g.id, fiches: g.fiches.map((f) => ({ nom: f.nom })) })) };
+const total = data.groupes.reduce((n, g) => n + g.fiches.length, 0);
 ---
+
+{
+  data.recherche && (
+    <div class="recherche-cartes" data-ilot="cartes" data-config={JSON.stringify(config)}>
+      <div class="recherche">
+        <label for="champ-recherche" class="sr">Rechercher une fiche par nom</label>
+        <input id="champ-recherche" type="search" placeholder="Nom d'une fiche…" autocomplete="off" data-recherche />
+        <button type="button" class="btn" data-effacer>Effacer</button>
+      </div>
+      <div class="filtres" role="group" aria-label="Filtrer par type">
+        <button type="button" data-filtre="tout" aria-pressed="true">Tout</button>
+        {data.groupes.map((g) => <button type="button" data-filtre={g.id} aria-pressed="false">{g.titre}</button>)}
+      </div>
+      <div class="resultats" data-resultats role="status" aria-live="polite">{total} fiches</div>
+    </div>
+  )
+}
 
 {
   data.groupes.map((g) => (
     <section class="section" data-groupe={g.id}>
-      <h2>{g.titre}</h2>
+      <h2>
+        {g.titre}
+        {data.recherche && <span class="compte-fiches" data-compte-fiches> ({g.fiches.length})</span>}
+      </h2>
       {
         g.regles.length > 0 && (
           <div class="bloc">
@@ -32,7 +56,7 @@ if (data.entrainement) {
 
       {
         g.fiches.map((f) => (
-          <article class={f.immediat ? 'fiche imm' : 'fiche'} data-fiche={f.id ?? f.nom}>
+          <article class={f.immediat ? 'fiche imm' : 'fiche'} data-fiche={`${g.id}:${f.nom}`}>
             <h3>
               {f.nom}
               {f.immediat && <span class="tagimm">immédiat</span>}
@@ -65,3 +89,5 @@ if (data.entrainement) {
     </section>
   ))
 }
+
+{data.recherche && <IlotCartes />}

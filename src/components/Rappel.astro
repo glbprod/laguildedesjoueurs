@@ -1,0 +1,35 @@
+---
+import { enrichir } from '../lib/texte';
+import { gab, cap } from '../scripts/logique/texte.js';
+
+// Rappel : cite, dans une phrase, les fiches d'un groupe d'effets qui portent une étiquette.
+// Le texte vient du YAML (`modele`) ; la liste est retrouvée ici, au build.
+type Fiche = { id?: string; nom: string; nomCourt?: string; etiquettes: string[]; effets: string[]; precisions: string[] };
+interface Props {
+  rappel: { titre: string; modele: string; groupe: string; etiquette: string; complement?: { groupe: string; fiche: string } };
+  groupes: Map<string, { fiches: Fiche[] }>;
+}
+const { rappel, groupes } = Astro.props;
+
+const cites = (groupes.get(rappel.groupe)?.fiches ?? []).filter((f) => f.etiquettes.includes(rappel.etiquette));
+const noms = cites.map((f) => f.nomCourt ?? f.nom);
+const texte = gab(rappel.modele, { n: noms.length, liste: noms.join(', ') });
+const complement = rappel.complement
+  ? groupes.get(rappel.complement.groupe)?.fiches.find((f) => f.id === rappel.complement!.fiche)
+  : undefined;
+---
+
+<section class="section">
+  <h2>{rappel.titre}</h2>
+  <div class="bloc">
+    <p set:html={enrichir(texte)} />
+    {
+      complement && (
+        <p>
+          <strong>{complement.nom}</strong> : <Fragment set:html={enrichir(complement.effets[0])} />{' '}
+          {complement.precisions[0] && <Fragment set:html={enrichir(cap(complement.precisions[0]))} />}
+        </p>
+      )
+    }
+  </div>
+</section>

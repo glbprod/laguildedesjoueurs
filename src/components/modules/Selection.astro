@@ -1,0 +1,81 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { enrichir } from '../../lib/texte';
+import { etapesSelection } from '../../scripts/logique/selection.js';
+
+type Camp = CollectionEntry<'jeux'>['data']['camps'][number];
+type MiseEnPlace = Extract<CollectionEntry<'modules'>['data'], { type: 'mise-en-place' }>;
+
+interface Props {
+  selection: NonNullable<MiseEnPlace['selection']>;
+  camps: Camp[];
+  cle: string;
+}
+const { selection, camps, cle } = Astro.props;
+const parId = new Map(camps.map((c) => [c.id, c]));
+// Les consignes sont générées ici et lues par l'îlot : une seule source pour le build et le clic.
+const etapes = etapesSelection(selection);
+const lots = selection.lotsFixes;
+---
+
+<section class="section" data-ilot="selection" data-stockage={cle} data-etapes={etapes.length}>
+  <h2>{selection.titre}</h2>
+  <div class="bloc">
+    {selection.intro && <p set:html={enrichir(selection.intro)} />}
+
+    {
+      lots && (
+        <div class="bascule-mode" role="group" aria-label="Mode de sélection">
+          <button type="button" data-mode="hasard" aria-pressed="true">{selection.titre}</button>
+          <button type="button" data-mode="premiere" aria-pressed="false">{lots.titre}</button>
+        </div>
+      )
+    }
+
+    <div data-panneau="hasard">
+      <div class="etape-courante" role="status" aria-live="polite">
+        <div class="rang" data-rang></div>
+        <div class="texte" data-texte></div>
+      </div>
+      <div class="commandes">
+        <button type="button" class="btn" data-precedent>Revenir</button>
+        <button type="button" class="btn primaire" data-suivant>Étape faite</button>
+      </div>
+      <ol class="etapes">
+        {
+          etapes.map((e, i) => (
+            <li data-etape={i}>
+              {e.camp && (
+                <>
+                  <span class="puce-camp" style={`--couleur: var(--${parId.get(e.camp)!.couleur})`}>{parId.get(e.camp)!.nom}</span>{' '}
+                </>
+              )}
+              {e.texte}
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+
+    {
+      lots && (
+        <div data-panneau="premiere" hidden>
+          <p>{lots.texte}</p>
+          <div class="lots">
+            {camps.map((c) => (
+              <div class="lot" style={`--couleur: var(--${c.couleur})`}>
+                <h3>{c.nom}</h3>
+                <ul>{(lots.lots[c.id] ?? []).map((m) => <li>{m}</li>)}</ul>
+              </div>
+            ))}
+          </div>
+          <p class="note">{lots.fin}</p>
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<script>
+  import '../../scripts/ilots/selection.js';
+</script>

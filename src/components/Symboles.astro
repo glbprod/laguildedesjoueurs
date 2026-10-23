@@ -1,0 +1,92 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { enrichir } from '../lib/texte';
+import { cap } from '../scripts/logique/texte.js';
+import Stepper from './Stepper.astro';
+
+// Symboles comptés par camp, avec alerte de paire et victoire à N symboles différents.
+// Un jeton attribué (suivi `possession`) peut ajouter un symbole : l'îlot lit son propriétaire.
+type Camp = CollectionEntry<'jeux'>['data']['camps'][number];
+type Condition = Extract<CollectionEntry<'modules'>['data'], { type: 'victoire' }>['conditions'][number];
+
+interface Props {
+  condition: Condition;
+  conditions: Condition[];
+  camps: Camp[];
+  groupes: Map<string, { fiches: { id?: string; nom: string }[] }>;
+  cle: string;
+}
+const { condition: c, conditions, camps, groupes, cle } = Astro.props;
+const s = c.suivi as Extract<NonNullable<Condition['suivi']>, { type: 'symboles' }>;
+
+// Nom de la fiche qui apporte un bonus : condition possession → groupe d'effets → fiche.
+const nomFiche = (b: (typeof s.bonus)[number]) => {
+  const possession = conditions.find((x) => x.id === b.condition)?.suivi;
+  const groupe = possession?.type === 'possession' ? groupes.get(possession.groupe) : undefined;
+  return groupe?.fiches.find((f) => f.id === b.fiche)?.nom ?? b.fiche;
+};
+const bonus = s.bonus.map((b) => ({
+  section: `condition.${b.condition}`,
+  fiche: b.fiche,
+  index: s.symboles.findIndex((y) => y.id === b.symbole),
+  nom: nomFiche(b),
+}));
+const config = {
+  section: `condition.${c.id}`,
+  camps: camps.map((k) => k.id),
+  noms: Object.fromEntries(camps.map((k) => [k.id, k.nom])),
+  nombre: s.symboles.length,
+  symboles: s.symboles,
+  plafond: s.plafond,
+  paire: s.paire,
+  victoire: s.victoire,
+  bonus,
+  messages: s.messages,
+};
+const bonusDe = (i: number) => bonus.find((b) => b.index === i);
+---
+
+<section class="course" data-ilot="symboles" data-stockage={cle} data-config={JSON.stringify(config)}>
+  <h2>{c.titre}</h2>
+  <div class="quoi" set:html={enrichir(c.description)} />
+
+  <div class="grille-sci">
+    <span></span>
+    {camps.map((k) => <span class="entete" style={`--couleur: var(--${k.couleur})`}>{k.nom}</span>)}
+    {
+      s.symboles.map((y, i) => (
+        <>
+          <span class="lib-symbole">
+            {cap(y.nom)}
+            {bonusDe(i) && <span class="petit">symbole du jeton {bonusDe(i)!.nom}</span>}
+          </span>
+          {camps.map((k) => (
+            <span class="cellule-sci">
+              <Stepper libelle={`${k.nom}, ${y.nom}`} cle={`${k.id}.${i}`} max={s.plafond} />
+              {bonusDe(i) && <span class="conv" data-bonus={k.id}></span>}
+            </span>
+          ))}
+        </>
+      ))
+    }
+  </div>
+
+  {
+    camps.map((k) => (
+      <div class="ligne-joueur" style={`--couleur: var(--${k.couleur})`}>
+        <span class="qui">{k.nom}</span>
+        <span class="jauge-lecture" data-jauge={k.id} aria-hidden="true">
+          {Array.from({ length: s.victoire }, () => <span class="pastille-ronde"></span>)}
+        </span>
+        <span class="lisible" data-diff={k.id}></span>
+      </div>
+    ))
+  }
+  <div class="alerte" data-paire role="status" aria-live="polite"></div>
+  {camps.map((k) => <div class="alerte" data-alerte={k.id}></div>)}
+  {s.notes.map((n) => <p class="note" set:html={enrichir(n)} />)}
+</section>
+
+<script>
+  import '../scripts/ilots/symboles.js';
+</script>
