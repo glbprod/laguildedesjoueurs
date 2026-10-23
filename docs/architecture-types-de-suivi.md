@@ -87,13 +87,19 @@ Contrôles faits au build :
 Avec une page par module, `commerce` est un module de plein droit : une entrée de plus dans
 la navigation de 7 Wonders Duel, à côté de « Un tour ». Rien de plus au schéma.
 
+## Données de 7 Wonders Duel
+
+`src/content/jeux/7wduel/` (cinq modules : mise en place, tour, commerce, victoire, effets)
+est migré de la page autonome v1.1. Le jeu est en `publie: false` : validé au build, sans
+page ni lien, tant que les composants de rendu n'existent pas. Il passera à `publie: true`
+à la phase 5. Auteurs et éditeur ne figurent pas dans les sources : ils sont facultatifs.
+
 ## Ce que cette phase ne fait pas
 
 - **Aucun rendu des nouveaux types ni des nouveaux champs.** Les îlots et les composants sont
   la phase 5. En attendant, un contenu sans rendu fait échouer le build : suivi sans rendu
   en victoire, bloc cochable, rappels, suivis ou fin de manche d'un tour, sélection ou
   structures d'une mise en place. Seul `blocsApres` est déjà rendu.
-- **Aucune donnée de 7 Wonders Duel :** la migration du JSON de la page est la phase 4.
 
 ## Lignes proposées pour le CLAUDE.md (non appliquées)
 

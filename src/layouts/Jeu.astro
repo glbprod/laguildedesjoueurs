@@ -20,6 +20,9 @@ const modules = await modulesDuJeu(slug);
 const actif = modules.find((m) => m.id === `${slug}/${module}`);
 if (module && !actif) throw new Error(`Module introuvable : ${slug}/${module}`);
 
+// Pied de page : seulement ce qui est renseigné dans jeu.yaml.
+const pied = [data.mention, data.auteurs, data.editeur, data.annee].filter(Boolean).join(' · ');
+
 const ROMAINS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
 const items = modules.map((m, i) => {
   const nom = m.id.slice(slug.length + 1);
@@ -57,7 +60,5 @@ const titrePage = actif
     <slot />
   </main>
 
-  <footer class="pied">
-    {data.auteurs} · {data.editeur}{data.annee ? ` · ${data.annee}` : ''}
-  </footer>
+  {pied && <footer class="pied">{pied}</footer>}
 </Page>

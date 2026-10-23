@@ -1,0 +1,270 @@
+# Onglet Cartes : Merveilles, Progrès, Guildes, symboles. Textes générés depuis le md.
+# Les jetons Progrès ont un `id` : la possession, les symboles et le décompte les désignent.
+type: effets
+titre: Cartes
+validation:
+  statut: valide
+  source: 7wduel_regles_v1.md §8, §9
+groupes:
+  - id: merveilles
+    titre: Merveilles
+    validation:
+      statut: valide
+      source: 7wduel_regles_v1.md §9
+    fiches:
+      - nom: Le Circus Maximus
+        sousTitre: 3 points
+        effets:
+          - Défausser une carte grise, au choix, construite par l'adversaire. 1 Bouclier.
+      - nom: Le Colosse
+        sousTitre: 3 points
+        effets:
+          - 2 Boucliers.
+      - nom: Le Grand Phare
+        sousTitre: 4 points
+        effets:
+          - "Produit chaque tour 1 unité au choix : Bois, Pierre ou Argile."
+        precisions:
+          - "Grand Phare et Pirée : leur production ne compte pas dans le prix du commerce payé par l'adversaire."
+      - nom: Les Jardins Suspendus
+        nomCourt: Jardins Suspendus
+        sousTitre: 3 points
+        etiquettes:
+          - rejouer
+        effets:
+          - 6 pièces. Rejouer.
+      - nom: La Grande Bibliothèque
+        sousTitre: 4 points
+        effets:
+          - Tirer au hasard 3 jetons Progrès parmi ceux écartés à la préparation, en garder 1, ranger les 2 autres.
+      - nom: Le Mausolée
+        sousTitre: 2 points
+        effets:
+          - Prendre toutes les cartes défaussées depuis le début de la partie et en construire une gratuitement.
+        precisions:
+          - "Mausolée : les cartes retirées à la préparation ne font pas partie de la défausse."
+      - nom: Le Pirée
+        nomCourt: Pirée
+        sousTitre: 2 points
+        etiquettes:
+          - rejouer
+        effets:
+          - "Produit chaque tour 1 unité au choix : Papyrus ou Verre. Rejouer."
+        precisions:
+          - "Grand Phare et Pirée : leur production ne compte pas dans le prix du commerce payé par l'adversaire."
+      - nom: Les Pyramides
+        sousTitre: 9 points
+        effets:
+          - —
+      - nom: Le Sphinx
+        nomCourt: Sphinx
+        sousTitre: 6 points
+        etiquettes:
+          - rejouer
+        effets:
+          - Rejouer.
+      - nom: La Statue de Zeus
+        sousTitre: 3 points
+        effets:
+          - Défausser une carte marron, au choix, construite par l'adversaire. 1 Bouclier.
+      - nom: Le Temple d'Artémis
+        nomCourt: Temple d'Artémis
+        etiquettes:
+          - rejouer
+        effets:
+          - 12 pièces. Rejouer.
+      - nom: La Via Appia
+        nomCourt: Via Appia
+        sousTitre: 3 points
+        etiquettes:
+          - rejouer
+        effets:
+          - 3 pièces. L'adversaire perd 3 pièces, rendues à la Banque. Rejouer.
+  - id: progres
+    titre: Progrès
+    validation:
+      statut: valide
+      source: 7wduel_regles_v1.md §8
+      note: La balance du jeton Loi est une déduction de l'image, validée par GLB (§8).
+    fiches:
+      - id: agriculture
+        nom: Agriculture
+        effets:
+          - 6 pièces immédiatement. Le jeton rapporte 4 points de victoire.
+      - id: architecture
+        nom: Architecture
+        effets:
+          - Les Merveilles construites ensuite coûtent 2 ressources de moins, au choix à chaque construction.
+      - id: economie
+        nom: Économie
+        effets:
+          - On récupère les pièces que l'adversaire dépense pour acheter des ressources.
+        precisions:
+          - seules comptent les pièces dépensées pour obtenir des ressources, pas celles du coût des bâtiments ;
+          - les réductions commerciales de l'adversaire (Dépôt de Pierre, Dépôt de Bois, Dépôt d'Argile, Douane) changent le prix, mais on récupère quand même les pièces dépensées.
+      - id: loi
+        nom: Loi
+        effets:
+          - Le jeton rapporte un symbole scientifique.
+      - id: maconnerie
+        nom: Maçonnerie
+        effets:
+          - Les cartes bleues construites ensuite coûtent 2 ressources de moins, au choix à chaque construction.
+      - id: mathematiques
+        nom: Mathématiques
+        effets:
+          - En fin de partie, 3 points par jeton Progrès possédé, celui-ci compris.
+      - id: philosophie
+        nom: Philosophie
+        effets:
+          - Le jeton rapporte 7 points de victoire.
+      - id: strategie
+        nom: Stratégie
+        effets:
+          - Les cartes rouges construites ensuite donnent 1 Bouclier de plus.
+        precisions:
+          - "exemple : une carte rouge à 2 Boucliers fait avancer le pion de 3 cases ;"
+          - sans effet sur les Merveilles à Boucliers ;
+          - sans effet sur les cartes rouges construites avant d'avoir le jeton.
+      - id: theologie
+        nom: Théologie
+        effets:
+          - Les Merveilles construites ensuite ont toutes l'effet « Rejouer ».
+        precisions:
+          - les Merveilles qui ont déjà l'effet « Rejouer » ne sont pas concernées. Une Merveille ne peut pas avoir deux fois cet effet.
+      - id: urbanisme
+        nom: Urbanisme
+        effets:
+          - 6 pièces immédiatement, puis 4 pièces à chaque construction gratuite par chaînage.
+  - id: guildes
+    titre: Guildes
+    validation:
+      statut: valide
+      source: 7wduel_regles_v1.md §8
+    regles:
+      - "On compte dans la Cité qui a le plus d'éléments du type indiqué : la sienne **ou celle de l'adversaire**."
+      - Les pièces sont prises à la Banque une seule fois, au moment de la construction.
+      - En fin de partie, la Cité retenue pour les points peut être différente de celle retenue pour les pièces.
+    note: "Déduction : le livret dit « la Cité qui en possède le plus grand nombre » sans préciser laquelle."
+    fiches:
+      - nom: Armateurs
+        effets:
+          - "À la construction : 1 pièce par carte marron et grise"
+          - "En fin de partie : 1 point par carte marron et grise"
+        precisions:
+          - "Armateurs : une seule Cité doit être retenue pour les 2 couleurs, marron et grise."
+      - nom: Commerçants
+        effets:
+          - "À la construction : 1 pièce par carte jaune"
+          - "En fin de partie : 1 point par carte jaune"
+      - nom: Magistrats
+        effets:
+          - "À la construction : 1 pièce par carte bleue"
+          - "En fin de partie : 1 point par carte bleue"
+      - nom: Tacticiens
+        effets:
+          - "À la construction : 1 pièce par carte rouge"
+          - "En fin de partie : 1 point par carte rouge"
+      - nom: Scientifiques
+        effets:
+          - "À la construction : 1 pièce par carte verte"
+          - "En fin de partie : 1 point par carte verte"
+      - nom: Bâtisseurs
+        effets:
+          - "En fin de partie : 2 points par Merveille construite"
+      - nom: Usuriers
+        effets:
+          - "En fin de partie : 1 point par lot complet de 3 pièces, dans la Cité la plus riche"
+  - id: symboles
+    titre: Symboles des cartes
+    validation:
+      statut: valide
+      source: 7wduel_regles_v1.md §8
+    notes:
+      - Les productions « au choix » ne comptent pas dans le prix du commerce payé par l'adversaire.
+      - Pour toutes ces cartes, les pièces sont prises à la Banque une seule fois, au moment de la construction.
+    fiches:
+      - nom: Une matière première (Argile, Bois ou Pierre)
+        sousTitre: Production
+        effets:
+          - La carte produit 1 unité de cette matière.
+      - nom: Deux fois la même matière première
+        sousTitre: Production
+        effets:
+          - La carte produit 2 unités de cette matière.
+      - nom: Un produit manufacturé (Verre ou Papyrus)
+        sousTitre: Production
+        effets:
+          - La carte produit 1 unité de ce produit.
+      - nom: Bois / Argile / Pierre, séparés par des barres
+        sousTitre: Production
+        effets:
+          - Chaque tour, 1 unité au choix parmi les 3.
+      - nom: Verre / Papyrus, séparés par une barre
+        sousTitre: Production
+        effets:
+          - Chaque tour, 1 unité au choix parmi les 2.
+      - nom: Une ressource marquée d'une pièce « 1 »
+        sousTitre: Commerce
+        effets:
+          - à partir du tour suivant, le joueur achète cette ressource à la Banque au prix fixe de 1 pièce l'unité.
+      - nom: Deux ressources marquées chacune d'une pièce « 1 »
+        sousTitre: Commerce
+        effets:
+          - même règle, pour les 2 ressources.
+      - nom: Laurier chiffré
+        sousTitre: Points, Boucliers, science, chaînage
+        effets:
+          - la carte rapporte ce nombre de points de victoire.
+      - nom: Bouclier
+        sousTitre: Points, Boucliers, science, chaînage
+        effets:
+          - la carte rapporte ce nombre de Boucliers.
+      - nom: Symbole scientifique
+        sousTitre: Points, Boucliers, science, chaînage
+        effets:
+          - la carte rapporte ce symbole.
+      - nom: Symbole de chaînage
+        sousTitre: Points, Boucliers, science, chaînage
+        effets:
+          - lors d'un Âge suivant, il permet de construire gratuitement une carte qui porte ce symbole dans son coût.
+      - nom: Pièce chiffrée
+        sousTitre: Pièces à la construction (dans sa propre Cité)
+        effets:
+          - le nombre indiqué
+      - nom: Merveille + 2
+        sousTitre: Pièces à la construction (dans sa propre Cité)
+        effets:
+          - 2 par Merveille construite
+      - nom: Carte grise + 3
+        sousTitre: Pièces à la construction (dans sa propre Cité)
+        effets:
+          - 3 par carte grise
+      - nom: Carte marron + 2
+        sousTitre: Pièces à la construction (dans sa propre Cité)
+        effets:
+          - 2 par carte marron
+      - nom: Carte jaune + 1
+        sousTitre: Pièces à la construction (dans sa propre Cité)
+        effets:
+          - 1 par carte jaune, **celle-ci comprise**
+      - nom: Carte rouge + 1
+        sousTitre: Pièces à la construction (dans sa propre Cité)
+        effets:
+          - 1 par carte rouge
+      - nom: Défausse
+        sousTitre: Effets décrits par l'aide de jeu
+        effets:
+          - prendre toute la défausse et construire gratuitement une carte au choix. Les cartes retirées à la préparation n'en font pas partie.
+      - nom: Trois jetons Progrès
+        sousTitre: Effets décrits par l'aide de jeu
+        effets:
+          - tirer au hasard 3 jetons parmi ceux écartés à la préparation, en garder 1, ranger les 2 autres.
+      - nom: Carte marron ou grise barrée
+        sousTitre: Effets décrits par l'aide de jeu
+        effets:
+          - défausser une carte de cette couleur, au choix, dans la Cité adverse.
+      - nom: Flèches circulaires
+        sousTitre: Effets décrits par l'aide de jeu
+        effets:
+          - rejouer un tour juste après celui-ci.

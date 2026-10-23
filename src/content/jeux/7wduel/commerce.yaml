@@ -1,0 +1,78 @@
+# Calculateur de commerce. Les trois exemples du livret sont recalculés au build.
+type: commerce
+titre: Commerce
+validation:
+  statut: valide
+  source: 7wduel_regles_v1.md §4
+  note: Ressources confirmées par GLB (aide de jeu, Dépôt de Bois ; livret, Chantier p. 5).
+regle: "**Prix d'une ressource = 2 + nombre de symboles de cette ressource produits par les cartes marron et grises de l'adversaire.**"
+points:
+  - On regarde la Cité adverse, mais on paie la Banque.
+  - Pas de limite d'achats par tour.
+  - Certaines cartes jaunes (les 3 Dépôts et la Douane) fixent le prix de certaines ressources à 1 pièce.
+rappels:
+  - Les ressources produites par les **cartes jaunes** et les **Merveilles** adverses ne comptent pas dans le prix.
+  - Les productions « au choix » ne comptent pas dans le prix du commerce payé par l'adversaire.
+prixBase: 2
+prixFixe: 1
+familles:
+  - id: marron
+    nom: carte marron
+    couleur: c-marron
+  - id: grise
+    nom: carte grise
+    couleur: c-grise
+ressources:
+  - id: bois
+    nom: Bois
+    famille: marron
+  - id: pierre
+    nom: Pierre
+    famille: marron
+  - id: argile
+    nom: Argile
+    famille: marron
+  - id: verre
+    nom: Verre
+    famille: grise
+  - id: papyrus
+    nom: Papyrus
+    famille: grise
+libelles:
+  pieces: Coût en pièces
+  besoin: Besoin
+  mienne: Ma production
+  adverse: Production adverse (cartes marron et grises seulement)
+  fixe: Prix fixé à 1 pièce (Dépôt, Douane)
+  effacer: Effacer le coût
+  total: Coût total
+  rien: "Votre production couvre tout : rien à acheter."
+exemples:
+  - nom: Fortifications
+    pieces: 0
+    besoin:
+      pierre: 2
+      argile: 1
+      papyrus: 1
+    mienne:
+      pierre: 2
+    adverse:
+      argile: 1
+    total: 5
+  - nom: Aqueduc
+    pieces: 0
+    besoin:
+      pierre: 3
+    mienne: {}
+    adverse:
+      pierre: 2
+    total: 12
+  - nom: Caravansérail
+    pieces: 2
+    besoin:
+      verre: 1
+      papyrus: 1
+    mienne: {}
+    adverse:
+      verre: 1
+    total: 7

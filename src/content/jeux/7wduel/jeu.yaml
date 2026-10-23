@@ -1,0 +1,26 @@
+# 7 Wonders Duel. Données migrées de la page autonome v1.1 (reference/7wduel_aide-de-jeu_v1.html).
+# publie: false tant que les composants de rendu (phase 5) n'existent pas : le jeu est
+# validé au build mais n'a ni page ni lien. Auteurs et éditeur : absents des sources fournies.
+titre: 7 Wonders Duel
+sousTitre: Aide de jeu
+mention: Aide de jeu non officielle
+joueurs: "2"
+duree: 3 Âges
+theme: 7wduel
+publie: false
+stockage: partie
+camps:
+  - id: j1
+    nom: Joueur 1
+    court: J1
+    couleur: j1
+  - id: j2
+    nom: Joueur 2
+    court: J2
+    couleur: j2
+modules:
+  - mise-en-place
+  - tour
+  - commerce
+  - victoire
+  - effets

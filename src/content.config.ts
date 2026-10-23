@@ -19,6 +19,8 @@ const DOSSIER_JEUX = './src/content/jeux';
 const validation = z.strictObject({
   statut: z.enum(['brouillon', 'valide']),
   source: z.string().optional(), // ex. « livret de règles, p. 6 »
+  // Réserve sur une partie du module (ex. une déduction de l'image, validée par GLB).
+  note: z.string().optional(),
 });
 
 const identifiant = z.string().regex(/^[a-z0-9-]+$/, 'minuscules, chiffres et tirets');
@@ -153,6 +155,7 @@ const piste = z.strictObject({
     jeton: z.strictObject({ valeur: z.number().int().positive() }).optional(),
   })).min(1),
   action: z.string(), // ce qui fait avancer le marqueur, au singulier (ex. « Bouclier »)
+  notes: z.array(z.string()).default([]), // sous la piste : orientation, effet des jetons…
   messages: z.strictObject({
     centre: z.string(),
     zone: z.string(),
@@ -217,6 +220,7 @@ const decompte = z.strictObject({
   departage: z.array(identifiant).default([]),
   // Conditions de ce module (piste, symboles) dont la victoire immédiate arrête la partie.
   arret: z.array(identifiant).default([]),
+  notes: z.array(z.string()).default([]), // sous le décompte : règle d'égalité…
   messages: z.strictObject({
     vide: z.string(),
     points: z.string(),
@@ -621,8 +625,10 @@ const jeux = defineCollection({
   schema: z.strictObject({
     titre: z.string(),
     sousTitre: z.string().optional(),
-    auteurs: z.string(),
-    editeur: z.string(),
+    // Facultatifs : on ne les renseigne que s'ils figurent dans les sources fournies.
+    auteurs: z.string().optional(),
+    editeur: z.string().optional(),
+    mention: z.string().optional(), // ex. « Aide de jeu non officielle », en pied de page
     annee: z.number().int().optional(),
     joueurs: z.string(),
     duree: z.string(),
@@ -631,6 +637,7 @@ const jeux = defineCollection({
     camps: z.array(z.strictObject({
       id: z.string(),
       nom: z.string(),
+      court: z.string().optional(), // forme abrégée pour les boutons étroits (ex. « J1 »)
       couleur: z.string(), // token CSS du thème, sans « -- » (ex. bien, rouge)
     })).default([]),
     modules: z.array(z.string()).min(1), // ordre d'affichage, par nom de fichier
