@@ -25,6 +25,14 @@ const jeux = await getCollection('jeux');
           </a>
         ))
       }
+      {/* Page autonome copiée dans dist/reference/ au build (scripts/copier-reference.mjs),
+          pas encore une collection : on la lie à la main en attendant l'intégration Astro. */}
+      <a class="carte" href={url('reference/chateaux_aide-de-jeu_v1.html')}>
+        <span>
+          <span class="titre">Châteaux de Bourgogne</span>
+          <span class="detail">Jeu de base · 2 joueurs</span>
+        </span>
+      </a>
     </div>
   </main>
 </Page>
