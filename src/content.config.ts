@@ -120,23 +120,35 @@ const victoire = z.object({
   }).optional(),
 });
 
-const effets = z.object({
+// Strict : une clé mal orthographiée (« precision ») ferait disparaître un texte
+// sans alerte. Un nom de champ inconnu casse le build.
+const effets = z.strictObject({
   type: z.literal('effets'),
   ...communs,
-  groupes: z.array(z.object({
+  groupes: z.array(z.strictObject({
     id: z.string(),
     titre: z.string(),
+    // Statut propre au groupe, quand ses sources n'ont pas toutes été relues
+    // ensemble (ex. une section du livret validée, une autre non).
+    validation: validation.optional(),
+    regles: z.array(z.string()).default([]), // en tête : valent pour toutes les fiches
     note: z.string().optional(),
-    fiches: z.array(z.object({
+    notes: z.array(z.string()).default([]),  // en pied de groupe
+    fiches: z.array(z.strictObject({
+      // Identifiant stable, unique dans le module : un autre module pourra désigner la fiche.
+      id: z.string().regex(/^[a-z0-9-]+$/, 'minuscules, chiffres et tirets').optional(),
       nom: z.string(),
+      nomCourt: z.string().optional(),    // forme abrégée, pour les rappels
       sousTitre: z.string().optional(),
       immediat: z.boolean().default(false),
+      etiquettes: z.array(z.string()).default([]), // ex. « rejouer » : sert à retrouver des fiches
       effets: z.array(z.string()).min(1),
+      precisions: z.array(z.string()).default([]), // détails qui complètent l'effet
     })),
   })),
   // Paquets du mode entraînement, construits à partir des groupes.
-  entrainement: z.object({
-    paquets: z.array(z.object({
+  entrainement: z.strictObject({
+    paquets: z.array(z.strictObject({
       id: z.string(),
       libelle: z.string(),
       groupe: z.string(),                           // id d'un groupe ci-dessus
@@ -169,6 +181,21 @@ const module = z
   .superRefine((m, ctx) => {
     const erreur = (path: (string | number)[], message: string) =>
       ctx.addIssue({ code: 'custom', path, message });
+
+    // Intégrité interne : identifiants uniques (une référence resterait ambiguë).
+    if (m.type === 'effets') {
+      const groupes = new Set<string>();
+      const fiches = new Set<string>();
+      m.groupes.forEach((g, i) => {
+        if (groupes.has(g.id)) erreur(['groupes', i, 'id'], `Groupe en double : « ${g.id} »`);
+        groupes.add(g.id);
+        g.fiches.forEach((f, j) => {
+          if (f.id === undefined) return;
+          if (fiches.has(f.id)) erreur(['groupes', i, 'fiches', j, 'id'], `Fiche en double : « ${f.id} »`);
+          fiches.add(f.id);
+        });
+      });
+    }
 
     // Intégrité interne : un paquet d'entraînement pointe vers un groupe existant.
     if (m.type === 'effets' && m.entrainement) {

@@ -1,0 +1,67 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { enrichir } from '../../lib/texte';
+
+interface Props {
+  data: Extract<CollectionEntry<'modules'>['data'], { type: 'effets' }>;
+}
+const { data } = Astro.props;
+
+// Le mode entraînement (cartes mémoire) relève d'un îlot qui n'existe pas encore :
+// mieux vaut échouer au build que l'omettre en silence.
+if (data.entrainement) {
+  throw new Error(`Le mode entraînement du module « effets » n'a pas encore de rendu (${data.titre})`);
+}
+---
+
+{
+  data.groupes.map((g) => (
+    <section class="section" data-groupe={g.id}>
+      <h2>{g.titre}</h2>
+      {
+        g.regles.length > 0 && (
+          <div class="bloc">
+            <ul class="check">
+              {g.regles.map((r) => <li set:html={enrichir(r)} />)}
+            </ul>
+            {g.note && <p class="note" set:html={enrichir(g.note)} />}
+          </div>
+        )
+      }
+      {g.regles.length === 0 && g.note && <p class="note" set:html={enrichir(g.note)} />}
+
+      {
+        g.fiches.map((f) => (
+          <article class={f.immediat ? 'fiche imm' : 'fiche'} data-fiche={f.id ?? f.nom}>
+            <h3>
+              {f.nom}
+              {f.immediat && <span class="tagimm">immédiat</span>}
+            </h3>
+            {f.sousTitre && <div class="sous-titre">{f.sousTitre}</div>}
+            {
+              f.effets.length > 1 ? (
+                <ul>{f.effets.map((e) => <li set:html={enrichir(e)} />)}</ul>
+              ) : (
+                <p set:html={enrichir(f.effets[0])} />
+              )
+            }
+            {
+              f.precisions.length > 0 && (
+                <ul class="precisions">
+                  {f.precisions.map((p) => <li set:html={enrichir(p)} />)}
+                </ul>
+              )
+            }
+            {
+              f.etiquettes.length > 0 && (
+                <p class="etiquettes">{f.etiquettes.map((t) => <span class="etiquette">{t}</span>)}</p>
+              )
+            }
+          </article>
+        ))
+      }
+
+      {g.notes.map((n) => <p class="note" set:html={enrichir(n)} />)}
+    </section>
+  ))
+}

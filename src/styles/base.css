@@ -149,6 +149,29 @@ ul.check li::before {
 .averti h2 { border-bottom: 0; padding-bottom: 0; font-size: 1.05rem; color: var(--rouge); margin-bottom: 0.35rem; }
 .averti ul { margin: 0; padding-left: 1.1rem; color: var(--encre-douce); }
 
+/* ---- fiches d'effets (module effets) ---- */
+.fiche {
+  background: var(--velin-fonce); border-radius: 4px; padding: 0.85rem 1rem; margin-bottom: 0.55rem;
+  border-left: 4px solid var(--encre-pale);
+}
+.fiche.imm { border-left-color: var(--rouge); }
+.fiche h3 { font-family: var(--police-titre); font-weight: 400; font-size: 1.1rem; margin: 0 0 0.1rem; }
+.fiche .sous-titre { font-size: 0.85rem; color: var(--encre-pale); margin-bottom: 0.2rem; }
+.fiche p { margin: 0.3rem 0 0; }
+.fiche ul { margin: 0.35rem 0 0; padding-left: 1.1rem; }
+.fiche li { margin-bottom: 0.28rem; }
+.fiche .precisions { font-size: 0.95rem; color: var(--encre-douce); }
+.tagimm {
+  display: inline-block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--rouge); color: var(--velin); border-radius: 2px;
+  padding: 0.08rem 0.35rem; margin-left: 0.4rem; vertical-align: 0.1rem;
+}
+.etiquettes { margin: 0.4rem 0 0; display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.etiquette {
+  font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--encre-pale);
+  border: 1px solid var(--velin-creux); border-radius: 2px; padding: 0.05rem 0.4rem;
+}
+
 /* ---- grandes cartes tactiles (accueil du site, accueil d'un jeu) ---- */
 .cartes { display: grid; gap: 0.7rem; margin-top: 1.3rem; }
 .carte {
